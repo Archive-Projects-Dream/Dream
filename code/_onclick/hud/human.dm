@@ -11,7 +11,6 @@
 	add_screen_object(/atom/movable/screen/floor_changer/vertical, HUD_MOB_FLOOR_CHANGER, HUD_GROUP_STATIC, ui_style, ui_human_floor_changer)
 	add_screen_object(/atom/movable/screen/mov_intent, HUD_MOB_MOVE_INTENT, HUD_GROUP_STATIC, ui_style)
 	add_screen_object(/atom/movable/screen/drop, HUD_MOB_DROP, HUD_GROUP_STATIC, ui_style, ui_swaphand_position(mymob, 1))
-	add_screen_object(/atom/movable/screen/swap_hand, HUD_MOB_SWAPHAND_2, HUD_GROUP_INFO, hands_icon, ui_swaphand_position(mymob, 2))
 	add_screen_object(/atom/movable/screen/human/toggle, HUD_HUMAN_TOGGLE_INVENTORY, HUD_GROUP_STATIC, ui_style)
 	add_screen_object(/atom/movable/screen/rest, HUD_MOB_REST, HUD_GROUP_HOTKEYS, ui_style)
 	add_screen_object(/atom/movable/screen/sleep, HUD_MOB_SLEEP, HUD_GROUP_HOTKEYS, ui_style, ui_above_throw)

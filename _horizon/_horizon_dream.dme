@@ -19,8 +19,6 @@
 
 // BEGIN_INCLUDE
 #include "code\SSdebugview.dm"
-#include "code\swap_hand.dm"
-#include "code\__HELPERS\mobs.dm"
 #include "code\__HELPERS\size_icons.dm"
 #include "code\datums\particles\leaves.dm"
 #include "code\elements\directional_attack.dm"
@@ -44,4 +42,7 @@
 #include "code\modules\visual_changes\debris_additions.dm"
 #include "code\modules\visual_changes\gun_smoke.dm"
 #include "code\modules\visual_changes\shockwave.dm"
+#include "code\progress_bar\hud.dm"
+#include "code\progress_bar\screen_objects.dm"
+#include "code\progress_bar\world_progressbar.dm"
 // END_INCLUDE
