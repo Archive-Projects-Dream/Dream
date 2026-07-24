@@ -88,10 +88,9 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	if(open && GLOB.mentorhelp_manager.active_tickets["[id]"] == src)
 		GLOB.mentorhelp_manager.active_tickets -= "[id]"
 	else if(GLOB.mentorhelp_manager.archived_tickets["[id]"] == src)
-		GLOB.mentorhelp_manager.archived_tickets -= "[id]"]
+		GLOB.mentorhelp_manager.archived_tickets -= "[id]"
 
-	if(author && author.current_mhelp == src)
-		author.current_mhelp = null
+	author.current_mhelp = null
 	author = null
 	mentor = null
 	return ..()
@@ -299,7 +298,7 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	// Recipient direct message
 	if(recipient)
 		if(with_sound && (recipient.prefs?.toggles & SOUND_ADMINHELP))
-			SEND_SOUND(recipient, sound('sound/effects/mhelp.ogg'))
+			SEND_SOUND(recipient, sound('_horizon/sound/mhelp.ogg'))
 		to_chat(recipient, wrap_message(msg, sender, recipient), confidential = TRUE)
 
 	for(var/client/admin_client in GLOB.admins)
@@ -312,7 +311,7 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 		// Initial broadcast
 		else if(!staff_only && !recipient && check_rights_for(admin_client, R_MENTOR))
 			formatted = wrap_message(formatted, sender, admin_client)
-			soundfile = 'sound/effects/mhelp.ogg'
+			soundfile = '_horizon/sound/mhelp.ogg'
 
 		// Eavesdrop
 		else if(check_rights_for(admin_client, R_MENTOR) && (!staff_only || is_staff(admin_client)) && admin_client != sender)
@@ -489,6 +488,12 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 	log_admin_private("[usr.key] reopened [author_key]'s mentorhelp thread")
 	notify("[span_green(usr.username())] has reopened this mentorhelp thread.",
 		unformatted_text = "[usr.username()] has reopened this mentorhelp thread.")
+
+/datum/mentorhelp/proc/reopenForClient(client/C)
+	if(!C || !C.holder)
+		return
+	usr = C.mob
+	reopen()
 
 /datum/mentorhelp/proc/close(client/closer)
 	if(!open)

@@ -148,14 +148,16 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	current_state = state
 
 /obj/effect/statclick/ticket_list/Click()
-	if (!usr.client?.holder)
+	if (!check_rights_for(usr.client, R_ADMIN))
 		message_admins("[key_name_admin(usr)] non-holder clicked on a ticket list statclick! ([src])")
-		usr.log_message("non-holder clicked on a ticket list statclick! ([src])", LOG_ADMIN)
+		log_game("[key_name(usr)] non-holder clicked on a ticket list statclick! ([src])")
 		return
 
-	GLOB.ahelp_tickets.BrowseTickets(current_state)
+	// GLOB.ahelp_tickets.BrowseTickets(current_state)
+	if(usr.client.holder)
+		usr.client.holder.ticket_panel()
+		to_chat(usr, span_notice("Accessing Ticket Panel... (Click <A href='byond://?_src_=admin_holder;[HrefToken()];ahelp_tickets=[current_state]'>here</A> for legacy view)"))
 
-//called by admin topic
 /obj/effect/statclick/ticket_list/proc/Action()
 	Click()
 
@@ -795,19 +797,27 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 			stack_trace("Invalid ticket state: [state]")
 			return "INVALID, CALL A CODER"
 
+/datum/admin_help/proc/set_subject(new_subject, client/setter)
+	if(!new_subject || !setter)
+		return FALSE
+
+	subject = sanitize(copytext_char(new_subject, 1, 100))
+
+	message_admins("[setter.ckey] set the subject of ticket [id] to: [subject]")
+
+	return TRUE
+
 /datum/admin_help/proc/Retitle()
-	var/new_title = input(usr, "Enter a title for the ticket", "Rename Ticket", name) as text|null
+	var/new_title = tgui_input_text(usr, "Enter a title for the ticket", "Rename Ticket", name)
 	if(new_title)
 		name = new_title
 		//not saying the original name cause it could be a long ass message
 		var/msg = "Ticket [TicketHref("#[id]")] titled [name] by [key_name_admin(usr)]"
 		message_admins(msg)
-		log_admin_private(msg)
 	TicketPanel() //we have to be here to do this
 
 //Forwarded action from admin/Topic
 /datum/admin_help/proc/Action(action)
-	testing("Ahelp action: [action]")
 	if(webhook_sent != WEBHOOK_NONE)
 		var/datum/discord_embed/embed = new()
 		embed.title = "Ticket #[id]"
@@ -826,18 +836,22 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 			TicketPanel()
 		if("retitle")
 			Retitle()
+		if("mark")
+			mark_ticket()
 		if("reject")
 			Reject()
 		if("reply")
 			usr.client.cmd_ahelp_reply(initiator)
-		if("icissue")
-			ICIssue()
+		if("autoreply")
+			AutoReply()
 		if("close")
 			Close()
 		if("resolve")
 			Resolve()
 		if("reopen")
 			Reopen()
+		if("defer")
+			defer_to_mentors()
 
 /datum/admin_help/proc/player_ticket_panel()
 	var/list/dat = list("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>Player Ticket</title></head>")
@@ -885,7 +899,14 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		usr.log_message("non-holder clicked on an ahelp statclick! ([src])", LOG_ADMIN)
 		return
 
-	ahelp_datum.TicketPanel()
+	// Open the TGUI ticket panel
+	if(usr.client.holder)
+		if(!usr.client.ticket_panel)
+			usr.client.ticket_panel = new /datum/ticket_panel()
+		usr.client.ticket_panel.selected_tab = ADMIN_TAB
+		usr.client.ticket_panel.selected_ticket = ahelp_datum.id
+		usr.client.holder.ticket_panel()
+		to_chat(usr, span_notice("Accessing Ticket Panel... (Click <A href='byond://?_src_=holder;[HrefToken()];ahelp=[REF(ahelp_datum)];ahelp_action=ticket'>here</A> for legacy view)"), confidential = TRUE)
 
 /obj/effect/statclick/ahelp/Destroy()
 	ahelp_datum = null
@@ -990,6 +1011,19 @@ GAME_VERB_HIDDEN(/client, no_tgui_adminhelp, "NoTguiAdminhelp")
 GAME_VERB(/client, adminhelp, "Adminhelp", "Admin")
 	GLOB.admin_help_ui_handler.ui_interact(mob)
 	to_chat(src, span_boldnotice("Adminhelp failing to open or work? <a href='byond://?src=[REF(src)];tguiless_adminhelp=1'>Click here</a>"))
+
+GAME_VERB(/client, mentorhelp, "Mentorhelp", "Admin")
+	execute_mentorhelp()
+
+/client/proc/execute_mentorhelp()
+	if(current_mhelp && current_mhelp.open)
+		if(tgui_alert(src, "You already have a mentorhelp thread open, would you like to close it?", "Mentor Help", list("Yes", "No")) == "Yes")
+			current_mhelp.close(src)
+		return
+
+	current_mhelp = new(src)
+	if(!current_mhelp.broadcast_request(src))
+		QDEL_NULL(current_mhelp)
 
 GAME_VERB(/client, view_latest_ticket, "View Latest Ticket", "Admin")
 	if(!current_ticket)

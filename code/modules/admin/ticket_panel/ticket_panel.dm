@@ -1,5 +1,3 @@
-#define ADMIN_TAB "admin"
-#define MENTOR_TAB "mentor"
 
 /datum/ticket_panel
 	var/selected_tab = ADMIN_TAB
@@ -20,8 +18,8 @@
 		info["ic_name"] = M.real_name
 
 	// Antag status instead of faction
-	if(M.mind?.special_role)
-		info["faction"] = "Antag: [M.mind.special_role]"
+	if(M.mind?.special_roles?.len)
+		info["faction"] = "Antag: [M.mind.special_roles.Join(", ")]"
 	else
 		info["faction"] = null
 
@@ -533,6 +531,3 @@ ADMIN_VERB(ticket_panel, R_ADMIN, "Ticket Panel", "Allows you to see tickets ope
 		user.ticket_panel = ticket_panel
 
 	ticket_panel.ui_interact(user)
-
-#undef ADMIN_TAB
-#undef MENTOR_TAB
