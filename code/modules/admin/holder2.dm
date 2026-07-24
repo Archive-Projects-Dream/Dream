@@ -528,3 +528,20 @@ you will have to do something like if(client.rights & R_ADMIN) yourself.
 
 #undef RESULT_2FA_VALID
 #undef RESULT_2FA_ID
+
+/datum/admins/proc/ticket_panel()
+	set name = "Ticket panel"
+	set desc = "Allows you to see tickets open for adminhelps and mentorhelps."
+	set category = "Admin"
+
+	if(!is_mentor(usr.client) && !is_staff(usr.client))
+		to_chat(usr, span_warning("You need to be an admin or mentor in order to access this panel..."))
+		return
+
+	var/datum/ticket_panel/ticket_panel = usr.client.ticket_panel
+
+	if(!ticket_panel)
+		ticket_panel = new()
+		usr.client.ticket_panel = ticket_panel
+
+	ticket_panel.ui_interact(usr)
