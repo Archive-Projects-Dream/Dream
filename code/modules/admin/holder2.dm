@@ -496,6 +496,14 @@ you will have to do something like if(client.rights & R_ADMIN) yourself.
 		return subject.holder.check_for_rights(rights_required)
 	return FALSE
 
+/// Returns TRUE if the client is a staff member (has R_ADMIN or greater)
+/proc/is_staff(client/C)
+	return C?.holder && check_rights_for(C, R_ADMIN)
+
+/// Returns TRUE if the client is a mentor (has R_MENTOR) or staff
+/proc/is_mentor(client/C)
+	return C?.holder && (check_rights_for(C, R_MENTOR) || check_rights_for(C, R_ADMIN))
+
 /proc/GenerateToken()
 	. = ""
 	for(var/I in 1 to 32)

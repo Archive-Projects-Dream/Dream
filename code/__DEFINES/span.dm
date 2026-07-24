@@ -165,6 +165,10 @@
 #define SPAN_ROUNDBODY(X) "<span class='round_body'>[X]</span>"
 #define SPAN_ROLE_HEADER(X) "<span class='role_header'>[X]</span>"
 #define SPAN_ROLE_BODY(X) "<span class='role_body'>[X]</span>"
+#define span_mentorhelp(str) ("<span class='mentorhelp'>" + str + "</span>")
+#define span_mentor(str) ("<span class='mentor'>" + str + "</span>")
+#define span_mentornotice(str) ("<span class='mentornotice'>" + str + "</span>")
+#define span_policy(str) ("<span class='policy'>" + str + "</span>")
 // [/HORIZON-ADD]
 
 // Spans that use embedded tgui components:
