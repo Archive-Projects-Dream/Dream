@@ -43,7 +43,7 @@ ADMIN_VERB(cmd_admin_pm_panel, R_NONE, "Admin PM", "Show a list of clients to PM
 			nametag = "[real_mob_name](as [mob_name])"
 		targets["[nametag] - [client]"] = client
 
-	var/target = input(src,"To whom shall we send a message?", "Admin PM", null) as null|anything in sort_list(targets)
+	var/target = tgui_input_list(src, "To whom shall we send a message?", "Admin PM", sort_list(targets))
 	if (isnull(target))
 		return
 	user.cmd_admin_pm(targets[target], null)
@@ -115,7 +115,7 @@ ADMIN_VERB(cmd_admin_pm_panel, R_NONE, "Admin PM", "Show a list of clients to PM
 	else
 		request = "[request] [formatted_recipient_ckey]."
 
-	var/message = input(src, message_prompt, request) as message|null
+	var/message = tgui_input_text(src.mob, message_prompt, request, null, , TRUE)
 
 	if(recipient_ticket)
 		LAZYREMOVE(recipient_ticket.opening_responders, src)
@@ -248,7 +248,7 @@ ADMIN_VERB(cmd_admin_pm_panel, R_NONE, "Admin PM", "Show a list of clients to PM
 		else
 			request = "[request] [recipient_print_key]."
 		//get message text, limit its length.and clean/escape html
-		msg = input(src,"Message:", request) as message|null
+		msg = tgui_input_text(src.mob, "Message:", request, null, , TRUE)
 		msg = trim(msg)
 
 	if(!msg)
