@@ -13,7 +13,6 @@
  * * pressure_affected - Whether or not difference in pressure affects the sound (E.g. if you can hear in space).
  * * ignore_walls - Whether or not the sound can pass through walls.
  * * falloff_distance - Distance at which falloff begins. Sound is at peak volume (in regards to falloff) aslong as this range.
- * * volume_preference - Optional: Will be checked to modify the volume of the sound for each listener.
  * * min_volume - minimum volume the sound can reach at max_range.
  * * mixer_channel - Optional: The mixer channel for volume control (defaults to guessing from sound file).
  */
@@ -100,7 +99,6 @@
  * * falloff_distance - Distance at which falloff begins. Sound is at peak volume (in regards to falloff) aslong as this range.
  * * distance_multiplier - Default 1, multiplies the maximum distance of our sound
  * * use_reverb - bool default TRUE, determines if our sound has reverb
- * * volume_preference - Optional: Will be checked to modify the volume of the sound.
  * * min_volume - minimum volume the sound can reach at max_range.
  * * mixer_channel - Optional: The mixer channel for volume control.
  */
