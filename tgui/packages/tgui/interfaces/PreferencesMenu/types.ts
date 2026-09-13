@@ -210,6 +210,7 @@ export type PreferencesMenuData = {
   window: PrefsWindow;
 
   channels: Channel[];
+  category_volume?: Record<string, number>;
 };
 
 export type Channel = {
@@ -217,6 +218,7 @@ export type Channel = {
   name: string;
   desc: string;
   volume: number;
+  category?: string;
 };
 
 export type ServerData = {
