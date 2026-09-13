@@ -156,7 +156,7 @@ GAME_VERB_DESC(/mob/living/silicon/ai, announcement_help, "Announcement Help", "
 	for(var/word in words)
 		play_vox_word(word, ai_turf, null)
 
-
+// [HORIZON-EDIT] Master_Sounds
 /proc/play_vox_word(word, ai_turf, mob/only_listener)
 
 	word = LOWER_TEXT(word)
@@ -164,29 +164,26 @@ GAME_VERB_DESC(/mob/living/silicon/ai, announcement_help, "Announcement Help", "
 	if(GLOB.vox_sounds[word])
 
 		var/sound_file = GLOB.vox_sounds[word]
+		var/sound/voice = sound(sound_file, wait = 1, channel = CHANNEL_VOX)
+			voice.status = SOUND_STREAM
 
 	// If there is no single listener, broadcast to everyone in the same z level
 		if(!only_listener)
 			// Play voice for all mobs in the z level
 			for(var/mob/player_mob as anything in GLOB.player_list)
-				var/pref_volume = safe_read_pref(player_mob.client, /datum/preference/numeric/volume/sound_ai_vox)
-				if(HAS_TRAIT(player_mob, TRAIT_DEAF) || !pref_volume)
+				if(HAS_TRAIT(player_mob, TRAIT_DEAF) || !player_mob.client?.prefs?.channel_volume["[CHANNEL_VOX]"])
 					continue
 
 				var/turf/player_turf = get_turf(player_mob)
 				if(!is_valid_z_level(ai_turf, player_turf))
 					continue
 
-				var/sound/voice = sound(sound_file, wait = 1, channel = CHANNEL_VOX, volume = pref_volume)
-				voice.status = SOUND_STREAM
 				SEND_SOUND(player_mob, voice)
 		else
-			var/pref_volume = safe_read_pref(only_listener.client, /datum/preference/numeric/volume/sound_ai_vox)
-			var/sound/voice = sound(sound_file, wait = 1, channel = CHANNEL_VOX, volume = pref_volume)
-			voice.status = SOUND_STREAM
 			SEND_SOUND(only_listener, voice)
 		return TRUE
 	return FALSE
+// [/HORIZON-EDIT]
 
 /proc/does_target_have_vox_off(mob/target)
 	return !safe_read_pref(target.client, /datum/preference/numeric/volume/sound_ai_vox)

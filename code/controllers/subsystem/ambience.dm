@@ -66,9 +66,7 @@ SUBSYSTEM_DEF(ambience)
 
 	if(!new_sound) // Dont try to play a sound if we dont have any.
 		return 1 MINUTES
-	/// volume modifier for ambience as set by the player in preferences.
-	var/volume_modifier = (M.client?.prefs.read_preference(/datum/preference/numeric/volume/sound_ambience_volume))/100
-	new_sound = sound(new_sound, repeat = 0, wait = 0, volume = volume*volume_modifier, channel = CHANNEL_AMBIENCE)
+	new_sound = sound(new_sound, repeat = 0, wait = 0, volume = volume, channel = CHANNEL_AMBIENCE) // [HORIZON-EDIT] Master_Sounds
 	SEND_SOUND(M, new_sound)
 
 	var/sound_length = SSsounds.get_sound_length(new_sound.file)

@@ -32,9 +32,8 @@ ADMIN_VERB(play_sound, R_SOUND, "Play Global Sound", "Play a sound to all connec
 	message_admins("[key_name_admin(user)] played sound [sound]")
 
 	for(var/mob/M in GLOB.player_list)
-		var/volume_modifier = M.client.prefs.read_preference(/datum/preference/numeric/volume/sound_midi)
-		if(volume_modifier > 0)
-			admin_sound.volume = vol * M.client.admin_music_volume * (volume_modifier/100)
+		if(M.client.prefs.channel_volume["[CHANNEL_ADMIN]"]) // [HORIZON-EDIT] Master_Sounds
+			admin_sound.volume = vol * M.client.admin_music_volume
 			SEND_SOUND(M, admin_sound)
 			admin_sound.volume = vol
 
