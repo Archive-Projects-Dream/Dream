@@ -4,7 +4,7 @@ let ambientAudio: HTMLAudioElement | null = null;
 let currentUiVolume = 0.8;
 
 export function setUiVolume(volume: number) {
-  if (typeof volume === 'number' && !isNaN(volume)) {
+  if (typeof volume === 'number') {
     currentUiVolume = Math.max(0, Math.min(1, volume));
   }
 }
