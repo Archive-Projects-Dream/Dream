@@ -864,10 +864,13 @@ SUBSYSTEM_DEF(ticker)
 	gather_newscaster() //called here so we ensure the log is created even upon admin reboot
 	if(!round_end_sound)
 		round_end_sound = choose_round_end_song()
+	// [HORIZON-EDIT] Master_Sounds
+	var/sound/end_of_round_sound_ref = sound(round_end_sound)
 	for(var/mob/M in GLOB.player_list)
-		var/pref_volume = M.client.prefs.read_preference(/datum/preference/numeric/volume/sound_midi)
-		if(pref_volume > 0)
-			SEND_SOUND(M.client, sound(round_end_sound, volume = pref_volume))
+		if(M.client.prefs?.channel_volume["[CHANNEL_LOBBYMUSIC]"])
+			end_of_round_sound_ref.volume = calculate_mixed_volume(M.client, 100, CHANNEL_LOBBYMUSIC)
+			SEND_SOUND(M.client, end_of_round_sound_ref)
+	// [/HORIZON-EDIT]
 
 	text2file(login_music, "data/last_round_lobby_music.txt")
 
