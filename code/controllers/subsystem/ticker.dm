@@ -37,8 +37,8 @@ SUBSYSTEM_DEF(ticker)
 
 	/// Time left until the round starts after all subsystems initialize
 	var/timeLeft = 120 SECONDS
-	/// value used to initialize `timeLeft` when the master subsystem finishes initializing. 
-	/// We do this to allow for the timer to be set manually before all subsystems initialize, 
+	/// value used to initialize `timeLeft` when the master subsystem finishes initializing.
+	/// We do this to allow for the timer to be set manually before all subsystems initialize,
 	/// while also making sure that when the timer does start, it does so at the value we have set.
 	/// This is set to the config value when SSticker initializes, so setting this only makes sense after that point.
 	var/start_at = 120 SECONDS
@@ -271,7 +271,10 @@ SUBSYSTEM_DEF(ticker)
 	INVOKE_ASYNC(SSdbcore, TYPE_PROC_REF(/datum/controller/subsystem/dbcore,SetRoundStart))
 
 	to_chat_spaced(world, html = span_bold(SPAN_ROLE_BODY("Добро пожаловать на [station_name()], приятного пребывания!")))
-	SEND_SOUND(world, sound(SSstation.announcer.get_rand_welcome_sound()))
+	// [HORIZON-EDIT] Master_Sounds
+	for(var/mob/player as anything in GLOB.player_list)
+		welcome_player(player)
+	// [HORIZON-EDIT]
 
 	current_state = GAME_STATE_PLAYING
 	Master.SetRunLevel(RUNLEVEL_GAME)
@@ -285,6 +288,15 @@ SUBSYSTEM_DEF(ticker)
 	PostSetup()
 
 	return TRUE
+
+// [HORIZON-ADD] Master_Sounds
+/datum/controller/subsystem/ticker/proc/welcome_player(mob/player)
+	var/list/channel_volume = player?.client?.prefs?.channel_volume
+	if(!(channel_volume["[CHANNEL_STORYTELLER]"]))
+		return
+	var/volume_played = channel_volume["[CHANNEL_STORYTELLER]"] * (channel_volume["[CHANNEL_MASTER_VOLUME]"] * 0.01)
+	SEND_SOUND(player, sound(SSstation.announcer.get_rand_welcome_sound(), volume = volume_played))
+// [/HORIZON-ADD]
 
 /datum/controller/subsystem/ticker/proc/PostSetup()
 	set waitfor = FALSE

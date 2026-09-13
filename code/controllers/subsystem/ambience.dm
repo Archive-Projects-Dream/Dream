@@ -58,6 +58,12 @@ SUBSYSTEM_DEF(ambience)
 ///Attempts to play an ambient sound to a mob, returning the cooldown in deciseconds
 /area/proc/play_ambience(mob/M, sound/override_sound, volume = 27)
 	var/sound/new_sound = override_sound || pick(ambientsounds)
+	// [HORIZON-ADD] Master_Sounds
+	if(M.client?.prefs.channel_volume)
+		volume *= M.client.prefs.channel_volume["[CHANNEL_MASTER_VOLUME]"] * 0.01
+		volume *= M.client.prefs.channel_volume["[CHANNEL_AMBIENCE]"] * 0.01
+	// [HORIZON-ADD]
+
 	if(!new_sound) // Dont try to play a sound if we dont have any.
 		return 1 MINUTES
 	/// volume modifier for ambience as set by the player in preferences.
@@ -115,6 +121,7 @@ SUBSYSTEM_DEF(ambience)
 
 	refresh_looping_ambience()
 
+// [HORIZON-EDIT] Master_Sounds
 /mob/proc/refresh_looping_ambience()
 	SIGNAL_HANDLER
 
@@ -123,9 +130,8 @@ SUBSYSTEM_DEF(ambience)
 
 	var/area/my_area = get_area(src)
 	var/sound_to_use = my_area.ambient_buzz
-	var/volume_modifier = client.prefs.read_preference(/datum/preference/numeric/volume/sound_ship_ambience_volume)
 
-	if(!sound_to_use || !(client.prefs.read_preference(/datum/preference/numeric/volume/sound_ship_ambience_volume)))
+	if(!sound_to_use || !client?.prefs?.channel_volume["[CHANNEL_AMBIENCE]"])
 		SEND_SOUND(src, sound(null, repeat = 0, wait = 0, channel = CHANNEL_AMBIENCE))
 		client.current_ambient_sound = null
 		return
@@ -145,4 +151,6 @@ SUBSYSTEM_DEF(ambience)
 			return
 
 		client.current_ambient_sound = sound_to_use
-		SEND_SOUND(src, sound(my_area.ambient_buzz, repeat = 1, wait = 0, volume = my_area.ambient_buzz_vol * (volume_modifier / 100), channel = CHANNEL_AMBIENCE))
+		var/volume_to_play = calculate_mixed_volume(client, my_area.ambient_buzz_vol, CHANNEL_AMBIENCE)
+		SEND_SOUND(src, sound(my_area.ambient_buzz, repeat = 1, wait = 0, volume = volume_to_play, channel = CHANNEL_AMBIENCE))
+// [/HORIZON-EDIT]

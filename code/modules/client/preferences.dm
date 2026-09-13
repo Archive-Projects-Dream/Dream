@@ -485,6 +485,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						sound_file = "sound/announcer/vox_fem/[pick(flist("sound/announcer/vox_fem/"))]"
 					if(CHANNEL_ANNOUNCEMENTS)
 						sound_file = 'sound/announcer/announcement/announce.ogg'
+					if(CHANNEL_STORYTELLER)
+						sound_file = 'sound/announcer/announcement/announce.ogg'
 					if(CHANNEL_HEARTBEAT)
 						sound_file = 'sound/effects/health/fastbeat.ogg'
 					if(CHANNEL_LOBBYMUSIC)

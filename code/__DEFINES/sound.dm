@@ -5,8 +5,8 @@
 
 #define CHANNEL_AMBIENCE 1022
 #define CHANNEL_WEATHER 1021
-#define CHANNEL_MACHINERY 1020 // Purely cosmetic sounds of machinery (Buzzing, printing, typing)
 
+#define CHANNEL_MACHINERY 1020 // Purely cosmetic sounds of machinery (Buzzing, printing, typing)
 #define CHANNEL_FOOTSTEPS 1019
 #define CHANNEL_MOB_SOUNDS 1018 // Something that can be important, but not purely innocent (Screaming(damage react), )
 #define CHANNEL_MOB_EMOTES 1017 // Anything not gameplay/combat at all from carbons and animals (screaming, moo)
@@ -16,16 +16,17 @@
 #define CHANNEL_UI 1014 // UI sounds, Machinery interface (PDA, Consoles) and informative playsound_local()
 #define CHANNEL_RINGTONES 1013 // Notifications from devices
 #define CHANNEL_VOX 1012 // AI vox system (ass blast usa)
-#define CHANNEL_ANNOUNCEMENTS 1011 // Cap/Corp announcemets
-#define CHANNEL_HEARTBEAT 1010 // Sound channel for personal heartbeats
+#define CHANNEL_STORYTELLER 1011
+#define CHANNEL_ANNOUNCEMENTS 1010 // Cap/Corp announcemets
+#define CHANNEL_HEARTBEAT 1009 // Sound channel for personal heartbeats
 
-#define CHANNEL_LOBBYMUSIC 1009 // Only lobby music
-#define CHANNEL_EVENT_MUSIC 1008 // Gameplay music played while fighting a strong enemy, heretic/bloodcult ascending
-#define CHANNEL_JUKEBOX 1007 // Any portable music player like boomboxes, jukeboxes, radios
-#define CHANNEL_INSTRUMENTS 1006 // MIDI shit from music instruments or In-game ambient music (elevator music)
+#define CHANNEL_LOBBYMUSIC 1008 // Only lobby music
+#define CHANNEL_EVENT_MUSIC 1007 // Gameplay music played while fighting a strong enemy, heretic/bloodcult ascending
+#define CHANNEL_JUKEBOX 1006 // Any portable music player like boomboxes, jukeboxes, radios
+#define CHANNEL_INSTRUMENTS 1005 // MIDI shit from music instruments or In-game ambient music (elevator music)
 
-#define CHANNEL_ADMIN 1005 // Bwoinks, pms
-#define CHANNEL_ADMIN_SOUNDS 1004 // Admin music mostly
+#define CHANNEL_ADMIN 1003 // Bwoinks, pms
+#define CHANNEL_ADMIN_SOUNDS 1002 // Admin music mostly
 
 #define CHANNEL_TEST_SOUND 1000 // Channel just for testing sounds in preferences. Do not use
 
