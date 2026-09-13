@@ -29,11 +29,14 @@ export const VolumeMixerPage = () => {
           <Box fontSize="1rem" color="label" mb={1}>Global Master Volume</Box>
           <Stack align="center">
             <Stack.Item grow={1}>
-              <SmoothSlider
-                value={globalMaster.volume}
-                fontSize="1.1rem"
+              <Slider
+                minValue={0}
+                maxValue={100}
                 stepPixelSize={4}
-                onChange={(v) => act('volume', { channel: globalMaster.num, volume: v })}
+                value={globalMaster.volume}
+                onChange={(_, value) =>
+                  act('volume', { channel: globalMaster.num, volume: Math.round(value) })
+                }
               />
             </Stack.Item>
             <Stack.Item>
