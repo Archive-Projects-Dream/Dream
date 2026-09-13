@@ -26,7 +26,7 @@
 	for(var/V in GLOB.player_list)
 		var/mob/M = V
 		if((M.client.prefs.channel_volume["[CHANNEL_WEATHER]"]) && is_station_level(M.z)) // [HORIZON-EDIT] Master_Sounds
-			M.playsound_local(M, 'sound/ambience/aurora_caelus/aurora_caelus.ogg', 20, FALSE, mixer_channel = CHANNEL_WEATHER, pressure_affected = FALSE)
+			M.playsound_local(M, 'sound/ambience/aurora_caelus/aurora_caelus.ogg', 20, FALSE, pressure_affected = FALSE, mixer_channel = CHANNEL_WEATHER)
 	fade_space(fade_in = TRUE)
 	fade_kitchen(fade_in = TRUE)
 

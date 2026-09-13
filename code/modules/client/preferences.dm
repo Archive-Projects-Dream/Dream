@@ -143,7 +143,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	var/needs_save = FALSE
 	for(var/channel in GLOB.used_sound_channels)
 		if(isnull(channel_volume["[channel]"]))
-			channel_volume["[channel]"] = 50
+			channel_volume["[channel]"] = 100
 			needs_save = TRUE
 
 	var/list/seen_categories = list()
@@ -221,7 +221,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			LAZYADD(seen_channels, channel)
 			var/volume = channel_volume["[channel]"]
 			if(isnull(volume) || !isnum(volume))
-				volume = 50
+				volume = 100
 				channel_volume["[channel]"] = volume
 			var/list/channel_info = get_channel_info(channel)
 			channels += list(list(
@@ -428,8 +428,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 		if("reset_all_volumes")
 			for(var/channel in GLOB.used_sound_channels)
-				var/default_vol = (channel == CHANNEL_MASTER_VOLUME) ? 100 : 50
-				channel_volume["[channel]"] = default_vol
+				channel_volume["[channel]"] = 100
 
 			var/list/seen_categories = list()
 			for(var/channel in GLOB.used_sound_channels)
@@ -477,6 +476,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						sound_file = 'sound/runtime/chatter/griffin_10.ogg'
 					if(CHANNEL_SHUTTLES)
 						sound_file = 'sound/runtime/hyperspace/hyperspace_begin.ogg'
+					if(CHANNEL_RADIO)
+						sound_file = "sound/items/radio/[pick(flist("sound/items/radio/"))]"
 					if(CHANNEL_UI)
 						sound_file = "sound/machines/arcade/[pick(flist("sound/machines/arcade/"))]"
 					if(CHANNEL_RINGTONES)

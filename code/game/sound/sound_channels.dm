@@ -21,6 +21,7 @@ GLOBAL_LIST_INIT(used_sound_channels, list(
 	CHANNEL_INSTRUMENTS,
 	CHANNEL_ADMIN,
 	CHANNEL_ADMIN_SOUNDS,
+	CHANNEL_RADIO,
 ))
 
 GLOBAL_LIST_INIT(proxy_sound_channels, list(
@@ -65,6 +66,8 @@ GLOBAL_DATUM_INIT(cached_mixer_channels, /alist, alist())
 		. = GLOB.cached_mixer_channels[sound_text_string] = CHANNEL_SOUND_EFFECTS
 	else if(findtext(sound_text_string, "hyperspace/"))
 		. = GLOB.cached_mixer_channels[sound_text_string] = CHANNEL_SHUTTLES
+	else if(findtext(sound_text_string, "radio/"))
+		. = GLOB.cached_mixer_channels[sound_text_string] = CHANNEL_RADIO
 	else
 		return FALSE
 

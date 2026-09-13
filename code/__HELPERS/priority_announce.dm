@@ -207,12 +207,14 @@
 /proc/dispatch_announcement_to_players(announcement, list/players = GLOB.player_list, sound_override = null, should_play_sound = TRUE, sound_channel = CHANNEL_ANNOUNCEMENTS) // [HORIZON-EDIT] Master_Sounds
 	var/sound_to_play = !isnull(sound_override) ? sound_override : 'sound/announcer/notice/notice2.ogg'
 
+	var/datum/callback/should_play_sound_callback = astype(should_play_sound)
+
 	for(var/mob/target in players)
 		if(isnewplayer(target) || HAS_TRAIT(target, TRAIT_DEAF))
 			continue
 
 		to_chat(target, announcement)
-		if(!should_play_sound)
+		if(!should_play_sound || (should_play_sound_callback && !should_play_sound_callback.Invoke(target)))
 			continue
 
 		if(target.client?.prefs?.channel_volume["[CHANNEL_ANNOUNCEMENTS]"])
