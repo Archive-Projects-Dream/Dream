@@ -3097,9 +3097,3 @@ GLOBAL_LIST_EMPTY(fire_appearances)
 	static_image.name = "unknown humanoid"
 
 	return static_image
-
-// [HORIZON-ADD] Master_Sounds
-/// Updates media volume for a sound channel
-/mob/proc/update_media_volume(channel)
-	return TRUE
-// [/HORIZON-ADD]

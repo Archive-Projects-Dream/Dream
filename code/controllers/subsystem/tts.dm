@@ -154,9 +154,9 @@ SUBSYSTEM_DEF(tts)
 		var/mob/listening_mob = hearer_atom.get_listening_mob()
 		var/tts_pref = listening_mob.client?.prefs.read_preference(/datum/preference/choiced/sound_tts)
 		var/hear_self_pref = listening_mob.client?.prefs.read_preference(/datum/preference/toggle/sound_tts_hear_self_radio)
+		// [HORIZON-EDIT] Master_Sounds
 		if(tts_pref == TTS_SOUND_OFF)
 			continue
-		// [HORIZON-EDIT] Master_Sounds
 		if(isnull(listening_mob.client) || calculate_mixed_volume(listening_mob.client, 100, mixer_channel) <= 0)
 			continue
 		// [/HORIZON-EDIT]
@@ -430,7 +430,7 @@ SUBSYSTEM_DEF(tts)
 				source_speaker = tts_request.target,
 				audio_length = tts_request.audio_length_radio,
 				audio_length_blips = tts_request.audio_length_blips_radio,
-				mixer_channel = CHANNEL_TTS, // [HORIZON-EDIT] Master_Sounds - own channel so muting TTS doesn't mute radio noise
+				mixer_channel = CHANNEL_TTS, // [HORIZON-EDIT] Master_Sounds
 			)
 
 		clear_radio_message(identifier)

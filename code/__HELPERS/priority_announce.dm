@@ -218,9 +218,6 @@
 			continue
 
 		// [HORIZON-EDIT] Master_Sounds
-		// Apply the full 3-layer mixer (master -> category -> channel) for the
-		// announcement sound_channel (CHANNEL_ANNOUNCEMENTS by default,
-		// CHANNEL_VOX for Syndicate captain, CHANNEL_STORYTELLER for custom senders).
 		var/client/target_client = target.client
 		if(!target_client?.prefs?.channel_volume?["[sound_channel]"])
 			continue

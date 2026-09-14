@@ -287,8 +287,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 // [/HORIZON-ADD]
 
 /datum/preferences/proc/set_channel_volume(channel, vol)
-	parent.mob.update_media_volume(channel)
-
 	//we gotta take into account existing sounds repeating/waiting, otherwise we completely wipe looping sounds (such as whitenoise).
 	for(var/sound/S in parent.SoundQuery())
 		var/sound_channel = S.channel

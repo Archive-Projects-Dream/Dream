@@ -58,10 +58,7 @@ SUBSYSTEM_DEF(ambience)
 ///Attempts to play an ambient sound to a mob, returning the cooldown in deciseconds
 /area/proc/play_ambience(mob/M, sound/override_sound, volume = 27)
 	var/sound/new_sound = override_sound || pick(ambientsounds)
-	// [HORIZON-EDIT] Master_Sounds
-	// Apply the full 3-layer mixer (master -> category -> channel) via calculate_mixed_volume.
-	volume = calculate_mixed_volume(M.client, volume, CHANNEL_AMBIENCE)
-	// [/HORIZON-EDIT]
+	volume = calculate_mixed_volume(M.client, volume, CHANNEL_AMBIENCE)	// [HORIZON-EDIT] Master_Sounds
 
 	if(!new_sound) // Dont try to play a sound if we dont have any.
 		return 1 MINUTES

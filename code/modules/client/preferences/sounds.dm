@@ -1,12 +1,4 @@
 // [HORIZON-EDIT] Master_Sounds
-// The old `/datum/preference/numeric/volume/*` preference family (sound_ambience_volume,
-// sound_jukebox, sound_tts_volume, sound_lobby_volume, sound_midi, etc.) was removed.
-// Per-sound volumes are now handled by the 3-layer volume mixer
-// (master -> category -> channel) in the Volume Mixer tab, see sound_channels.dm.
-// The sound_breathing/sound_announcements toggles were also removed: their sounds
-// (CHANNEL_BREATH / CHANNEL_ANNOUNCEMENTS) are muted by setting the channel to 0.
-// [/HORIZON-EDIT]
-
 /// Controls hearing the combat mode sound
 /datum/preference/toggle/sound_combatmode
 	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
@@ -81,3 +73,4 @@
 /// default value is max/2 because 100 1x modifier, while 200 is 2x
 /datum/preference/numeric/sound_ghost_poll_prompt_volume/create_default_value()
 	return maximum/2
+// [/HORIZON-EDIT]
