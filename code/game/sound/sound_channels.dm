@@ -96,14 +96,13 @@ GLOBAL_LIST_INIT(channel_to_category, init_channel_categories())
 
 	. *= channels["[CHANNEL_MASTER_VOLUME]"] * 0.01
 
-	if(isnull(mixer_channel) || !(channel_key in channels))
+	if(isnull(mixer_channel) || mixer_channel == CHANNEL_MASTER_VOLUME || !(channel_key in channels))
 		return .
 
 	. *= channels[channel_key] * 0.01
 
-	if(mixer_channel != CHANNEL_MASTER_VOLUME)
-		var/category = GLOB.channel_to_category[channel_key]
-		if(!isnull(category))
-			var/cat_vol = prefs.category_volume[category]
-			if(!isnull(cat_vol))
-				. *= cat_vol * 0.01
+	var/category = GLOB.channel_to_category[channel_key]
+	if(!isnull(category))
+		var/cat_vol = prefs.category_volume[category]
+		if(!isnull(cat_vol))
+			. *= cat_vol * 0.01

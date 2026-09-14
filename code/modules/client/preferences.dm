@@ -97,8 +97,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	var/list/cached_character_profiles
 
 	var/list/channel_volume = list(
-		"1005" = 100, //master starts at 100%
-		"1018" = 100, //heartbeats for some fuckin reason
+		"1024" = 100, //master starts at 100%
+		"1008" = 100, //heartbeats for some fuckin reason
 	)
 	var/list/category_volume = list()
 	var/list/test_sound_channels = list()
@@ -422,9 +422,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			else
 				update_test_sound(mixer_channel_changed = channel)
 
-			// [HORIZON-EDIT] Master_Sounds
 			on_mixer_volume_changed(changed_channel = channel)
-			// [/HORIZON-EDIT]
 
 			return TRUE
 
@@ -452,10 +450,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					SEND_SOUND(parent.mob, new_sound)
 
 			update_test_sound(category_changed = category)
-
-			// [HORIZON-EDIT] Master_Sounds
 			on_mixer_volume_changed(changed_category = category)
-			// [/HORIZON-EDIT]
 
 			return TRUE
 
@@ -474,9 +469,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			save_preferences()
 			set_channel_volume(CHANNEL_MASTER_VOLUME, 100)
 			update_test_sound(master_changed = TRUE)
-			// [HORIZON-EDIT] Master_Sounds
 			on_mixer_volume_changed(changed_channel = CHANNEL_MASTER_VOLUME)
-			// [/HORIZON-EDIT]
 			return TRUE
 
 		if("test_sound")

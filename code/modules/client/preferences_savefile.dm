@@ -120,7 +120,6 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 			new_typepath = /obj/item/clothing/accessory/pride,
 			data_to_migrate = list(INFO_RESKIN = save_data?["pride_pin"]),
 		)
-
 	if (current_version < 48)
 		migrate_quirk_to_loadout(
 			quirk_to_migrate = "Colorist",
@@ -262,6 +261,9 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	// Sound channel volumes
 	channel_volume = savefile.get_entry("channel_volume", channel_volume)
 	channel_volume = SANITIZE_LIST(channel_volume)
+	// Category volumes
+	category_volume = savefile.get_entry("category_volume", category_volume)
+	category_volume = SANITIZE_LIST(category_volume)
 	// [/HORIZON-ADD]
 
 	//try to fix any outdated data if necessary
@@ -337,7 +339,10 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	savefile.set_entry("hearted_until", (hearted_until > world.realtime ? hearted_until : null))
 	savefile.set_entry("favorite_outfits", favorite_outfits)
 	savefile.set_entry("job_assigned_profiles", job_assigned_profiles)
-	savefile.set_entry("channel_volume", channel_volume) // [HORIZON-ADD] Master_Sounds
+	// [HORIZON-ADD] Master_Sounds
+	savefile.set_entry("channel_volume", channel_volume)
+	savefile.set_entry("category_volume", category_volume)
+	// [/HORIZON-ADD]
 	savefile.save()
 	return TRUE
 
