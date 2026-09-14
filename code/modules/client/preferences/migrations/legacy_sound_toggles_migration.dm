@@ -10,4 +10,3 @@
 	write_preference(GLOB.preference_entries[/datum/preference/numeric/volume/sound_lobby_volume], toggles & 1<<3)
 	write_preference(GLOB.preference_entries[/datum/preference/numeric/volume/sound_midi], toggles & 1<<1)
 	write_preference(GLOB.preference_entries[/datum/preference/numeric/volume/sound_ship_ambience_volume], toggles & 1<<8)
-
