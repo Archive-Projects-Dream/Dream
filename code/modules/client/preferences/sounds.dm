@@ -1,4 +1,5 @@
 // [HORIZON-EDIT] Master_Sounds
+// Volumes are now configured per channel in the Volume Mixer tab.
 /// Controls hearing the combat mode sound
 /datum/preference/toggle/sound_combatmode
 	category = PREFERENCE_CATEGORY_GAME_PREFERENCES

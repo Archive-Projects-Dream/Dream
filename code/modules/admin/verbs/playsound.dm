@@ -33,8 +33,6 @@ ADMIN_VERB(play_sound, R_SOUND, "Play Global Sound", "Play a sound to all connec
 
 	for(var/mob/M in GLOB.player_list)
 		// [HORIZON-EDIT] Master_Sounds
-		// Apply the full 3-layer mixer (master -> category -> channel) on top of
-		// the player's per-admin music volume.
 		var/client/player_client = M.client
 		if(!player_client?.prefs?.channel_volume?["[CHANNEL_ADMIN]"])
 			continue
@@ -181,7 +179,6 @@ GLOBAL_VAR_INIT(web_sound_cooldown, 0)
 			var/mob/M = m
 			var/client/C = M.client
 			// [HORIZON-EDIT] Master_Sounds
-			// Gated by the admin music mixer channel instead of the old sound_midi preference.
 			if(calculate_mixed_volume(C, 100, CHANNEL_ADMIN_SOUNDS) > 0)
 				// Stops playing lobby music and admin loaded music automatically.
 				SEND_SOUND(C, sound(null, channel = CHANNEL_LOBBYMUSIC))
