@@ -32,10 +32,19 @@ ADMIN_VERB(play_sound, R_SOUND, "Play Global Sound", "Play a sound to all connec
 	message_admins("[key_name_admin(user)] played sound [sound]")
 
 	for(var/mob/M in GLOB.player_list)
-		if(M.client.prefs.channel_volume["[CHANNEL_ADMIN]"]) // [HORIZON-EDIT] Master_Sounds
-			admin_sound.volume = vol * M.client.admin_music_volume
-			SEND_SOUND(M, admin_sound)
-			admin_sound.volume = vol
+		// [HORIZON-EDIT] Master_Sounds
+		// Apply the full 3-layer mixer (master -> category -> channel) on top of
+		// the player's per-admin music volume.
+		var/client/player_client = M.client
+		if(!player_client?.prefs?.channel_volume?["[CHANNEL_ADMIN]"])
+			continue
+		var/mixed_volume = calculate_mixed_volume(player_client, vol * player_client.admin_music_volume, CHANNEL_ADMIN)
+		if(mixed_volume <= 0)
+			continue
+		admin_sound.volume = mixed_volume
+		SEND_SOUND(M, admin_sound)
+		admin_sound.volume = vol
+		// [/HORIZON-EDIT]
 
 	BLACKBOX_LOG_ADMIN_VERB("Play Global Sound")
 

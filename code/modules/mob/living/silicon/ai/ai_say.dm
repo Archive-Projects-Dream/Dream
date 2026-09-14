@@ -164,22 +164,33 @@ GAME_VERB_DESC(/mob/living/silicon/ai, announcement_help, "Announcement Help", "
 	if(GLOB.vox_sounds[word])
 
 		var/sound_file = GLOB.vox_sounds[word]
-		var/sound/voice = sound(sound_file, wait = 1, channel = CHANNEL_VOX)
-		voice.status = SOUND_STREAM
 
 	// If there is no single listener, broadcast to everyone in the same z level
 		if(!only_listener)
 			// Play voice for all mobs in the z level
 			for(var/mob/player_mob as anything in GLOB.player_list)
-				if(HAS_TRAIT(player_mob, TRAIT_DEAF) || !player_mob.client?.prefs?.channel_volume["[CHANNEL_VOX]"])
+				if(HAS_TRAIT(player_mob, TRAIT_DEAF) || !player_mob.client?.prefs?.channel_volume?["[CHANNEL_VOX]"])
 					continue
 
 				var/turf/player_turf = get_turf(player_mob)
 				if(!is_valid_z_level(ai_turf, player_turf))
 					continue
 
+				// Per-listener mixer volume (master -> category -> channel)
+				var/mixed_volume = calculate_mixed_volume(player_mob.client, 100, CHANNEL_VOX)
+				if(mixed_volume <= 0)
+					continue
+				var/sound/voice = sound(sound_file, wait = 1, channel = CHANNEL_VOX, volume = mixed_volume)
+				voice.status = SOUND_STREAM
 				SEND_SOUND(player_mob, voice)
 		else
+			if(!only_listener.client?.prefs?.channel_volume?["[CHANNEL_VOX]"])
+				return TRUE
+			var/mixed_volume = calculate_mixed_volume(only_listener.client, 100, CHANNEL_VOX)
+			if(mixed_volume <= 0)
+				return TRUE
+			var/sound/voice = sound(sound_file, wait = 1, channel = CHANNEL_VOX, volume = mixed_volume)
+			voice.status = SOUND_STREAM
 			SEND_SOUND(only_listener, voice)
 		return TRUE
 	return FALSE

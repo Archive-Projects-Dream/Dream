@@ -291,11 +291,15 @@ SUBSYSTEM_DEF(ticker)
 
 // [HORIZON-ADD] Master_Sounds
 /datum/controller/subsystem/ticker/proc/welcome_player(mob/player)
-	var/list/channel_volume = player?.client?.prefs?.channel_volume
-	if(!(channel_volume["[CHANNEL_STORYTELLER]"]))
+	var/client/player_client = player?.client
+	if(!player_client?.prefs)
 		return
-	var/volume_played = channel_volume["[CHANNEL_STORYTELLER]"] * (channel_volume["[CHANNEL_MASTER_VOLUME]"] * 0.01)
-	SEND_SOUND(player, sound(SSstation.announcer.get_rand_welcome_sound(), volume = volume_played))
+	// Welcome sound is the station announcer - routes through CHANNEL_ANNOUNCEMENTS
+	// so the mixer's Announcements category + channel + master all apply.
+	var/volume_played = calculate_mixed_volume(player_client, 100, CHANNEL_ANNOUNCEMENTS)
+	if(volume_played <= 0)
+		return
+	SEND_SOUND(player, sound(SSstation.announcer.get_rand_welcome_sound(), volume = volume_played, channel = CHANNEL_ANNOUNCEMENTS))
 // [/HORIZON-ADD]
 
 /datum/controller/subsystem/ticker/proc/PostSetup()
@@ -867,9 +871,10 @@ SUBSYSTEM_DEF(ticker)
 	// [HORIZON-EDIT] Master_Sounds
 	var/sound/end_of_round_sound_ref = sound(round_end_sound)
 	for(var/mob/M in GLOB.player_list)
-		if(M.client.prefs?.channel_volume["[CHANNEL_LOBBYMUSIC]"])
-			end_of_round_sound_ref.volume = calculate_mixed_volume(M.client, 100, CHANNEL_LOBBYMUSIC)
-			SEND_SOUND(M.client, end_of_round_sound_ref)
+		if(!M.client?.prefs?.channel_volume?["[CHANNEL_LOBBYMUSIC]"])
+			continue
+		end_of_round_sound_ref.volume = calculate_mixed_volume(M.client, 100, CHANNEL_LOBBYMUSIC)
+		SEND_SOUND(M.client, end_of_round_sound_ref)
 	// [/HORIZON-EDIT]
 
 	text2file(login_music, "data/last_round_lobby_music.txt")

@@ -141,8 +141,14 @@
 		if(SOUND_EMITTER_GLOBAL)
 			hearing_mobs = GLOB.player_list.Copy()
 	for(var/mob/M in hearing_mobs)
-		if(M.client.prefs.channel_volume["[CHANNEL_ADMIN]"]) // [HORIZON-EDIT] Master_Sounds
-			M.playsound_local(M, sound_file, sound_volume, FALSE, channel = CHANNEL_ADMIN, pressure_affected = FALSE) // [HORIZON-EDIT] Master_Sounds
+		// [HORIZON-EDIT] Master_Sounds
+		// playsound_local already routes through calculate_mixed_volume when
+		// channel == CHANNEL_ADMIN (in GLOB.used_sound_channels); the truthy
+		// check on channel_volume here just gates whether to play at all.
+		if(!M.client?.prefs?.channel_volume?["[CHANNEL_ADMIN]"])
+			continue
+		M.playsound_local(M, sound_file, sound_volume, FALSE, channel = CHANNEL_ADMIN, pressure_affected = FALSE)
+		// [/HORIZON-EDIT]
 	if(user)
 		log_admin("[ADMIN_LOOKUPFLW(user)] activated a sound emitter with file \"[sound_file]\" at [AREACOORD(src)]")
 	flick("shield1", src)

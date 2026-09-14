@@ -217,13 +217,18 @@
 		if(!should_play_sound || (should_play_sound_callback && !should_play_sound_callback.Invoke(target)))
 			continue
 
-		if(target.client?.prefs?.channel_volume["[CHANNEL_ANNOUNCEMENTS]"])
-			var/sound/mixed_sound = sound(sound_to_play)
-			if("[sound_channel]" in target.client?.prefs?.channel_volume)
-				mixed_sound.volume = target.client?.prefs?.channel_volume["[sound_channel]"]
-			if(!isnull(target.client))
-				SEND_SOUND(target, mixed_sound)
-// [/HORIZON-ADD]
+		// [HORIZON-EDIT] Master_Sounds
+		// Apply the full 3-layer mixer (master -> category -> channel) for the
+		// announcement sound_channel (CHANNEL_ANNOUNCEMENTS by default,
+		// CHANNEL_VOX for Syndicate captain, CHANNEL_STORYTELLER for custom senders).
+		var/client/target_client = target.client
+		if(!target_client?.prefs?.channel_volume?["[sound_channel]"])
+			continue
+		var/mixed_volume = calculate_mixed_volume(target_client, 100, sound_channel)
+		if(mixed_volume <= 0)
+			continue
+		SEND_SOUND(target, sound(sound_to_play, volume = mixed_volume, channel = sound_channel))
+		// [/HORIZON-EDIT]
 
 #undef MAJOR_ANNOUNCEMENT_TITLE
 #undef MAJOR_ANNOUNCEMENT_TEXT
