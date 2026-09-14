@@ -32,6 +32,8 @@
 
 #define CHANNEL_TEST_SOUND 1000 // Channel just for testing sounds in preferences. Do not use
 
+#define CHANNEL_TTS 999 // Text to speech (spoken words and radio TTS). Kept separate from CHANNEL_RADIO so muting TTS doesn't mute radio noise
+
 //THIS SHOULD ALWAYS BE THE LOWEST ONE!
 //KEEP IT UPDATED
 #define CHANNEL_HIGHEST_AVAILABLE 980

@@ -1,58 +1,17 @@
-/datum/preference/numeric/volume
-	abstract_type = /datum/preference/numeric/volume
-	minimum = 0
-	maximum = 100
-
-/datum/preference/numeric/volume/create_default_value()
-	return maximum
-
-/// Controls ambience volume
-/datum/preference/numeric/volume/sound_ambience_volume
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_ambience_volume"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/datum/preference/numeric/volume/sound_ambience_volume/apply_to_client(client/client, value)
-	client.update_ambience_pref(value)
-
-/datum/preference/toggle/sound_breathing
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_breathing"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/datum/preference/toggle/sound_breathing/apply_to_client_updated(client/client, value)
-	var/mob/living/carbon/carbon_mob = client.mob
-	if(istype(carbon_mob) && !value)
-		carbon_mob.breathing_loop.stop()
-
-/// Controls hearing announcement sounds
-/datum/preference/toggle/sound_announcements
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_announcements"
-	savefile_identifier = PREFERENCE_PLAYER
+// [HORIZON-EDIT] Master_Sounds
+// The old `/datum/preference/numeric/volume/*` preference family (sound_ambience_volume,
+// sound_jukebox, sound_tts_volume, sound_lobby_volume, sound_midi, etc.) was removed.
+// Per-sound volumes are now handled by the 3-layer volume mixer
+// (master -> category -> channel) in the Volume Mixer tab, see sound_channels.dm.
+// The sound_breathing/sound_announcements toggles were also removed: their sounds
+// (CHANNEL_BREATH / CHANNEL_ANNOUNCEMENTS) are muted by setting the channel to 0.
+// [/HORIZON-EDIT]
 
 /// Controls hearing the combat mode sound
 /datum/preference/toggle/sound_combatmode
 	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
 	savefile_key = "sound_combatmode"
 	savefile_identifier = PREFERENCE_PLAYER
-
-/// Controls hearing instruments
-/datum/preference/numeric/volume/sound_instruments
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_instruments"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/// Controls jukebox track volume
-/datum/preference/numeric/volume/sound_jukebox
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_jukebox"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/datum/preference/numeric/volume/sound_jukebox/apply_to_client_updated(client/client, value)
-	var/mob/client_mob = client.mob
-	if(!isnull(client_mob))
-		SEND_SIGNAL(client_mob, COMSIG_MOB_JUKEBOX_PREFERENCE_APPLIED)
 
 /datum/preference/choiced/sound_tts
 	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
@@ -82,29 +41,6 @@
 	savefile_identifier = PREFERENCE_PLAYER
 	default_value = FALSE // turn this on at your own peril
 
-/datum/preference/numeric/volume/sound_tts_volume
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_tts_volume"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/datum/preference/numeric/volume/sound_tts_volume/apply_to_client_updated(client/client, value)
-	var/mob/client_mob = client.mob
-	if(!isnull(client_mob))
-		SEND_SIGNAL(client_mob, COMSIG_MOB_TTS_VOLUME_PREFERENCE_APPLIED)
-
-/datum/preference/numeric/volume/sound_tts_radio_volume
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_tts_radio_volume"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/datum/preference/numeric/volume/sound_tts_radio_volume/apply_to_client_updated(client/client, value)
-	var/mob/client_mob = client.mob
-	if(!isnull(client_mob))
-		SEND_SIGNAL(client_mob, COMSIG_MOB_TTS_RADIO_VOLUME_PREFERENCE_APPLIED)
-
-/datum/preference/numeric/volume/sound_tts_radio_volume/create_default_value()
-	return 75
-
 /datum/preference/choiced/sound_achievement
 	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
 	savefile_key = "sound_achievement"
@@ -120,45 +56,6 @@
 	var/sound/sound_to_send = LAZYACCESS(GLOB.achievement_sounds, value)
 	if(sound_to_send)
 		SEND_SOUND(client.mob, sound_to_send)
-
-/// Controls hearing lobby music
-/datum/preference/numeric/volume/sound_lobby_volume
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_lobby_volume"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/datum/preference/numeric/volume/sound_lobby_volume/apply_to_client_updated(client/client, value)
-	if (value && isnewplayer(client.mob))
-		client.playtitlemusic()
-	else
-		client.mob.stop_sound_channel(CHANNEL_LOBBYMUSIC)
-
-/// Controls hearing admin music
-/datum/preference/numeric/volume/sound_midi
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_midi"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/// Controls ship ambience volume
-/datum/preference/numeric/volume/sound_ship_ambience_volume
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_ship_ambience_volume"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/datum/preference/numeric/volume/sound_ship_ambience_volume/apply_to_client_updated(client/client, value)
-	client.mob.refresh_looping_ambience()
-
-/// Controls radio noise volume
-/datum/preference/numeric/volume/sound_radio_noise
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_radio_noise"
-	savefile_identifier = PREFERENCE_PLAYER
-
-/// Controls hearing AI VOX announcements
-/datum/preference/numeric/volume/sound_ai_vox
-	category = PREFERENCE_CATEGORY_GAME_PREFERENCES
-	savefile_key = "sound_ai_vox"
-	savefile_identifier = PREFERENCE_PLAYER
 
 /// Choice of which ghost poll prompt to use
 /datum/preference/choiced/sound_ghost_poll_prompt

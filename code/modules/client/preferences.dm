@@ -259,6 +259,33 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 	return assets
 
+// [HORIZON-ADD] Master_Sounds
+/datum/preferences/proc/mixer_channel_affected(check_channel, changed_channel, changed_category)
+	if(changed_channel == CHANNEL_MASTER_VOLUME)
+		return TRUE
+	if(check_channel == changed_channel)
+		return TRUE
+	if(!isnull(changed_category) && GLOB.channel_to_category["[check_channel]"] == changed_category)
+		return TRUE
+	return FALSE
+
+/// Notifies datum-managed sounds (jukebox, TTS) and the ambience subsystem that a mixer
+/datum/preferences/proc/on_mixer_volume_changed(changed_channel = null, changed_category = null)
+	var/mob/listener = parent?.mob
+	if(isnull(listener))
+		return
+
+	if(isnull(changed_category) && !isnull(changed_channel))
+		changed_category = GLOB.channel_to_category["[changed_channel]"]
+
+	if(mixer_channel_affected(CHANNEL_JUKEBOX, changed_channel, changed_category))
+		SEND_SIGNAL(listener, COMSIG_MOB_JUKEBOX_PREFERENCE_APPLIED)
+	if(mixer_channel_affected(CHANNEL_TTS, changed_channel, changed_category))
+		SEND_SIGNAL(listener, COMSIG_MOB_TTS_VOLUME_PREFERENCE_APPLIED)
+	if(mixer_channel_affected(CHANNEL_AMBIENCE, changed_channel, changed_category))
+		parent.update_ambience_pref()
+// [/HORIZON-ADD]
+
 /datum/preferences/proc/set_channel_volume(channel, vol)
 	parent.mob.update_media_volume(channel)
 
@@ -397,6 +424,10 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			else
 				update_test_sound(mixer_channel_changed = channel)
 
+			// [HORIZON-EDIT] Master_Sounds
+			on_mixer_volume_changed(changed_channel = channel)
+			// [/HORIZON-EDIT]
+
 			return TRUE
 
 		if("category_volume")
@@ -424,6 +455,10 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 			update_test_sound(category_changed = category)
 
+			// [HORIZON-EDIT] Master_Sounds
+			on_mixer_volume_changed(changed_category = category)
+			// [/HORIZON-EDIT]
+
 			return TRUE
 
 		if("reset_all_volumes")
@@ -441,6 +476,9 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			save_preferences()
 			set_channel_volume(CHANNEL_MASTER_VOLUME, 100)
 			update_test_sound(master_changed = TRUE)
+			// [HORIZON-EDIT] Master_Sounds
+			on_mixer_volume_changed(changed_channel = CHANNEL_MASTER_VOLUME)
+			// [/HORIZON-EDIT]
 			return TRUE
 
 		if("test_sound")
@@ -476,6 +514,9 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						sound_file = "sound/mobs/humanoids/human/laugh/[pick(flist("sound/mobs/humanoids/human/laugh/"))]"
 						vol = 50
 					if(CHANNEL_VOICES)
+						sound_file = 'sound/runtime/chatter/griffin_10.ogg'
+						vol = 40
+					if(CHANNEL_TTS)
 						sound_file = 'sound/runtime/chatter/griffin_10.ogg'
 						vol = 40
 					if(CHANNEL_SHUTTLES)

@@ -1,7 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useBackend } from 'tgui/backend';
 import { Box, Button, Section, Slider, Stack, Tooltip } from 'tgui-core/components';
+import { features } from './preferences/features';
+import { FeatureValueInput } from './preferences/features/base';
 import type { Channel, PreferencesMenuData } from './types';
+
+const SOUND_OPTIONS = [
+  'sound_combatmode',
+  'sound_achievement',
+  'sound_tts',
+  'sound_tts_radio',
+  'sound_tts_hear_self_radio',
+  'sound_ghost_poll_prompt',
+  'sound_ghost_poll_prompt_volume',
+];
 
 const groupChannelsByCategory = (channels: Channel[]) => {
   return channels.reduce<Record<string, Channel[]>>((groups, ch) => {
@@ -15,6 +27,7 @@ const groupChannelsByCategory = (channels: Channel[]) => {
 export const VolumeMixerPage = () => {
   const { data, act } = useBackend<PreferencesMenuData>();
   const { channels = [], category_volume = {} } = data;
+  const gamePreferences = data.character_preferences?.game_preferences ?? {};
 
   const globalMaster = channels.find((c) => c.name === 'Master Volume');
   const otherChannels = channels.filter((c) => c.name !== 'Master Volume');
@@ -112,6 +125,51 @@ export const VolumeMixerPage = () => {
                     <VolumeSlider channel={channel} />
                   </Stack.Item>
                 ))}
+              </Stack>
+            </Stack.Item>
+          );
+        })}
+      </Stack>
+
+      <Box
+        fontSize="0.95rem"
+        bold
+        color="label"
+        mt={3}
+        mb={2}
+        style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)', paddingBottom: '4px' }}
+      >
+        Sound Options
+      </Box>
+      <Stack wrap>
+        {SOUND_OPTIONS.map((optionId) => {
+          const feature = features[optionId];
+          const value = gamePreferences[optionId];
+          if (!feature || value === undefined) {
+            return null;
+          }
+          return (
+            <Stack.Item
+              key={optionId}
+              grow={1}
+              basis="45%"
+              style={{ minWidth: '250px', marginBottom: '8px' }}
+            >
+              <Stack align="center">
+                <Stack.Item grow={1} pr={2}>
+                  <Tooltip content={feature.description} position="bottom-start">
+                    <Box as="span" fontSize="0.85rem">
+                      {feature.name}
+                    </Box>
+                  </Tooltip>
+                </Stack.Item>
+                <Stack.Item>
+                  <FeatureValueInput
+                    feature={feature}
+                    featureId={optionId}
+                    value={value}
+                  />
+                </Stack.Item>
               </Stack>
             </Stack.Item>
           );

@@ -23,6 +23,7 @@ GLOBAL_LIST_INIT(used_sound_channels, list(
 	CHANNEL_ADMIN,
 	CHANNEL_ADMIN_SOUNDS,
 	CHANNEL_RADIO,
+	CHANNEL_TTS,
 ))
 
 GLOBAL_LIST_INIT(proxy_sound_channels, list(

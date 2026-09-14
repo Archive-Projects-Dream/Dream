@@ -281,6 +281,8 @@
 			return list("Mob Emotes", "Spitting, kissing, and every other emote with a sound.", "Player & Mobs")
 		if(CHANNEL_VOICES)
 			return list("Voices", "The sound when someone speaks.", "Announcements & Voices")
+		if(CHANNEL_TTS)
+			return list("Text to Speech", "Voiced speech (TTS) of people around you and over the radio.", "Announcements & Voices")
 		if(CHANNEL_RINGTONES)
 			return list("Ringtones", "Sound when you get a notification from a mobile device.", "General")
 		if(CHANNEL_ADMIN)
