@@ -194,10 +194,13 @@ GAME_VERB_DESC(/mob/living/silicon/ai, announcement_help, "Announcement Help", "
 			SEND_SOUND(only_listener, voice)
 		return TRUE
 	return FALSE
-// [/HORIZON-EDIT]
 
 /proc/does_target_have_vox_off(mob/target)
-	return !safe_read_pref(target.client, /datum/preference/numeric/volume/sound_ai_vox)
+	var/client/target_client = target?.client
+	if(isnull(target_client))
+		return TRUE
+	return calculate_mixed_volume(target_client, 100, CHANNEL_VOX) <= 0
+// [/HORIZON-EDIT]
 
 #undef VOX_DELAY
 #endif

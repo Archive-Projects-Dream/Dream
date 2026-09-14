@@ -114,19 +114,13 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	if (current_version < 42)
 		migrate_body_types(save_data)
 
-	if (current_version < 43)
-		migrate_legacy_sound_toggles(savefile)
-
 	if (current_version < 45)
 		migrate_quirk_to_loadout(
 			quirk_to_migrate = "Pride Pin",
 			new_typepath = /obj/item/clothing/accessory/pride,
 			data_to_migrate = list(INFO_RESKIN = save_data?["pride_pin"]),
 		)
-	if (current_version < 46)
-		migrate_boolean_sound_prefs_to_default_volume()
-	if (current_version < 47)
-		migrate_boolean_sound_prefs_to_default_volume_v2()
+
 	if (current_version < 48)
 		migrate_quirk_to_loadout(
 			quirk_to_migrate = "Colorist",

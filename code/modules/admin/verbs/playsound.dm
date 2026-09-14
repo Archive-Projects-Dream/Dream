@@ -154,8 +154,10 @@ GLOBAL_VAR_INIT(web_sound_cooldown, 0)
 
 		var/list/recipients = list()
 		for(var/client/client as anything in GLOB.clients)
-			if(client.prefs.read_preference(/datum/preference/numeric/volume/sound_midi) > 0)
+			// [HORIZON-EDIT] Master_Sounds
+			if(calculate_mixed_volume(client, 100, CHANNEL_ADMIN_SOUNDS) > 0)
 				recipients += client
+			// [/HORIZON-EDIT]
 		recipients |= user.client
 		to_chat(recipients, fieldset_block("Now Playing: [span_bold(music_extra_data["title"])] by [span_bold(music_extra_data["artist"])]", jointext(to_chat_message, ""), "boxed_message"))
 
@@ -178,7 +180,9 @@ GLOBAL_VAR_INIT(web_sound_cooldown, 0)
 		for(var/m in GLOB.player_list)
 			var/mob/M = m
 			var/client/C = M.client
-			if(C.prefs.read_preference(/datum/preference/numeric/volume/sound_midi))
+			// [HORIZON-EDIT] Master_Sounds
+			// Gated by the admin music mixer channel instead of the old sound_midi preference.
+			if(calculate_mixed_volume(C, 100, CHANNEL_ADMIN_SOUNDS) > 0)
 				// Stops playing lobby music and admin loaded music automatically.
 				SEND_SOUND(C, sound(null, channel = CHANNEL_LOBBYMUSIC))
 				SEND_SOUND(C, sound(null, channel = CHANNEL_ADMIN))
@@ -186,6 +190,7 @@ GLOBAL_VAR_INIT(web_sound_cooldown, 0)
 					C.tgui_panel?.play_music(web_sound_url, music_extra_data)
 				else
 					C.tgui_panel?.stop_music()
+			// [/HORIZON-EDIT]
 
 	CLIENT_COOLDOWN_START(GLOB, web_sound_cooldown, duration)
 
