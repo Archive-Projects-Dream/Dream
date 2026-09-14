@@ -452,6 +452,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 			if(!isnull(channel_num) && (channel_num in GLOB.used_sound_channels))
 				var/sound_file
+				var/vol = 100
 				switch(channel_num)
 					if(CHANNEL_SOUND_EFFECTS)
 						sound_file = "sound/items/weapons/punch[rand(1,4)].ogg"
@@ -470,12 +471,16 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						sound_file = "sound/effects/footstep/[pick(flist("sound/effects/footstep/"))]"
 					if(CHANNEL_MOB_SOUNDS)
 						sound_file = "sound/mobs/non-humanoids/tourist/[pick(flist("sound/mobs/non-humanoids/tourist/"))]"
+						vol = 50
 					if(CHANNEL_MOB_EMOTES)
 						sound_file = "sound/mobs/humanoids/human/laugh/[pick(flist("sound/mobs/humanoids/human/laugh/"))]"
+						vol = 50
 					if(CHANNEL_VOICES)
 						sound_file = 'sound/runtime/chatter/griffin_10.ogg'
+						vol = 40
 					if(CHANNEL_SHUTTLES)
-						sound_file = 'sound/runtime/hyperspace/hyperspace_begin.ogg'
+						sound_file = "sound/runtime/hyperspace/[pick(flist("sound/runtime/hyperspace/"))]"
+						//vol = 100
 					if(CHANNEL_RADIO)
 						sound_file = "sound/items/radio/[pick(flist("sound/items/radio/"))]"
 					if(CHANNEL_UI)
@@ -490,6 +495,9 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						sound_file = 'sound/announcer/announcement/announce.ogg'
 					if(CHANNEL_HEARTBEAT)
 						sound_file = 'sound/effects/health/fastbeat.ogg'
+					if(CHANNEL_BREATH)
+						sound_file = "sound/mobs/humanoids/breathing/[pick(flist("sound/mobs/humanoids/breathing/"))]"
+						vol = 7
 					if(CHANNEL_LOBBYMUSIC)
 						sound_file = 'sound/music/antag/spy.ogg'
 					if(CHANNEL_EVENT_MUSIC)
@@ -499,13 +507,14 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						sound_file = 'sound/music/sisyphus/sisyphus.ogg'
 					if(CHANNEL_ADMIN)
 						sound_file = 'sound/effects/adminhelp.ogg'
+						//vol = 100
 					if(CHANNEL_ADMIN_SOUNDS)
 						sound_file = 'sound/music/antag/thatshowfamiliesworks.ogg'
 					else
 						sound_file = 'sound/machines/ping.ogg'
 
 				test_sound_channels["[CHANNEL_TEST_SOUND]"] = list("mixer_channel" = channel_num, "base_volume" = 100)
-				usr.playsound_local(get_turf(usr), sound_file, 100, channel = CHANNEL_TEST_SOUND, mixer_channel = channel_num)
+				usr.playsound_local(get_turf(usr), sound_file, vol, channel = CHANNEL_TEST_SOUND, mixer_channel = channel_num)
 
 			else if(!isnull(category_name))
 				var/test_channel_for_cat

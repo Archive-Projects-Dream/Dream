@@ -20,14 +20,15 @@
 #define CHANNEL_STORYTELLER 1010
 #define CHANNEL_ANNOUNCEMENTS 1009 // Cap/Corp announcemets
 #define CHANNEL_HEARTBEAT 1008 // Sound channel for personal heartbeats
+#define CHANNEL_BREATH 1007 // Something that can be important, but not purely innocent (Screaming(damage react), )
 
-#define CHANNEL_LOBBYMUSIC 1007 // Only lobby music
-#define CHANNEL_EVENT_MUSIC 1006 // Gameplay music played while fighting a strong enemy, heretic/bloodcult ascending
-#define CHANNEL_JUKEBOX 1005 // Any portable music player like boomboxes, jukeboxes, radios
-#define CHANNEL_INSTRUMENTS 1004 // MIDI shit from music instruments or In-game ambient music (elevator music)
+#define CHANNEL_LOBBYMUSIC 1006 // Only lobby music
+#define CHANNEL_EVENT_MUSIC 1005 // Gameplay music played while fighting a strong enemy, heretic/bloodcult ascending
+#define CHANNEL_JUKEBOX 1004 // Any portable music player like boomboxes, jukeboxes, radios
+#define CHANNEL_INSTRUMENTS 1003 // MIDI shit from music instruments or In-game ambient music (elevator music)
 
-#define CHANNEL_ADMIN 1003 // Bwoinks, pms
-#define CHANNEL_ADMIN_SOUNDS 1002 // Admin music mostly
+#define CHANNEL_ADMIN 1002 // Bwoinks, pms
+#define CHANNEL_ADMIN_SOUNDS 1001 // Admin music mostly
 
 #define CHANNEL_TEST_SOUND 1000 // Channel just for testing sounds in preferences. Do not use
 
