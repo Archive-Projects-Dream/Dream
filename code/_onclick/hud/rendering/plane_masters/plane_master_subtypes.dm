@@ -645,7 +645,7 @@
 	var/filter = get_filter("wall_displace")
 	if(!filter)
 		return
-	animate(filter, duration, x = dx, y = dy, easing = LINEAR_EASING, flags = ANIMATION_END_NOW)
+	animate(filter, duration, x = dx, y = dy, easing = LINEAR_EASING)
 
 /atom/movable/screen/plane_master/wall_fov/shadows_plane
 	name = "wall fov shadows plane"
@@ -662,7 +662,7 @@
 	. = ..()
 	add_filter("wall_underlay", 1, list(type = "layer", render_source = OFFSET_RENDER_TARGET(ATOMS_FOV_SHADOWS_RENDER_TARGET, offset), flags = FILTER_UNDERLAY))
 	add_filter("wall_displace", 2, list(type = "displace", icon = icon(FOV_WALL_ICON, "1"), size = 1))
-	add_filter("wall_alpha", 3, list(type = "alpha", render_source = OFFSET_RENDER_TARGET(ATOMS_FOV_SHADOWS_RENDER_TARGET, offset), "flags" = MASK_INVERSE))
+	add_filter("wall_alpha", 3, list(type = "alpha", render_source = OFFSET_RENDER_TARGET(ATOMS_FOV_SHADOWS_RENDER_TARGET, offset), flags = MASK_INVERSE))
 
 /atom/movable/screen/plane_master/wall_fov/plane1
 	name = "wall fov plane1"
@@ -738,7 +738,7 @@
 /atom/movable/screen/plane_master/wall_fov/plane7/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	add_filter("wall_underlay", 1, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_6_RENDER_TARGET, offset), flags = FILTER_UNDERLAY))
-	add_filter("wall_displace", 2, list(type = "displace", icon = icon(FOV_WALL_ICON, "7"), size =64))
+	add_filter("wall_displace", 2, list(type = "displace", icon = icon(FOV_WALL_ICON, "7"), size = 64))
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_6_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane8

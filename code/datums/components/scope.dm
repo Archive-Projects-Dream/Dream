@@ -14,6 +14,7 @@
 	var/zoom_method = ZOOM_METHOD_RIGHT_CLICK
 	/// if not null, an item action will be added. Redundant if the mode is ZOOM_METHOD_RIGHT_CLICK or ZOOM_METHOD_WIELD.
 	var/item_action_type
+	var/list/wall_fov_planes_cache = list()
 
 /datum/component/scope/Initialize(range_modifier = 1, zoom_method = ZOOM_METHOD_RIGHT_CLICK, item_action_type)
 	if(!isitem(parent))
@@ -68,12 +69,9 @@
 		user_mob.face_atom(tracker.given_turf)
 	animate(user_client, world.tick_lag, pixel_x = tracker.given_x, pixel_y = tracker.given_y)
 
-// [HORIZON] - Какой же это костыль...
-	var/datum/hud/hud = user_mob.hud_used
-	if(hud)
-		for(var/plane_id in ALL_WALLS_FOV_PLANES)
-			var/atom/movable/screen/plane_master/wall_fov/PM = hud.get_plane_master(plane_id)
-			PM?.set_displace_offset(-tracker.given_x, -tracker.given_y, world.tick_lag)
+// [HORIZON]
+	for(var/atom/movable/screen/plane_master/wall_fov/PM in wall_fov_planes_cache)
+		PM.set_displace_offset(-tracker.given_x, -tracker.given_y, world.tick_lag)
 // [/HORIZON]
 
 /datum/component/scope/proc/on_move(atom/movable/source, atom/oldloc, dir, forced)
@@ -191,6 +189,15 @@
 		RegisterSignals(user, capacity_signals, PROC_REF(on_incapacitated))
 	START_PROCESSING(SSprojectiles, src)
 	ADD_TRAIT(user, TRAIT_USER_SCOPED, REF(src))
+// [HORIZON]
+	var/datum/hud/hud = user.hud_used
+	wall_fov_planes_cache.Cut()
+	if(hud)
+		for(var/plane_id in ALL_WALLS_FOV_PLANES)
+			var/atom/movable/screen/plane_master/wall_fov/PM = hud.get_plane_master(plane_id)
+			if(PM)
+				wall_fov_planes_cache += PM
+// [/HORIZON]
 	return TRUE
 
 ///Stop scoping if the `newloc` we move to is not a turf
@@ -243,12 +250,9 @@
 	if(user.client)
 		animate(user.client, 0.2 SECONDS, pixel_x = 0, pixel_y = 0)
 
-// [HORIZON] - Какой же это костыль...
-		var/datum/hud/hud = user.hud_used
-		if(hud)
-			for(var/plane_id in ALL_WALLS_FOV_PLANES)
-				var/atom/movable/screen/plane_master/wall_fov/PM = hud.get_plane_master(plane_id)
-				PM?.set_displace_offset(0, 0, 0.2 SECONDS)
+// [HORIZON]
+	for(var/atom/movable/screen/plane_master/wall_fov/PM in wall_fov_planes_cache)
+		PM.set_displace_offset(0, 0, 0.2 SECONDS)
 // [/HORIZON]
 
 	tracker = null
