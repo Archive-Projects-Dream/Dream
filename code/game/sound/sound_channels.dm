@@ -84,25 +84,13 @@ GLOBAL_LIST_INIT(channel_to_category, init_channel_categories())
 			map["[channel]"] = info[3]
 	return map
 
-/// Calculates the "adjusted" volume for a user's volume mixer (3 layers: Master -> Category -> Channel)
+/// Calculates the "adjusted" volume for a user's volume mixer
 /proc/calculate_mixed_volume(client/client, volume, mixer_channel)
 	. = volume
-	var/datum/preferences/prefs = client?.prefs
-	if(isnull(prefs))
+	var/list/channels = client?.prefs?.channel_volume
+	if(isnull(channels))
 		return .
-
-	var/list/channels = prefs.channel_volume
-	var/channel_key = "[mixer_channel]"
-
 	. *= channels["[CHANNEL_MASTER_VOLUME]"] * 0.01
-
-	if(isnull(mixer_channel) || mixer_channel == CHANNEL_MASTER_VOLUME || !(channel_key in channels))
+	if(isnull(mixer_channel) || !("[mixer_channel]" in channels))
 		return .
-
-	. *= channels[channel_key] * 0.01
-
-	var/category = GLOB.channel_to_category[channel_key]
-	if(!isnull(category))
-		var/cat_vol = prefs.category_volume[category]
-		if(!isnull(cat_vol))
-			. *= cat_vol * 0.01
+	. *= channels["[mixer_channel]"] * 0.01
