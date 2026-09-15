@@ -78,7 +78,6 @@
 #define WALLS_FOV_PLANE_10_RENDER_TARGET "*WALLS_FOV_PLANE_10"
 #define WALLS_FOV_PLANE_11_RENDER_TARGET "*WALLS_FOV_PLANE_11"
 #define WALLS_FOV_PLANE_12_RENDER_TARGET "*WALLS_FOV_PLANE_12"
-#define FOV_WALL_ICON '_horizon/walls_fov_wide.dmi'
 
 //---------- LIGHTING -------------
 /// Normal 1 per turf dynamic lighting objects
