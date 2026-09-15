@@ -641,6 +641,15 @@
 	render_relay_planes = list()
 	color = list(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,2)
 
+/*
+// Под дебаг теней
+/atom/movable/screen/plane_master/wall_fov/show_to(mob/mymob)
+	..()
+	if(!isobserver(mymob))
+		return
+	hide_from(mymob)
+*/
+
 /atom/movable/screen/plane_master/wall_fov/proc/set_displace_offset(dx, dy, duration)
 	var/filter = get_filter("wall_displace")
 	if(!filter)
@@ -793,6 +802,12 @@
 	RegisterSignal(home, COMSIG_PLANE_GROUP_HUD_CHANGED, PROC_REF(hud_changed))
 	hud_changed(null, null, home.our_hud)
 
+/atom/movable/screen/plane_master/wall_fov/plane11/show_to(mob/mymob)
+	..()
+	if(!isobserver(mymob))
+		return
+	set_alpha(100)
+
 /atom/movable/screen/plane_master/wall_fov/plane11/proc/hud_changed(datum/source, datum/hud/old_hud, datum/hud/new_hud)
 	SIGNAL_HANDLER
 	if(old_hud)
@@ -863,7 +878,6 @@
 	icon_state = "shadow"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
-	pixel_y = 3 // Для тестов, мне лень двигать спрайт каждый раз
 	//mouse_opacity = MOUSE_OPACITY_TRANSPARENT // Debug - Вернуть после тестов
 
 /atom/movable/atom_shadow/door
@@ -895,6 +909,7 @@
 	. = ..()
 	if(!glass)
 		shadow = new(loc)
+		shadow.icon_state = icon_state
 		shadow.setDir(dir)
 
 /obj/machinery/door/airlock/update_icon(updates = ALL)
