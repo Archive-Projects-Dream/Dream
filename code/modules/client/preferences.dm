@@ -431,10 +431,9 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						sound_file = "sound/ambience/general/ambigen[rand(1,14)].ogg"
 					if(CHANNEL_WEATHER)
 						sound_file = pick(
-							'sound/ambience/weather/rain/rain_mid.ogg',
-							'sound/ambience/weather/ashstorm/outside/weak_mid2.ogg',
-							'sound/ambience/weather/ashstorm/outside/active_mid2.ogg',
-							'sound/ambience/weather/snowstorm/snow3.ogg',
+							"sound/ambience/weather/rain/[pick(flist("sound/ambience/weather/rain/"))]",
+							"sound/ambience/weather/snowstorm/[pick(flist("sound/ambience/weather/snowstorm/"))]",
+							"sound/ambience/weather/ashstorm/outside/[pick(flist("sound/ambience/weather/ashstorm/outside/"))]",
 						)
 					if(CHANNEL_MACHINERY)
 						sound_file = 'sound/machines/mining/refinery.ogg'
@@ -483,7 +482,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 						sound_file = 'sound/effects/adminhelp.ogg'
 						//vol = 100
 					if(CHANNEL_ADMIN_SOUNDS)
-						sound_file = 'sound/music/antag/thatshowfamiliesworks.ogg'
+						sound_file = 'sound/music/lobby_music/title0.ogg'
 					else
 						sound_file = 'sound/machines/ping.ogg'
 

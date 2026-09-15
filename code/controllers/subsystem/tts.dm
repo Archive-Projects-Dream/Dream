@@ -146,8 +146,7 @@ SUBSYSTEM_DEF(tts)
 			hearer_atom = weakref?.resolve()
 		else
 			hearer_atom = hearer
-		if(!hearer_atom || QDELETED(hearer_atom))
-			stack_trace("TTS tried to play a sound to a deleted mob.")
+		if(!hearer_atom || QDELING(hearer_atom))
 			continue
 		if(!ismob(hearer_atom))
 			continue
