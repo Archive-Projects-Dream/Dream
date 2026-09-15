@@ -238,9 +238,6 @@
 	return new /datum/sound_token(source, soundin, range, volume, falloff_exponent, falloff_distance, allowed_listeners, sound_length, _delete_on_end = TRUE, _channel = channel)
 
 /// Returns channel name and description for the volume mixer UI
-/// Arguments: channel - The channel ID (CHANNEL_* define)
-/// Returns: list(name, description) or error message if channel not found
-/// Returns channel name, description, and category for the volume mixer UI
 /proc/get_channel_info(channel)
 	switch(channel)
 		if(CHANNEL_MASTER_VOLUME)
@@ -268,7 +265,7 @@
 		if(CHANNEL_SOUND_EFFECTS)
 			return list("Sound Effects", "Item pickup/drop/equip, anvil, polling, and other sound effects.", "Environment")
 		if(CHANNEL_FOOTSTEPS)
-			return list("Footsteps", "The sound when anyone moves around.", "Environment")
+			return list("Footsteps", "The sound when anyone moves around.", "Player & Mobs")
 		if(CHANNEL_WEATHER)
 			return list("Weather", "Looping noise of dust storm, rain, snow storm.", "Environment")
 		if(CHANNEL_MACHINERY)

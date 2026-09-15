@@ -96,10 +96,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	/// The character profiles, saved so we can cheaply recompute them in ui_data only when necessary, without having to use expensive update_static_data calls.
 	var/list/cached_character_profiles
 
-	var/list/channel_volume = list(
-		"1024" = 100, //master starts at 100%
-		"1008" = 100, //heartbeats for some fuckin reason
-	)
+	var/list/channel_volume = list()
 	var/list/test_sound_channels = list()
 
 /datum/preferences/Destroy(force)
@@ -139,6 +136,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		if(load_character())
 			return
 
+	// [HORIZON-ADD] Master_Sounds
 	var/needs_save = FALSE
 	for(var/channel in GLOB.used_sound_channels)
 		if(isnull(channel_volume["[channel]"]))
@@ -147,6 +145,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 	if(needs_save)
 		save_preferences()
+	// [/HORIZON-ADD]
 
 	//we couldn't load character data so just randomize the character appearance + name
 	randomise_appearance_prefs() //let's create a random character then - rather than a fat, bald and naked man.
@@ -184,6 +183,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 /datum/preferences/ui_status(mob/user, datum/ui_state/state)
 	return user.client == parent ? UI_INTERACTIVE : UI_CLOSE
 
+// [HORIZON-EDIT] Master_Sounds
 /datum/preferences/ui_data(mob/user)
 	var/list/data = list()
 
@@ -223,6 +223,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		data["channels"] = channels
 
 	return data
+// [/HORIZON-EDIT]
 
 /datum/preferences/ui_static_data(mob/user)
 	var/list/data = list()
@@ -267,7 +268,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		SEND_SIGNAL(listener, COMSIG_MOB_TTS_VOLUME_PREFERENCE_APPLIED)
 	if(mixer_channel_affected(CHANNEL_AMBIENCE, changed_channel))
 		parent.update_ambience_pref()
-// [/HORIZON-ADD]
 
 /datum/preferences/proc/set_channel_volume(channel, vol)
 	//we gotta take into account existing sounds repeating/waiting, otherwise we completely wipe looping sounds (such as whitenoise).
@@ -299,6 +299,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		)
 		new_sound.status = SOUND_UPDATE
 		SEND_SOUND(parent.mob, new_sound)
+// [/HORIZON-ADD]
 
 /datum/preferences/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
 	. = ..()

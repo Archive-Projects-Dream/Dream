@@ -258,7 +258,6 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	key_bindings = savefile.get_entry("key_bindings", key_bindings)
 
 	// [HORIZON-ADD] Master_Sounds
-	// Sound channel volumes
 	channel_volume = savefile.get_entry("channel_volume", channel_volume)
 	channel_volume = SANITIZE_LIST(channel_volume)
 	// [/HORIZON-ADD]
@@ -336,9 +335,7 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	savefile.set_entry("hearted_until", (hearted_until > world.realtime ? hearted_until : null))
 	savefile.set_entry("favorite_outfits", favorite_outfits)
 	savefile.set_entry("job_assigned_profiles", job_assigned_profiles)
-	// [HORIZON-ADD] Master_Sounds
-	savefile.set_entry("channel_volume", channel_volume)
-	// [/HORIZON-ADD]
+	savefile.set_entry("channel_volume", channel_volume) // [HORIZON-ADD] Master_Sounds
 	savefile.save()
 	return TRUE
 
