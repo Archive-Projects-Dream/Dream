@@ -245,7 +245,6 @@
 	name = "wall fov MATRIX"
 	render_relay_planes = list()
 	color = list(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,2)
-	critical = PLANE_CRITICAL_DISPLAY
 
 /atom/movable/screen/plane_master/wall_fov/shadows_plane
 	name = "wall fov shadows plane"
@@ -258,7 +257,7 @@
 	plane = WALLS_FOV_PLANE_0
 	render_target = WALLS_FOV_PLANE_0_RENDER_TARGET
 
-/atom/movable/screen/plane_master/wall_fov/plane0/New()
+/atom/movable/screen/plane_master/wall_fov/plane0/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(ATOMS_FOV_SHADOWS_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "1"), size = 1)
@@ -269,7 +268,7 @@
 	plane = WALLS_FOV_PLANE_1
 	render_target = WALLS_FOV_PLANE_1_RENDER_TARGET
 
-/atom/movable/screen/plane_master/wall_fov/plane1/New()
+/atom/movable/screen/plane_master/wall_fov/plane1/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_0_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "1"), size = 1)
@@ -280,7 +279,7 @@
 	plane = WALLS_FOV_PLANE_2
 	render_target = WALLS_FOV_PLANE_2_RENDER_TARGET
 
-/atom/movable/screen/plane_master/wall_fov/plane2/New()
+/atom/movable/screen/plane_master/wall_fov/plane2/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_1_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "2"), size = 2)
@@ -291,7 +290,7 @@
 	plane = WALLS_FOV_PLANE_3
 	render_target = WALLS_FOV_PLANE_3_RENDER_TARGET
 
-/atom/movable/screen/plane_master/wall_fov/plane3/New()
+/atom/movable/screen/plane_master/wall_fov/plane3/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_2_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "3"), size = 4)
@@ -302,7 +301,7 @@
 	plane = WALLS_FOV_PLANE_4
 	render_target = WALLS_FOV_PLANE_4_RENDER_TARGET
 
-/atom/movable/screen/plane_master/wall_fov/plane4/New()
+/atom/movable/screen/plane_master/wall_fov/plane4/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_3_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "4"), size = 8)
@@ -313,7 +312,7 @@
 	plane = WALLS_FOV_PLANE_5
 	render_target = WALLS_FOV_PLANE_5_RENDER_TARGET
 
-/atom/movable/screen/plane_master/wall_fov/plane5/New()
+/atom/movable/screen/plane_master/wall_fov/plane5/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_4_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "5"), size = 16)
@@ -324,7 +323,7 @@
 	plane = WALLS_FOV_PLANE_6
 	render_target = WALLS_FOV_PLANE_6_RENDER_TARGET
 
-/atom/movable/screen/plane_master/wall_fov/plane6/New()
+/atom/movable/screen/plane_master/wall_fov/plane6/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_5_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "6"), size = 32)
@@ -335,7 +334,7 @@
 	plane = WALLS_FOV_PLANE_7
 	render_target = WALLS_FOV_PLANE_7_RENDER_TARGET
 
-/atom/movable/screen/plane_master/wall_fov/plane7/New()
+/atom/movable/screen/plane_master/wall_fov/plane7/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_6_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "7"), size = 64)
@@ -346,7 +345,7 @@
 	plane = WALLS_FOV_PLANE_8
 	render_target = WALLS_FOV_PLANE_8_RENDER_TARGET
 
-/atom/movable/screen/plane_master/wall_fov/plane8/New()
+/atom/movable/screen/plane_master/wall_fov/plane8/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_7_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "8"), size = 128)
@@ -359,7 +358,7 @@
 	render_relay_planes = list(RENDER_PLANE_GAME)
 	color = null
 
-/atom/movable/screen/plane_master/wall_fov/plane9/New()
+/atom/movable/screen/plane_master/wall_fov/plane9/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	var/offset_target = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset)
 	filters += filter(type = "layer", render_source = offset_target, flags = FILTER_UNDERLAY)
