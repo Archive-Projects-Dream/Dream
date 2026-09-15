@@ -100,7 +100,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		"1024" = 100, //master starts at 100%
 		"1008" = 100, //heartbeats for some fuckin reason
 	)
-	var/list/category_volume = list()
 	var/list/test_sound_channels = list()
 
 /datum/preferences/Destroy(force)
@@ -145,16 +144,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		if(isnull(channel_volume["[channel]"]))
 			channel_volume["[channel]"] = 100
 			needs_save = TRUE
-
-	var/list/seen_categories = list()
-	for(var/channel in GLOB.used_sound_channels)
-		var/list/info = get_channel_info(channel)
-		var/category = info[3]
-		if(category && !(category in seen_categories))
-			seen_categories += category
-			if(isnull(category_volume[category]))
-				category_volume[category] = 100
-				needs_save = TRUE
 
 	if(needs_save)
 		save_preferences()
@@ -232,7 +221,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				"volume" = volume
 			))
 		data["channels"] = channels
-		data["category_volume"] = category_volume
 
 	return data
 
@@ -260,29 +248,24 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	return assets
 
 // [HORIZON-ADD] Master_Sounds
-/datum/preferences/proc/mixer_channel_affected(check_channel, changed_channel, changed_category)
+/datum/preferences/proc/mixer_channel_affected(check_channel, changed_channel)
 	if(changed_channel == CHANNEL_MASTER_VOLUME)
 		return TRUE
 	if(check_channel == changed_channel)
 		return TRUE
-	if(!isnull(changed_category) && GLOB.channel_to_category["[check_channel]"] == changed_category)
-		return TRUE
 	return FALSE
 
 /// Notifies datum-managed sounds (jukebox, TTS) and the ambience subsystem that a mixer
-/datum/preferences/proc/on_mixer_volume_changed(changed_channel = null, changed_category = null)
+/datum/preferences/proc/on_mixer_volume_changed(changed_channel = null)
 	var/mob/listener = parent?.mob
 	if(isnull(listener))
 		return
 
-	if(isnull(changed_category) && !isnull(changed_channel))
-		changed_category = GLOB.channel_to_category["[changed_channel]"]
-
-	if(mixer_channel_affected(CHANNEL_JUKEBOX, changed_channel, changed_category))
+	if(mixer_channel_affected(CHANNEL_JUKEBOX, changed_channel))
 		SEND_SIGNAL(listener, COMSIG_MOB_JUKEBOX_PREFERENCE_APPLIED)
-	if(mixer_channel_affected(CHANNEL_TTS, changed_channel, changed_category))
+	if(mixer_channel_affected(CHANNEL_TTS, changed_channel))
 		SEND_SIGNAL(listener, COMSIG_MOB_TTS_VOLUME_PREFERENCE_APPLIED)
-	if(mixer_channel_affected(CHANNEL_AMBIENCE, changed_channel, changed_category))
+	if(mixer_channel_affected(CHANNEL_AMBIENCE, changed_channel))
 		parent.update_ambience_pref()
 // [/HORIZON-ADD]
 
@@ -303,11 +286,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			should_update = TRUE
 		else if(mixer_channel == channel)
 			should_update = TRUE
-		else
-			var/sound_category = GLOB.channel_to_category["[mixer_channel]"]
-			var/channel_category = GLOB.channel_to_category["[channel]"]
-			if(sound_category && sound_category == channel_category)
-				should_update = TRUE
 
 		if(!should_update)
 			continue
@@ -426,45 +404,9 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 			return TRUE
 
-		if("category_volume")
-			var/category = params["category"]
-			var/volume = text2num(params["volume"])
-			if(isnull(category) || isnull(volume))
-				return FALSE
-			category_volume[category] = volume
-			save_preferences()
-			for(var/sound/S in parent.SoundQuery())
-				var/sound_channel = S.channel
-				var/mixer_channel = sound_channel
-				var/base_volume = S.volume
-
-				var/list/test_info = test_sound_channels["[sound_channel]"]
-				if(test_info)
-					mixer_channel = test_info["mixer_channel"]
-					base_volume = test_info["base_volume"]
-
-				var/sound_category = GLOB.channel_to_category["[mixer_channel]"]
-				if(sound_category == category)
-					var/sound/new_sound = sound(null, repeat = S.repeat, wait = S.wait, channel = S.channel, volume = calculate_mixed_volume(parent, base_volume, mixer_channel))
-					new_sound.status = SOUND_UPDATE
-					SEND_SOUND(parent.mob, new_sound)
-
-			update_test_sound(category_changed = category)
-			on_mixer_volume_changed(changed_category = category)
-
-			return TRUE
-
 		if("reset_all_volumes")
 			for(var/channel in GLOB.used_sound_channels)
 				channel_volume["[channel]"] = 100
-
-			var/list/seen_categories = list()
-			for(var/channel in GLOB.used_sound_channels)
-				var/list/info = get_channel_info(channel)
-				var/category = info[3]
-				if(category && !(category in seen_categories))
-					seen_categories += category
-					category_volume[category] = 100
 
 			save_preferences()
 			set_channel_volume(CHANNEL_MASTER_VOLUME, 100)
@@ -474,7 +416,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 		if("test_sound")
 			var/channel_num = text2num(params["channel"])
-			var/category_name = params["category"]
 
 			parent.mob.stop_sound_channel(CHANNEL_TEST_SOUND)
 			test_sound_channels.Cut()
@@ -548,16 +489,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				test_sound_channels["[CHANNEL_TEST_SOUND]"] = list("mixer_channel" = channel_num, "base_volume" = 100)
 				usr.playsound_local(get_turf(usr), sound_file, vol, channel = CHANNEL_TEST_SOUND, mixer_channel = channel_num)
 
-			else if(!isnull(category_name))
-				var/test_channel_for_cat
-				for(var/c in GLOB.used_sound_channels)
-					var/list/info = get_channel_info(c)
-					if(info[3] == category_name)
-						test_channel_for_cat = c
-						break
-				if(test_channel_for_cat)
-					test_sound_channels["[CHANNEL_TEST_SOUND]"] = list("mixer_channel" = test_channel_for_cat, "base_volume" = 100)
-					usr.playsound_local(get_turf(usr), 'sound/machines/ping.ogg', 100, channel = CHANNEL_TEST_SOUND, mixer_channel = test_channel_for_cat)
 			return TRUE
 
 		if("stop_all_sounds")
@@ -866,7 +797,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	return default_randomization
 
 // [HORIZON-ADD]
-/datum/preferences/proc/update_test_sound(mixer_channel_changed = null, category_changed = null, master_changed = FALSE)
+/datum/preferences/proc/update_test_sound(mixer_channel_changed = null, master_changed = FALSE)
 	var/list/test_info = test_sound_channels["[CHANNEL_TEST_SOUND]"]
 	if(!test_info)
 		return
@@ -878,10 +809,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		should_update = TRUE
 	else if(mixer_channel_changed && test_mixer_channel == mixer_channel_changed)
 		should_update = TRUE
-	else if(category_changed)
-		var/sound_category = GLOB.channel_to_category["[test_mixer_channel]"]
-		if(sound_category == category_changed)
-			should_update = TRUE
 
 	if(!should_update)
 		return

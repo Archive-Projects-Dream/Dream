@@ -26,7 +26,7 @@ const groupChannelsByCategory = (channels: Channel[]) => {
 
 export const VolumeMixerPage = () => {
   const { data, act } = useBackend<PreferencesMenuData>();
-  const { channels = [], category_volume = {} } = data;
+  const { channels = [] } = data;
   const gamePreferences = data.character_preferences?.game_preferences ?? {};
 
   const globalMaster = channels.find((c) => c.name === 'Master Volume');
@@ -74,7 +74,6 @@ export const VolumeMixerPage = () => {
 
       <Stack wrap mt="5px">
         {categories.map((category) => {
-          const catVol = category_volume[category] ?? 100;
           return (
             <Stack.Item
               key={category}
@@ -91,33 +90,6 @@ export const VolumeMixerPage = () => {
               >
                 {category}
               </Box>
-
-              <Stack align="center" mb={2}>
-                <Stack.Item grow={1}>
-                  <SmoothSlider
-                    value={catVol}
-                    fontSize="0.95rem"
-                    stepPixelSize={3}
-                    onChange={(v) => act('category_volume', { category, volume: v })}
-                  />
-                </Stack.Item>
-                <Stack.Item>
-                  <Button
-                    compact
-                    color="transparent"
-                    icon="play"
-                    tooltip="Test Category"
-                    onClick={() => act('test_sound', { category })}
-                  />
-                  <Button
-                    compact
-                    color="transparent"
-                    icon="arrow-rotate-right"
-                    tooltip="Reset Category"
-                    onClick={() => act('category_volume', { category, volume: 100 })}
-                  />
-                </Stack.Item>
-              </Stack>
 
               <Stack align="start" direction="row" wrap>
                 {groupedChannels[category].map((channel) => (

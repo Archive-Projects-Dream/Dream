@@ -73,17 +73,6 @@ GLOBAL_DATUM_INIT(cached_mixer_channels, /alist, alist())
 	else
 		return FALSE
 
-// Channel -> category
-GLOBAL_LIST_INIT(channel_to_category, init_channel_categories())
-
-/proc/init_channel_categories()
-	var/list/map = list()
-	for(var/channel in GLOB.used_sound_channels)
-		var/list/info = get_channel_info(channel)
-		if(length(info) >= 3)
-			map["[channel]"] = info[3]
-	return map
-
 /// Calculates the "adjusted" volume for a user's volume mixer
 /proc/calculate_mixed_volume(client/client, volume, mixer_channel)
 	. = volume

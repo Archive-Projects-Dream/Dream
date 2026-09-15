@@ -261,9 +261,6 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	// Sound channel volumes
 	channel_volume = savefile.get_entry("channel_volume", channel_volume)
 	channel_volume = SANITIZE_LIST(channel_volume)
-	// Category volumes
-	category_volume = savefile.get_entry("category_volume", category_volume)
-	category_volume = SANITIZE_LIST(category_volume)
 	// [/HORIZON-ADD]
 
 	//try to fix any outdated data if necessary
@@ -341,7 +338,6 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	savefile.set_entry("job_assigned_profiles", job_assigned_profiles)
 	// [HORIZON-ADD] Master_Sounds
 	savefile.set_entry("channel_volume", channel_volume)
-	savefile.set_entry("category_volume", category_volume)
 	// [/HORIZON-ADD]
 	savefile.save()
 	return TRUE
