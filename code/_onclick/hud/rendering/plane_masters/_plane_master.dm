@@ -238,6 +238,10 @@
 
 /atom/movable/screen/plane_master/wall_fov
 	name = "wall fov MATRIX"
+	plane = WALL_FOV_PLANE
+	appearance_flags = PLANE_MASTER|NO_CLIENT_COLOR
+	render_target = WALL_FOV_RENDER_TARGET
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	render_relay_planes = list()
 	color = list(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,2)
 
