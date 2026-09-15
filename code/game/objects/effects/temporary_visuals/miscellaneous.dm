@@ -866,3 +866,7 @@ GLOBAL_LIST_EMPTY(blood_particles)
 
 /obj/effect/temp_visual/focus_ring/proc/dissipate()
 	animate(src, alpha = 0, time = 0.5 SECONDS, easing = QUAD_EASING|EASE_OUT)
+
+/obj/effect/temp_visual/pillow_hit
+	icon_state = "pillow_hit"
+	duration = 0.9 SECONDS
