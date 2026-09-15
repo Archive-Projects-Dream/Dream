@@ -910,7 +910,11 @@
 	if(!glass)
 		shadow = new(loc)
 		shadow.icon_state = icon_state
-		shadow.setDir(dir)
+		shadow.dir = dir
+
+/obj/machinery/door/airlock/setDir(newdir)
+    . = ..()
+    shadow?.dir = newdir
 
 /obj/machinery/door/airlock/update_icon(updates = ALL)
 	. = ..()
