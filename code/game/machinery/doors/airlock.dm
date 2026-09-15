@@ -158,6 +158,8 @@
 	flags_1 = HTML_USE_INITAL_ICON_1
 	rad_insulation = RAD_MEDIUM_INSULATION
 
+	var/atom/movable/atom_shadow/door/shadow
+
 /obj/machinery/door/airlock/get_save_vars()
 	. = ..()
 	. -= NAMEOF(src, icon_state) // airlocks ignore icon_state and instead use get_airlock_overlay()
@@ -188,7 +190,9 @@
 	AddComponent(/datum/component/redirect_attack_hand_from_turf, interact_check = CALLBACK(src, PROC_REF(drag_check)))
 
 	AddElement(/datum/element/nav_computer_icon, 'icons/effects/nav_computer_indicators.dmi', "airlock", TRUE)
-
+	if(!glass)
+		shadow = new(loc)
+		shadow.setDir(dir)
 	RegisterSignal(src, COMSIG_MACHINERY_BROKEN, PROC_REF(on_break))
 
 	RegisterSignal(SSdcs, COMSIG_GLOB_GREY_TIDE, PROC_REF(grey_tide))
@@ -341,6 +345,10 @@
 		return
 
 	return ..()
+
+/obj/machinery/door/airlock/setDir(ndir)
+	. = ..()
+	shadow?.dir = dir
 
 /obj/machinery/door/airlock/proc/isElectrified()
 	return (secondsElectrified != MACHINE_NOT_ELECTRIFIED)
@@ -550,6 +558,17 @@
 /obj/machinery/door/airlock/update_icon(updates = ALL)
 	if(!airlock_state)
 		airlock_state = icon_state
+
+	if(shadow)
+		switch(airlock_state)
+			if(AIRLOCK_OPENING)
+				shadow.icon_state = "opening"
+			if(AIRLOCK_OPEN)
+				shadow.icon_state = "open"
+			if(AIRLOCK_CLOSING)
+				shadow.icon_state = "closing"
+			if(AIRLOCK_CLOSED)
+				shadow.icon_state = "closed"
 
 	return ..()
 

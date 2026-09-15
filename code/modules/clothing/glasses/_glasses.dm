@@ -117,6 +117,23 @@
 	equip_sound = SFX_GOGGLES_EQUIP
 	custom_materials = list(/datum/material/iron = HALF_SHEET_MATERIAL_AMOUNT, /datum/material/glass = HALF_SHEET_MATERIAL_AMOUNT)
 
+// [HORIZON-ADD] - Wall mask FOV
+/obj/item/clothing/glasses/meson/equipped(mob/living/user, slot)
+	. = ..()
+	if(!(slot & ITEM_SLOT_EYES))
+		return
+
+	var/atom/movable/screen/plane_master/visual_shadow = user.hud_used?.get_plane_master(WALLS_FOV_PLANE_9)
+	if(visual_shadow)
+		visual_shadow.set_alpha(150)
+
+/obj/item/clothing/glasses/meson/dropped(mob/living/user)
+	. = ..()
+	var/atom/movable/screen/plane_master/visual_shadow = user.hud_used?.get_plane_master(WALLS_FOV_PLANE_9)
+	if(visual_shadow)
+		visual_shadow.set_alpha(255)
+// [/HORIZON-ADD]
+
 /obj/item/clothing/glasses/meson/suicide_act(mob/living/user)
 	user.visible_message(span_suicide("[user] is putting \the [src] to [user.p_their()] eyes and overloading the brightness! It looks like [user.p_theyre()] trying to commit suicide!"))
 	return BRUTELOSS

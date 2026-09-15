@@ -277,6 +277,7 @@
 	name = "Wall"
 	documentation = "Holds all walls. We render this onto the game world. Separate so we can use this + space and floor planes as a guide for where byond blackness is NOT."
 	plane = WALL_PLANE
+	blend_mode = BLEND_OVERLAY // [HORIZON] - Блядь
 	render_relay_planes = list(RENDER_PLANE_GAME_WORLD, RENDER_PLANE_LIGHT_MASK)
 
 /atom/movable/screen/plane_master/wall/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
@@ -288,6 +289,28 @@
 	documentation = "Holds most non floor/wall things. Anything on this plane \"wants\" to interlayer depending on position."
 	plane = GAME_PLANE
 	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+
+// [HORIZON] - Wall mask FOV — hides objects where wall shadows cover them
+/atom/movable/screen/plane_master/game_world_fov_hidden_walls
+	name = "game world fov hidden (wall masks)"
+	documentation = "Hides objects where the 9-mask wall shadow system covers them."
+	plane = GAME_PLANE_FOV_HIDDEN
+	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+
+/atom/movable/screen/plane_master/game_world_fov_hidden_walls/Initialize(mapload, datum/hud/hud_owner)
+	. = ..()
+	add_filter("vision_cone", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset), flags = MASK_INVERSE ))
+
+/atom/movable/screen/plane_master/game_world_upper_fov_hidden_walls
+	name = "game world upper fov hidden (wall mask)"
+	documentation = "Upper-layer objects hidden by the 9-mask wall shadow system"
+	plane = GAME_PLANE_UPPER_FOV_HIDDEN
+	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+
+/atom/movable/screen/plane_master/game_world_upper_fov_hidden_walls/Initialize(mapload, datum/hud/hud_owner)
+	. = ..()
+	add_filter("vision_cone", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset), flags = MASK_INVERSE ))
+// [/HORIZON]
 
 /atom/movable/screen/plane_master/game_world_above
 	name = "Upper Game"
