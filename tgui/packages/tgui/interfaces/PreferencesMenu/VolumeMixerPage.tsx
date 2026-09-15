@@ -32,7 +32,17 @@ export const VolumeMixerPage = () => {
   const otherChannels = channels.filter((c) => c.name !== 'Master Volume');
 
   const groupedChannels = groupChannelsByCategory(otherChannels);
-  const categories = Object.keys(groupedChannels).sort();
+
+  const categories = Object.keys(groupedChannels).sort((a, b) => {
+    const countA = groupedChannels[a].length;
+    const countB = groupedChannels[b].length;
+
+    if (countA !== countB) {
+      return countB - countA;
+    }
+
+    return a.localeCompare(b);
+  });
 
   const halfIndex = Math.ceil(SOUND_OPTIONS.length / 2);
   const leftOptions = SOUND_OPTIONS.slice(0, halfIndex);
@@ -103,7 +113,7 @@ export const VolumeMixerPage = () => {
         </Box>
       )}
 
-      <Stack wrap mt="5px">
+      <Stack wrap>
         {categories.map((category) => {
           return (
             <Stack.Item
@@ -116,7 +126,7 @@ export const VolumeMixerPage = () => {
                 fontSize="0.95rem"
                 bold
                 color="label"
-                mb={2}
+                mt="6px"
                 style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}
               >
                 {category}
@@ -134,16 +144,15 @@ export const VolumeMixerPage = () => {
         })}
       </Stack>
 
-      <Box
+      <Stack
         fontSize="0.95rem"
         bold
         color="label"
-        mt={3}
-        mb={2}
-        style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}
+        mb={1}
+        style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)', marginTop: '10px' }}
       >
         Sound Options
-      </Box>
+      </Stack>
 
       <Stack wrap>
         <Stack.Item grow={1} basis="48%" style={{ minWidth: '250px' }}>
