@@ -122,24 +122,16 @@
 	. = ..()
 	if(!(slot & ITEM_SLOT_EYES))
 		return
-
-	// Ищем плоскость именно ФИЗИЧЕСКОГО этажа моба
-	var/mob_true_z_offset = GET_Z_PLANE_OFFSET(user.z)
-	var/our_shadow_plane = GET_NEW_PLANE(WALLS_FOV_PLANE_9, mob_true_z_offset)
-	var/atom/movable/screen/plane_master/visual_shadow = user.hud_used?.get_plane_master(our_shadow_plane)
-
-	if(visual_shadow)
-		visual_shadow.set_alpha(150) // Тени становятся полупрозрачными
+	ADD_TRAIT(user, TRAIT_MESON_VISION, CLOTHING_TRAIT)
+	user.update_sight()
 
 /obj/item/clothing/glasses/meson/dropped(mob/living/user)
 	. = ..()
-
-	var/mob_true_z_offset = GET_Z_PLANE_OFFSET(user.z)
-	var/our_shadow_plane = GET_NEW_PLANE(WALLS_FOV_PLANE_9, mob_true_z_offset)
-	var/atom/movable/screen/plane_master/visual_shadow = user.hud_used?.get_plane_master(our_shadow_plane)
-
-	if(visual_shadow)
-		visual_shadow.set_alpha(255) // Возвращаем плотность
+	if(ishuman(user))
+		var/mob/living/carbon/human/H = user
+		if(H.glasses == src)
+			REMOVE_TRAIT(user, TRAIT_MESON_VISION, CLOTHING_TRAIT)
+			user.update_sight()
 // [/HORIZON-ADD]
 
 /obj/item/clothing/glasses/meson/suicide_act(mob/living/user)

@@ -299,7 +299,7 @@
 
 /atom/movable/screen/plane_master/game_world_fov_hidden_walls/Initialize(mapload, datum/hud/hud_owner)
 	. = ..()
-	add_filter("vision_cone", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset), flags = MASK_INVERSE ))
+	add_filter("vision_cone", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE ))
 
 /atom/movable/screen/plane_master/game_world_upper_fov_hidden_walls
 	name = "game world upper fov hidden (wall mask)"
@@ -309,7 +309,7 @@
 
 /atom/movable/screen/plane_master/game_world_upper_fov_hidden_walls/Initialize(mapload, datum/hud/hud_owner)
 	. = ..()
-	add_filter("vision_cone", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset), flags = MASK_INVERSE ))
+	add_filter("vision_cone", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE ))
 // [/HORIZON]
 
 /atom/movable/screen/plane_master/game_world_above

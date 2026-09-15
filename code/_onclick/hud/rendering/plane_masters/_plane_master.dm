@@ -347,44 +347,51 @@
 /atom/movable/screen/plane_master/wall_fov/plane8/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_7_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
-	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "8"), size = 128)
+	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "8"), size = 96)
 	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_7_RENDER_TARGET, offset))
 
 /atom/movable/screen/plane_master/wall_fov/plane9
 	name = "wall fov plane9"
 	plane = WALLS_FOV_PLANE_9
 	render_target = WALLS_FOV_PLANE_9_RENDER_TARGET
-	render_relay_planes = list(RENDER_PLANE_GAME)
-	color = null
 
 /atom/movable/screen/plane_master/wall_fov/plane9/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
 	. = ..()
-	var/offset_target = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset)
-	filters += filter(type = "layer", render_source = offset_target, flags = FILTER_UNDERLAY)
+	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
+	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "8"), size = 128)
+	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset))
+
+/atom/movable/screen/plane_master/wall_fov/plane10
+	name = "wall fov plane10"
+	plane = WALLS_FOV_PLANE_10
+	render_target = WALLS_FOV_PLANE_10_RENDER_TARGET
+
+/atom/movable/screen/plane_master/wall_fov/plane10/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
+	. = ..()
+	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_9_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
+	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "9"), size = 192)
+	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_9_RENDER_TARGET, offset))
+
+/atom/movable/screen/plane_master/wall_fov/plane11
+	name = "wall fov plane11 (mask base)"
+	plane = WALLS_FOV_PLANE_11
+	render_target = WALLS_FOV_PLANE_11_RENDER_TARGET
+	color = null
+
+/atom/movable/screen/plane_master/wall_fov/plane11/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
+	. = ..()
+	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_10_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
 	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "9"), size = 256)
-	filters += filter(type = "layer", render_source = offset_target)
-	filters += filter(type = "blur", size = 5)
-	filters += filter(type = "layer", render_source = offset_target)
-	filters += filter(type = "blur", size = 1)
+	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_10_RENDER_TARGET, offset))
 
-/*
- * Тут лучше всего логика была бы
- * Отключить рендер у 9 слоя.
- * Создать 10 который просто бы копировал 9
- * Рендерить его на слой, `render_relay_planes = list(RENDER_PLANE_GAME)`
- * Регулирывать альфу у мезонов в 10 канале для прозрачных теней
- * А логику маски отдельной рендерить от 9 слоя, убираю все что попадает в неё.
- * Так же включив `render_relay_planes = list(RENDER_PLANE_GAME)` у неё для прозрачности
- */
-
-/atom/movable/screen/plane_master/wall_fov/plane9/set_home(datum/plane_master_group/home)
+/atom/movable/screen/plane_master/wall_fov/plane11/set_home(datum/plane_master_group/home)
 	. = ..()
 	if(!.)
 		return
 	RegisterSignal(home, COMSIG_GROUP_HUD_CHANGED, PROC_REF(hud_changed))
 	hud_changed(null, null, home.our_hud)
 
-/atom/movable/screen/plane_master/wall_fov/plane9/proc/hud_changed(datum/source, datum/hud/old_hud, datum/hud/new_hud)
+/atom/movable/screen/plane_master/wall_fov/plane11/proc/hud_changed(datum/source, datum/hud/old_hud, datum/hud/new_hud)
 	SIGNAL_HANDLER
 	if(old_hud)
 		UnregisterSignal(old_hud, COMSIG_HUD_OFFSET_CHANGED, PROC_REF(on_offset_change))
@@ -392,27 +399,55 @@
 		RegisterSignal(new_hud, COMSIG_HUD_OFFSET_CHANGED, PROC_REF(on_offset_change))
 	offset_change(new_hud?.current_plane_offset || 0)
 
-/atom/movable/screen/plane_master/wall_fov/plane9/proc/on_offset_change(datum/source, old_offset, new_offset)
+/atom/movable/screen/plane_master/wall_fov/plane11/proc/on_offset_change(datum/source, old_offset, new_offset)
 	SIGNAL_HANDLER
 	offset_change(new_offset)
 
-/atom/movable/screen/plane_master/wall_fov/plane9/proc/offset_change(mob_offset)
+/atom/movable/screen/plane_master/wall_fov/plane11/proc/offset_change(mob_offset)
 	var/mob/our_mob = home?.our_hud?.mymob
 	if(!our_mob)
 		return
-
 	var/atom/eye = our_mob.canon_client?.eye || our_mob
 	var/turf/eye_turf = get_turf(eye)
 	if(!eye_turf)
 		eye_turf = get_turf(our_mob)
-
 	var/viewed_z_offset = GET_Z_PLANE_OFFSET(eye_turf.z)
 	var/mob_z_offset = GET_Z_PLANE_OFFSET(our_mob.z)
-
 	if(offset == mob_z_offset || offset == viewed_z_offset)
 		enable_alpha()
 	else
 		disable_alpha()
+
+/atom/movable/screen/plane_master/wall_fov/shadow_mask
+	name = "wall fov shadow mask (visuals)"
+	plane = WALLS_FOV_PLANE_12
+	render_target = WALLS_FOV_PLANE_12_RENDER_TARGET
+	render_relay_planes = list(RENDER_PLANE_GAME)
+	color = null
+
+/atom/movable/screen/plane_master/wall_fov/shadow_mask/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
+	. = ..()
+	var/offset_target = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset)
+	filters += filter(type = "layer", render_source = offset_target, flags = FILTER_UNDERLAY)
+	filters += filter(type = "blur", size = 5)
+	filters += filter(type = "layer", render_source = offset_target)
+	filters += filter(type = "blur", size = 1)
+
+/atom/movable/screen/plane_master/wall_fov/shadow_mask/show_to(mob/mymob)
+	. = ..()
+	if(!. || !mymob)
+		return
+	RegisterSignal(mymob, SIGNAL_ADDTRAIT(TRAIT_MESON_VISION), PROC_REF(update_mesons), override = TRUE)
+	RegisterSignal(mymob, SIGNAL_REMOVETRAIT(TRAIT_MESON_VISION), PROC_REF(update_mesons), override = TRUE)
+	update_mesons(mymob)
+
+/atom/movable/screen/plane_master/wall_fov/shadow_mask/proc/update_mesons(mob/source)
+	SIGNAL_HANDLER
+	if(HAS_TRAIT(source, TRAIT_MESON_VISION))
+		set_alpha(150)
+	else
+		set_alpha(255)
+// [/HORIZON-ADD]
 
 /atom/movable/atom_shadow
 	name = "shadow"
@@ -420,6 +455,7 @@
 	icon_state = "shadow"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
+	pixel_y = 3
 	//mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	var/parent
 

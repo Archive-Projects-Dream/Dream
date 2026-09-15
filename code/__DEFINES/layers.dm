@@ -57,6 +57,9 @@
 #define WALLS_FOV_PLANE_7 1058
 #define WALLS_FOV_PLANE_8 1059
 #define WALLS_FOV_PLANE_9 1060
+#define WALLS_FOV_PLANE_10 1061
+#define WALLS_FOV_PLANE_11 1062
+#define WALLS_FOV_PLANE_12 1063
 
 #define WALL_FOV_PLANE 10000
 #define WALL_FOV_RENDER_TARGET "*wall_fov_target"
@@ -72,7 +75,10 @@
 #define WALLS_FOV_PLANE_7_RENDER_TARGET "*WALLS_FOV_PLANE_7"
 #define WALLS_FOV_PLANE_8_RENDER_TARGET "*WALLS_FOV_PLANE_8"
 #define WALLS_FOV_PLANE_9_RENDER_TARGET "*WALLS_FOV_PLANE_9"
-#define FOV_WALL_ICON '_horizon/walls_fov3.dmi'
+#define WALLS_FOV_PLANE_10_RENDER_TARGET "*WALLS_FOV_PLANE_10"
+#define WALLS_FOV_PLANE_11_RENDER_TARGET "*WALLS_FOV_PLANE_11"
+#define WALLS_FOV_PLANE_12_RENDER_TARGET "*WALLS_FOV_PLANE_12"
+#define FOV_WALL_ICON '_horizon/walls_fov_wide.dmi'
 
 //---------- LIGHTING -------------
 /// Normal 1 per turf dynamic lighting objects
