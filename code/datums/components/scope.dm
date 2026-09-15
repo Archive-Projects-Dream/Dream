@@ -1,5 +1,6 @@
 ///Used to allow reaching the maximum offset range without exiting the boundaries of the game screen.
 #define MOUSE_POINTER_OFFSET_MULT 1.1
+#define ALL_WALLS_FOV_PLANES list(WALLS_FOV_PLANE_0, WALLS_FOV_PLANE_1, WALLS_FOV_PLANE_2, WALLS_FOV_PLANE_3, WALLS_FOV_PLANE_4,  WALLS_FOV_PLANE_5, WALLS_FOV_PLANE_6,  WALLS_FOV_PLANE_7,  WALLS_FOV_PLANE_8, WALLS_FOV_PLANE_9,  WALLS_FOV_PLANE_10, WALLS_FOV_PLANE_11)
 
 ///A component that allows players to use the item to zoom out. Mainly intended for firearms, but now works with other items too.
 /datum/component/scope
@@ -66,6 +67,14 @@
 	if(!user_client.intended_direction)
 		user_mob.face_atom(tracker.given_turf)
 	animate(user_client, world.tick_lag, pixel_x = tracker.given_x, pixel_y = tracker.given_y)
+
+// [HORIZON] - Какой же это костыль...
+	var/datum/hud/hud = user_mob.hud_used
+	if(hud)
+		for(var/plane_id in ALL_WALLS_FOV_PLANES)
+			var/atom/movable/screen/plane_master/wall_fov/PM = hud.get_plane_master(plane_id)
+			PM?.set_displace_offset(-tracker.given_x, -tracker.given_y, world.tick_lag)
+// [/HORIZON]
 
 /datum/component/scope/proc/on_move(atom/movable/source, atom/oldloc, dir, forced)
 	SIGNAL_HANDLER
@@ -233,6 +242,15 @@
 
 	if(user.client)
 		animate(user.client, 0.2 SECONDS, pixel_x = 0, pixel_y = 0)
+
+// [HORIZON] - Какой же это костыль...
+		var/datum/hud/hud = user.hud_used
+		if(hud)
+			for(var/plane_id in ALL_WALLS_FOV_PLANES)
+				var/atom/movable/screen/plane_master/wall_fov/PM = hud.get_plane_master(plane_id)
+				PM?.set_displace_offset(0, 0, 0.2 SECONDS)
+// [/HORIZON]
+
 	tracker = null
 	tracker_owner_ckey = null
 
@@ -270,4 +288,5 @@
 	given_y = clamp(uncapped_y, -y_cap, y_cap)
 	given_turf = locate(owner.x+round(given_x/ICON_SIZE_X, 1),owner.y+round(given_y/ICON_SIZE_Y, 1),owner.z)
 
+#undef ALL_WALLS_FOV_PLANES
 #undef MOUSE_POINTER_OFFSET_MULT
