@@ -221,3 +221,6 @@
 	/// Sound tokens currently playing for this mob.
 	/// Managed by /datum/sound_token and the soundtoken subsystem
 	var/list/datum/sound_token/sound_tokens
+
+	// [HORIZON-ADD] - Wallening Testmerge
+	sight = SEE_MOBS|SEE_OBJS|SEE_TURFS

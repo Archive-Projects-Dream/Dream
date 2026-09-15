@@ -236,11 +236,6 @@
 		return
 	show_to(relevant)
 
-/atom/movable/screen/plane_master/walls
-	name = "wall fov w"
-	plane = WALL_PLANE
-	blend_mode = BLEND_OVERLAY
-
 /atom/movable/screen/plane_master/wall_fov
 	name = "wall fov MATRIX"
 	render_relay_planes = list()
@@ -378,21 +373,42 @@
  * Так же включив `render_relay_planes = list(RENDER_PLANE_GAME)` у неё для прозрачности
  */
 
-/atom/movable/screen/plane_master/wall_fov/mask_relay
-	name = "wall fov overlay"
-	documentation = "Semi-transparent shadow overlay shown when meson vision is active. Uses the 9-mask wall shadow system to show where objects are hidden."
-	plane = HIGH_GAME_PLANE
-	render_relay_planes = list(RENDER_PLANE_GAME)
-	start_hidden = TRUE
-	appearance_flags = NO_CLIENT_COLOR
-
-/atom/movable/screen/plane_master/wall_fov/mask_relay/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
+/atom/movable/screen/plane_master/wall_fov/plane9/set_home(datum/plane_master_group/home)
 	. = ..()
-	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset), flags = FILTER_UNDERLAY)
-	filters += filter(type = "displace", icon = icon(FOV_WALL_ICON, "9"), size = 256)
-	filters += filter(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset))
-	filters += filter(type = "blur", size = 1)
-	filters += filter(type = "alpha", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset))
+	if(!.)
+		return
+	RegisterSignal(home, COMSIG_GROUP_HUD_CHANGED, PROC_REF(hud_changed))
+	hud_changed(null, null, home.our_hud)
+
+/atom/movable/screen/plane_master/wall_fov/plane9/proc/hud_changed(datum/source, datum/hud/old_hud, datum/hud/new_hud)
+	SIGNAL_HANDLER
+	if(old_hud)
+		UnregisterSignal(old_hud, COMSIG_HUD_OFFSET_CHANGED, PROC_REF(on_offset_change))
+	if(new_hud)
+		RegisterSignal(new_hud, COMSIG_HUD_OFFSET_CHANGED, PROC_REF(on_offset_change))
+	offset_change(new_hud?.current_plane_offset || 0)
+
+/atom/movable/screen/plane_master/wall_fov/plane9/proc/on_offset_change(datum/source, old_offset, new_offset)
+	SIGNAL_HANDLER
+	offset_change(new_offset)
+
+/atom/movable/screen/plane_master/wall_fov/plane9/proc/offset_change(mob_offset)
+	var/mob/our_mob = home?.our_hud?.mymob
+	if(!our_mob)
+		return
+
+	var/atom/eye = our_mob.canon_client?.eye || our_mob
+	var/turf/eye_turf = get_turf(eye)
+	if(!eye_turf)
+		eye_turf = get_turf(our_mob)
+
+	var/viewed_z_offset = GET_Z_PLANE_OFFSET(eye_turf.z)
+	var/mob_z_offset = GET_Z_PLANE_OFFSET(our_mob.z)
+
+	if(offset == mob_z_offset || offset == viewed_z_offset)
+		enable_alpha()
+	else
+		disable_alpha()
 
 /atom/movable/atom_shadow
 	name = "shadow"
@@ -400,28 +416,57 @@
 	icon_state = "shadow"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
-	//mouse_opacity = MOUSE_OPACITY_TRANSPARENT // ВЕРНИ
+	//mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	var/parent
 
 /atom/movable/atom_shadow/Initialize(mapload, parent)
 	. = ..()
 	src.parent = parent
-	RegisterSignal(parent, COMSIG_QDELETING, PROC_REF(parent_destroy))
-
-/atom/movable/atom_shadow/proc/parent_destroy()
-	Destroy()
 
 /atom/movable/atom_shadow/door
 	icon = '_horizon/airlock_mask.dmi'
 
+// MARK: WALL
 /turf/closed/wall
 	plane = WALL_PLANE
+	var/atom/movable/atom_shadow/shadow
 
 /turf/closed/wall/Initialize(mapload)
 	. = ..()
-	new /atom/movable/atom_shadow(src, src)
+	shadow = new /atom/movable/atom_shadow(src, src)
 
 /turf/closed/wall/smooth_icon()
 	. = ..()
 	var/atom/movable/atom_shadow/shadow = locate(/atom/movable/atom_shadow) in src
 	shadow?.icon_state = "wall-[smoothing_junction]"
+
+/turf/closed/wall/Destroy()
+	shadow?.Destroy()
+	return ..()
+
+// MARK: Door Airlock
+/obj/machinery/door/airlock
+	var/atom/movable/atom_shadow/door/shadow
+
+/obj/machinery/door/airlock/Initialize(mapload)
+	. = ..()
+	if(!glass)
+		shadow = new(loc)
+		shadow.setDir(dir)
+
+/obj/machinery/door/airlock/update_icon(updates = ALL)
+	. = ..()
+	if(shadow)
+		switch(airlock_state)
+			if(AIRLOCK_OPENING)
+				shadow.icon_state = "opening"
+			if(AIRLOCK_OPEN)
+				shadow.icon_state = "open"
+			if(AIRLOCK_CLOSING)
+				shadow.icon_state = "closing"
+			if(AIRLOCK_CLOSED)
+				shadow.icon_state = "closed"
+
+/obj/machinery/door/airlock/Destroy()
+	shadow?.Destroy()
+	return ..()

@@ -123,15 +123,23 @@
 	if(!(slot & ITEM_SLOT_EYES))
 		return
 
-	var/atom/movable/screen/plane_master/visual_shadow = user.hud_used?.get_plane_master(WALLS_FOV_PLANE_9)
+	// Ищем плоскость именно ФИЗИЧЕСКОГО этажа моба
+	var/mob_true_z_offset = GET_Z_PLANE_OFFSET(user.z)
+	var/our_shadow_plane = GET_NEW_PLANE(WALLS_FOV_PLANE_9, mob_true_z_offset)
+	var/atom/movable/screen/plane_master/visual_shadow = user.hud_used?.get_plane_master(our_shadow_plane)
+
 	if(visual_shadow)
-		visual_shadow.set_alpha(150)
+		visual_shadow.set_alpha(150) // Тени становятся полупрозрачными
 
 /obj/item/clothing/glasses/meson/dropped(mob/living/user)
 	. = ..()
-	var/atom/movable/screen/plane_master/visual_shadow = user.hud_used?.get_plane_master(WALLS_FOV_PLANE_9)
+
+	var/mob_true_z_offset = GET_Z_PLANE_OFFSET(user.z)
+	var/our_shadow_plane = GET_NEW_PLANE(WALLS_FOV_PLANE_9, mob_true_z_offset)
+	var/atom/movable/screen/plane_master/visual_shadow = user.hud_used?.get_plane_master(our_shadow_plane)
+
 	if(visual_shadow)
-		visual_shadow.set_alpha(255)
+		visual_shadow.set_alpha(255) // Возвращаем плотность
 // [/HORIZON-ADD]
 
 /obj/item/clothing/glasses/meson/suicide_act(mob/living/user)
