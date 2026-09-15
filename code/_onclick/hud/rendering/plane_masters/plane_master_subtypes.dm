@@ -790,19 +790,22 @@
 	. = ..()
 	if(!.)
 		return
-	RegisterSignal(home, COMSIG_GROUP_HUD_CHANGED, PROC_REF(hud_changed))
+	RegisterSignal(home, COMSIG_PLANE_GROUP_HUD_CHANGED, PROC_REF(hud_changed))
 	hud_changed(null, null, home.our_hud)
 
 /atom/movable/screen/plane_master/wall_fov/plane11/proc/hud_changed(datum/source, datum/hud/old_hud, datum/hud/new_hud)
 	SIGNAL_HANDLER
 	if(old_hud)
-		UnregisterSignal(old_hud, COMSIG_HUD_OFFSET_CHANGED, PROC_REF(on_offset_change))
+		UnregisterSignal(old_hud, COMSIG_HUD_Z_CHANGED, PROC_REF(on_offset_change))
 	if(new_hud)
-		RegisterSignal(new_hud, COMSIG_HUD_OFFSET_CHANGED, PROC_REF(on_offset_change))
-	offset_change(new_hud?.current_plane_offset || 0)
+		RegisterSignal(new_hud, COMSIG_HUD_Z_CHANGED, PROC_REF(on_offset_change))
+	offset_change(0)
 
-/atom/movable/screen/plane_master/wall_fov/plane11/proc/on_offset_change(datum/source, old_offset, new_offset)
+// не уверен в этом месте
+/atom/movable/screen/plane_master/wall_fov/plane11/proc/on_offset_change(datum/source, old_offset = null, new_offset = null)
 	SIGNAL_HANDLER
+	if(new_offset == null)
+		new_offset = old_offset
 	offset_change(new_offset)
 
 /atom/movable/screen/plane_master/wall_fov/plane11/proc/offset_change(mob_offset)
