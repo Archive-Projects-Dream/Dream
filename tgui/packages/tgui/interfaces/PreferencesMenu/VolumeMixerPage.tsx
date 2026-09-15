@@ -7,11 +7,11 @@ import type { Channel, PreferencesMenuData } from './types';
 const SOUND_OPTIONS = [
   'sound_combatmode',
   'sound_achievement',
+  'sound_ghost_poll_prompt',
+  'sound_ghost_poll_prompt_volume',
   'sound_tts',
   'sound_tts_radio',
   'sound_tts_hear_self_radio',
-  'sound_ghost_poll_prompt',
-  'sound_ghost_poll_prompt_volume',
 ];
 
 const groupChannelsByCategory = (channels: Channel[]) => {
@@ -34,6 +34,38 @@ export const VolumeMixerPage = () => {
   const groupedChannels = groupChannelsByCategory(otherChannels);
   const categories = Object.keys(groupedChannels).sort();
 
+  const halfIndex = Math.ceil(SOUND_OPTIONS.length / 2);
+  const leftOptions = SOUND_OPTIONS.slice(0, halfIndex);
+  const rightOptions = SOUND_OPTIONS.slice(halfIndex);
+
+  const renderSoundOption = (optionId: string) => {
+    const feature = features[optionId];
+    const value = gamePreferences[optionId];
+    if (!feature || value === undefined) {
+      return null;
+    }
+    return (
+      <Stack.Item key={optionId} mb={1}>
+        <Stack align="center">
+          <Stack.Item grow={1} pr={2}>
+            <Tooltip content={feature.description} position="bottom-start">
+              <Box as="span" fontSize="0.85rem">
+                {feature.name}
+              </Box>
+            </Tooltip>
+          </Stack.Item>
+          <Stack.Item style={{ minWidth: 160, width: 180 }}>
+            <FeatureValueInput
+              feature={feature}
+              featureId={optionId}
+              value={value}
+            />
+          </Stack.Item>
+        </Stack>
+      </Stack.Item>
+    );
+  };
+
   return (
     <Section fill scrollable overflow="auto">
       {globalMaster && (
@@ -44,7 +76,7 @@ export const VolumeMixerPage = () => {
               <Slider
                 minValue={0}
                 maxValue={100}
-                stepPixelSize={4}
+                stepPixelSize={8}
                 value={globalMaster.volume}
                 onChange={(_, value) =>
                   act('volume', { channel: globalMaster.num, volume: Math.round(value) })
@@ -78,14 +110,14 @@ export const VolumeMixerPage = () => {
               key={category}
               grow={1}
               basis="48%"
-              style={{ minWidth: '250px', marginBottom: '15px' }}
+              style={{ minWidth: '250px' }}
             >
               <Box
                 fontSize="0.95rem"
                 bold
                 color="label"
                 mb={2}
-                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)', paddingBottom: '4px' }}
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}
               >
                 {category}
               </Box>
@@ -108,43 +140,23 @@ export const VolumeMixerPage = () => {
         color="label"
         mt={3}
         mb={2}
-        style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)', paddingBottom: '4px' }}
+        style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}
       >
         Sound Options
       </Box>
+
       <Stack wrap>
-        {SOUND_OPTIONS.map((optionId) => {
-          const feature = features[optionId];
-          const value = gamePreferences[optionId];
-          if (!feature || value === undefined) {
-            return null;
-          }
-          return (
-            <Stack.Item
-              key={optionId}
-              grow={1}
-              basis="45%"
-              style={{ minWidth: '250px', marginBottom: '8px' }}
-            >
-              <Stack align="center">
-                <Stack.Item grow={1} pr={2}>
-                  <Tooltip content={feature.description} position="bottom-start">
-                    <Box as="span" fontSize="0.85rem">
-                      {feature.name}
-                    </Box>
-                  </Tooltip>
-                </Stack.Item>
-                <Stack.Item>
-                  <FeatureValueInput
-                    feature={feature}
-                    featureId={optionId}
-                    value={value}
-                  />
-                </Stack.Item>
-              </Stack>
-            </Stack.Item>
-          );
-        })}
+        <Stack.Item grow={1} basis="48%" style={{ minWidth: '250px' }}>
+          <Stack direction="column">
+            {leftOptions.map(renderSoundOption)}
+          </Stack>
+        </Stack.Item>
+
+        <Stack.Item grow={1} basis="48%" style={{ minWidth: '250px' }}>
+          <Stack direction="column">
+            {rightOptions.map(renderSoundOption)}
+          </Stack>
+        </Stack.Item>
       </Stack>
 
       <Box mt="15px" textAlign="center">
