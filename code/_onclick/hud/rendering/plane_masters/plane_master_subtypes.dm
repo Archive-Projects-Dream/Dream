@@ -618,7 +618,7 @@
 // [HORIZON]
 // MARK: Wall mask FOV
 
-#define FOV_WALL_ICON '_horizon/walls_fov_wide.dmi'
+#define FOV_WALL_ICON '_horizon/icons/walls_fov_wide.dmi'
 
 /atom/movable/screen/plane_master/game_world_fov_hidden_walls
 	name = "game world fov hidden (wall masks)"
@@ -874,14 +874,14 @@
 
 /atom/movable/atom_shadow
 	name = "shadow"
-	icon = '_horizon/solid_wall_mask.dmi'
+	icon = '_horizon/icons/obj/solid_wall_mask.dmi'
 	icon_state = "shadow"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	//mouse_opacity = MOUSE_OPACITY_TRANSPARENT // Debug - Вернуть после тестов
 
 /atom/movable/atom_shadow/door
-	icon = '_horizon/airlock_mask.dmi'
+	icon = '_horizon/icons/obj/airlock_mask.dmi'
 
 // MARK: WALL
 /turf/closed/wall
