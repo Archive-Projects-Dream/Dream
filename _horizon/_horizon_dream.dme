@@ -23,6 +23,8 @@
 #include "code\elements\directional_attack.dm"
 #include "code\game\machinery\doors\airlocks.dm"
 #include "code\game\machinery\doors\door.dm"
+#include "code\game\modules_wall\wall_icon.dm"
+#include "code\game\modules_wall\wall_types.dm"
 #include "code\game\objects\items\overlay_internals_tank.dm"
 #include "code\game\turfs\closed\minerals.dm"
 #include "code\game\turfs\closed\wall\mineral_walls.dm"
