@@ -204,8 +204,20 @@
 // We don't react to smoothing changing here because this else exists only to "revert" intact changes
 /turf/closed/wall/r_wall/update_icon_state()
 	if(d_state != INTACT)
-		icon = 'icons/turf/walls/reinforced_states.dmi'
-		icon_state = "[base_decon_state]-[d_state]"
+		base_icon_state = "reinforced_wall"
+		switch(d_state)
+			if(SUPPORT_LINES, COVER)
+				icon = '_horizon/icons/turf/walls/rwalls/reinforced_wall_2.dmi'
+				return ..()
+			if(CUT_COVER)
+				icon = '_horizon/icons/turf/walls/rwalls/reinforced_wall_3.dmi'
+				return ..()
+			if(ANCHOR_BOLTS, SUPPORT_RODS)
+				icon = '_horizon/icons/turf/walls/rwalls/reinforced_wall_4.dmi'
+				return ..()
+			if(SHEATH)
+				icon = '_horizon/icons/turf/walls/rwalls/reinforced_wall_5.dmi'
+				return ..()
 	else
 		icon = initial(icon)
 		icon_state = "[base_icon_state]-[smoothing_junction]"
