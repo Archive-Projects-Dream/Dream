@@ -1,10 +1,7 @@
-// MARK: Модульное слгаживание стен
 /turf/closed/wall
 	/// when walls smooth with one another, the type of junction each wall is.
-	var/junctiontype
 	var/list/wall_connections = list("0", "0", "0", "0")
 	var/special_icon
-	var/neighbors_list = 0
 
 	/*
 	 * blend_turfs - Turfs to blending with
@@ -16,9 +13,6 @@
 	var/list/noblend_turfs = list()
 	var/list/blend_objects = list()
 	var/list/noblend_objects = list()
-
-
-	var/base_state = "wall"
 
 //----- Modulus Walls ---//
 

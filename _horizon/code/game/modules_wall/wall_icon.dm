@@ -55,8 +55,6 @@
 			if(get_dir(src, T) in GLOB.cardinals)
 				wall_dirs += get_dir(src, T)
 
-	for(var/neighbor in wall_dirs)
-		neighbors_list |= neighbor
 	wall_connections = dirs_to_corner_states(wall_dirs)
 
 /turf/closed/wall/proc/can_join_with(turf/closed/wall/W)
