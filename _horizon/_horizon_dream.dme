@@ -46,4 +46,6 @@
 #include "code\modules\visual_changes\debris_additions.dm"
 #include "code\modules\visual_changes\gun_smoke.dm"
 #include "code\modules\visual_changes\shockwave.dm"
+#include "code\game\modules_wall\floor_types.dm"
+#include "code\game\modules_wall\open_turf.dm"
 // END_INCLUDE
