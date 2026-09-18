@@ -13,24 +13,21 @@
 #define PLANE_SPACE -21
 #define PLANE_SPACE_PARALLAX -20
 
-#define WEATHER_MASK_PLANE -14
+#define WEATHER_MASK_PLANE -13
 #define WEATHER_MASK_RENDER_TARGET "*WEATHER_MASK_RENDER_TARGET"
 
-#define DISPLACEMENT_PLANE -13
+#define DISPLACEMENT_PLANE -12
 #define DISPLACEMENT_RENDER_TARGET "*DISPLACEMENT_RENDER_TARGET"
 
-#define RENDER_PLANE_TRANSPARENT -12 //Transparent plane that shows openspace underneath the floor
+#define RENDER_PLANE_TRANSPARENT -11 //Transparent plane that shows openspace underneath the floor
 
-#define TRANSPARENT_FLOOR_PLANE -11
+#define TRANSPARENT_FLOOR_PLANE -10
 
-#define GAME_PLANE_UPPER_FOV_HIDDEN -10
-#define GAME_PLANE_FOV_HIDDEN -9
-#define FLOOR_PLANE -8
-#define FRILL_PLANE_WINDOW -7
-#define FRILL_PLANE -6
-#define FRILL_RENDER_TARGET "FRILL_PLANE"
-#define WALL_PLANE -5
-#define GAME_PLANE -4
+#define FLOOR_PLANE -7
+
+#define WALL_PLANE -6
+#define GAME_PLANE -5
+#define MOB_PLANE -4
 #define ABOVE_GAME_PLANE -3
 ///Slightly above the game plane but does not catch mouse clicks. Useful for certain visuals that should be clicked through, like seethrough trees
 #define SEETHROUGH_PLANE -2

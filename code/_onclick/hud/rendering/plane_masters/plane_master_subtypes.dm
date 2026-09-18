@@ -277,7 +277,6 @@
 	name = "Wall"
 	documentation = "Holds all walls. We render this onto the game world. Separate so we can use this + space and floor planes as a guide for where byond blackness is NOT."
 	plane = WALL_PLANE
-	blend_mode = BLEND_OVERLAY // [HORIZON] - Блядь
 	render_relay_planes = list(RENDER_PLANE_GAME_WORLD, RENDER_PLANE_LIGHT_MASK)
 
 /atom/movable/screen/plane_master/wall/Initialize(mapload, datum/hud/hud_owner, datum/plane_master_group/home, offset)
@@ -623,7 +622,7 @@
 /atom/movable/screen/plane_master/game_world_fov_hidden_walls
 	name = "game world fov hidden (wall masks)"
 	documentation = "Hides objects where the 11-mask wall shadow system covers them."
-	plane = GAME_PLANE_FOV_HIDDEN
+	plane = MOB_PLANE
 	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
 
 /atom/movable/screen/plane_master/game_world_fov_hidden_walls/Initialize(mapload, datum/hud/hud_owner)
