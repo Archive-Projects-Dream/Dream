@@ -1,6 +1,7 @@
 /turf/open
 	var/icon_prefix
 	var/bleed_layer = 0
+	var/list/edge_overlays
 
 /turf/open/Initialize(mapload, ...)
 	. = ..()
@@ -64,8 +65,10 @@
 				var/special_icon_state = "[turf.icon_prefix]_[pick("innercorner", "outercorner")]" // 2 different variations
 				new_overlays += get_wall_object(turf.icon, special_icon_state, dir = REVERSE_DIR(direction), plane = plane, layer = layer + 0.001 + turf.bleed_layer * 0.001)
 
-	cut_overlays()
-	add_overlay(new_overlays)
+	if(edge_overlays)
+		overlays -= edge_overlays
+	edge_overlays = new_overlays
+	add_overlay(edge_overlays)
 
 /turf/open/proc/update_neighbors()
 	for(var/direction in GLOB.alldirs)
