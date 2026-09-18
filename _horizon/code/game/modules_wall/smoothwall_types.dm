@@ -29,7 +29,13 @@
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	//mouse_opacity = MOUSE_OPACITY_TRANSPARENT // Debug - Вернуть после тестов
-	tiles_with = list(/atom/movable/atom_shadow)
+	tiles_with = list(
+		/atom/movable/atom_shadow,
+		/obj/structure/window/fulltile,
+		/obj/structure/window/reinforced/fulltile,
+		/obj/structure/window/reinforced/plasma/fulltile,
+		/obj/structure/window/reinforced/tinted/fulltile
+		)
 
 /atom/movable/atom_shadow/Initialize(mapload)
 	. = ..()
@@ -66,17 +72,17 @@
 	return ..()
 
 // MARK: Door Airlock
-/obj/machinery/door/airlock
+/obj/machinery/door
 	var/atom/movable/atom_shadow/door/shadow
 
-/obj/machinery/door/airlock/Initialize(mapload)
+/obj/machinery/door/Initialize(mapload)
 	. = ..()
 	if(!glass)
 		shadow = new(loc)
 		shadow.icon_state = icon_state
 		shadow.dir = dir
 
-/obj/machinery/door/airlock/setDir(newdir)
+/obj/machinery/door/setDir(newdir)
     . = ..()
     shadow?.dir = newdir
 
@@ -93,6 +99,11 @@
 			if(AIRLOCK_CLOSED)
 				shadow.icon_state = "closed"
 
-/obj/machinery/door/airlock/Destroy()
+/obj/machinery/door/Destroy()
 	shadow?.Destroy()
 	return ..()
+
+/obj/machinery/door/poddoor/update_icon(updates = ALL)
+	. = ..()
+	if(shadow)
+		shadow.icon_state = density ? "closed" : "open"
