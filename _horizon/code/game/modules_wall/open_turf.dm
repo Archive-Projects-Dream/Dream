@@ -1,25 +1,30 @@
-// open_turf.dm
-//turfs with density = FALSE
-
 /turf/open
-	plane = FLOOR_PLANE
-	var/is_groundmap_turf = FALSE //whether this a turf used as main turf type for the 'outside' of a map.
-	var/allow_construction = TRUE //whether you can build things like barricades on this turf.
-	var/wet = 0 //whether the turf is wet (only used by floors).
-	var/supports_surgery = TRUE
-	var/scorchable = FALSE //if TRUE set to be an icon_state which is the full sprite version of whatever gets scorched --> for border turfs like grass edges and shorelines
-	var/scorchedness = 0 //how scorched is this turf 0 to 3
-	var/icon_state_before_scorching //this is really dumb, blame the mappers...
+	var/icon_prefix
+	var/bleed_layer = 0
 
 /turf/open/Initialize(mapload, ...)
 	. = ..()
-	update_icon()
+	rebuild_edges()
+	update_neighbors()
 
-/turf/open/update_icon()
+/turf/open/auto_turf/Destroy()
 	. = ..()
+	if(.)
+		for(var/direction in GLOB.alldirs)
+			var/turf/open/T = get_step(src, direction)
+			if(istype(T))
+				T.rebuild_edges()
+
+/turf/open/proc/layers_over(turf/open/other_turf)
+	if(istype(other_turf, /turf/open))
+		var/turf/open/other_auto_turf = other_turf
+		return bleed_layer > other_auto_turf.bleed_layer
+	return (bleed_layer > 0) // assume all non auto turfs have a bleed layer of 0
+
+/turf/open/proc/rebuild_edges()
 	var/list/new_overlays = list()
 	var/alist/auto_turf_dirs = alist()
-	for(var/turf/open/auto_turf/auto_neighbor in orange(1, src))
+	for(var/turf/open/auto_neighbor in orange(1, src))
 		if(!auto_neighbor.layers_over(src))
 			continue
 		auto_turf_dirs[get_dir(src, auto_neighbor)] = auto_neighbor
@@ -55,48 +60,37 @@
 
 		for(var/direction in unhandled_dirs)
 			if((direction in auto_turf_dirs) && !(direction in handled_dirs))
-				var/turf/open/auto_turf/turf = auto_turf_dirs[direction]
-				var/special_icon_state = "[turf.icon_prefix]_[pick("innercorner", "outercorner")]"
+				var/turf/open/turf = auto_turf_dirs[direction]
+				var/special_icon_state = "[turf.icon_prefix]_[pick("innercorner", "outercorner")]" // 2 different variations
 				new_overlays += get_wall_object(turf.icon, special_icon_state, dir = REVERSE_DIR(direction), plane = plane, layer = layer + 0.001 + turf.bleed_layer * 0.001)
 
 	cut_overlays()
 	add_overlay(new_overlays)
 
-// Auto-turf
+/turf/open/proc/update_neighbors()
+	for(var/direction in GLOB.alldirs)
+		var/turf/open/T = get_step(src, direction)
+		if(istype(T))
+			T.rebuild_edges()
 
+// MARK: AUTO-TURF (Snad/Snow)
 /turf/open/auto_turf
 	name = "auto-sand"
 	icon = '_horizon/icons/turf/open/auto_sand.dmi'
-	icon_state = "sand_1"//editor icon
-	is_groundmap_turf = TRUE
-	var/icon_prefix = "sand"
-	var/layer_name = list("layer 1", "layer2", "layer 3", "layer 4", "layer 5")
+	icon_state = "sand_1" //editor icon
+	icon_prefix = "sand"
+	bleed_layer = 1
+	var/list/layer_name = list("layer 1", "layer2", "layer 3", "layer 4", "layer 5")
 	var/variant = 0
 	var/variant_prefix_name = ""
-	var/bleed_layer = 0 //snow layer
 
-/turf/open/auto_turf/Initialize(mapload, ...)
-	. = ..()
-	update_neighbors()
+	// F4CK SMOTHING-SYSTEM
+	smoothing_flags = NONE
+	smoothing_groups = NONE
+	canSmoothWith = NONE
 
-/turf/open/auto_turf/setDir()
-	SHOULD_CALL_PARENT(FALSE)
-	dir = pick(NORTH,SOUTH,EAST,WEST,NORTHEAST,NORTHWEST,SOUTHEAST,SOUTHWEST)
-
-/turf/proc/insert_self_into_baseturfs()
-	baseturfs += type
-
-/turf/open/auto_turf/insert_self_into_baseturfs()
-	baseturfs += type
-
-/turf/open/auto_turf/proc/layers_over(turf/open/other_turf)
-	if(istype(other_turf, /turf/open/auto_turf))
-		var/turf/open/auto_turf/other_auto_turf = other_turf
-		return bleed_layer > other_auto_turf.bleed_layer
-	return (bleed_layer > 0) // assume all non auto turfs have a bleed layer of 0
-
-//Update icon
 /turf/open/auto_turf/update_icon()
+	. = ..()
 	if(variant && (bleed_layer == initial(bleed_layer)))
 		icon_state = "[icon_prefix]_[bleed_layer]_[variant]"
 	else
@@ -120,27 +114,16 @@
 	else
 		name = name_to_set
 
-	..()
+/turf/open/auto_turf/setDir()
+	SHOULD_CALL_PARENT(FALSE)
+	dir = pick(NORTH,SOUTH,EAST,WEST,NORTHEAST,NORTHWEST,SOUTHEAST,SOUTHWEST)
 
+/*
 /turf/open/auto_turf/proc/changing_layer(new_layer)
 	if(isnull(new_layer) || new_layer == bleed_layer)
 		return
-
 	bleed_layer = max(0, new_layer)
-
 	update_icon()
+	rebuild_edges()
 	update_neighbors()
-
-/turf/open/auto_turf/proc/update_neighbors()
-	for(var/direction in GLOB.alldirs)
-		var/turf/open/T = get_step(src, direction)
-		if(istype(T))
-			T.update_icon()
-
-/turf/open/auto_turf/ChangeTurf(newtype, flags, ...)
-	. = ..()
-	if(.)
-		for(var/direction in GLOB.alldirs)
-			var/turf/T = get_step(src, direction)
-			if(istype(T, /turf/open))
-				T.update_icon()
+*/

@@ -2,9 +2,6 @@
 /turf/open/auto_turf/sand
 	layer_name = list("red dirt", "sand", "rocky sand", "this layer does not exist", "call a coder")
 
-/turf/open/auto_turf/sand/insert_self_into_baseturfs()
-	baseturfs += /turf/open/auto_turf/sand/layer0
-
 /turf/open/auto_turf/sand/layer0
 	icon_state = "sand_0"
 	bleed_layer = 0
@@ -26,15 +23,11 @@
 
 //Ice
 /turf/open/auto_turf/snow
-	scorchable = TRUE
 	name = "auto-snow"
 	icon = '_horizon/icons/turf/open/snow2.dmi'
 	icon_state = "snow_0"
 	icon_prefix = "snow"
 	layer_name = list("icy dirt", "shallow snow", "deep snow", "very deep snow", "rock filled snow")
-
-/turf/open/auto_turf/snow/insert_self_into_baseturfs()
-	baseturfs += /turf/open/auto_turf/snow/layer0
 
 /turf/open/auto_turf/snow/layer0
 	icon_state = "snow_0"
