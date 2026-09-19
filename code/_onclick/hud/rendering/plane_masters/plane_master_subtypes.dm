@@ -283,17 +283,22 @@
 	. = ..()
 	add_relay_to(GET_NEW_PLANE(RENDER_PLANE_EMISSIVE, offset), relay_layer = EMISSIVE_WALL_LAYER, relay_color = GLOB.em_block_color)
 
+/atom/movable/screen/plane_master/wall_above
+	name = "Above Wall"
+	plane = ABOVE_WALL_PLANE
+	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+
 /atom/movable/screen/plane_master/game
 	name = "Game"
 	documentation = "Holds most non floor/wall things. Anything on this plane \"wants\" to interlayer depending on position."
 	plane = GAME_PLANE
-	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+	render_relay_planes = list(RENDER_PLANE_MASKED_WORLD)
 
 /atom/movable/screen/plane_master/game_world_above
 	name = "Upper Game"
 	documentation = "For stuff you want to draw like the game plane, but not ever below its contents"
 	plane = ABOVE_GAME_PLANE
-	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+	render_relay_planes = list(RENDER_PLANE_MASKED_WORLD)
 
 /atom/movable/screen/plane_master/seethrough
 	name = "Seethrough"
@@ -613,21 +618,39 @@
 	SIGNAL_HANDLER
 	var/mob/our_mob = home?.our_hud?.mymob
 	hide_plane(our_mob)
-
 // [HORIZON]
 // MARK: Wall mask FOV
 
 #define FOV_WALL_ICON '_horizon/icons/walls_fov_wide.dmi'
 
-/atom/movable/screen/plane_master/game_world_fov_hidden_walls
-	name = "game world fov hidden (wall masks)"
-	documentation = "Hides objects where the 11-mask wall shadow system covers them."
+// [HORIZON-ADD]
+/atom/movable/screen/plane_master/mob
+	name = "Mob"
 	plane = MOB_PLANE
-	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+	render_relay_planes = list(RENDER_PLANE_MASKED_WORLD)
+// [/HORIZON-ADD]
 
-/atom/movable/screen/plane_master/game_world_fov_hidden_walls/Initialize(mapload, datum/hud/hud_owner)
+/atom/movable/screen/plane_master/rendering_plate/masked_game_hub
+	name = "Masked Game Hub"
+	documentation = "Собирает в себя все плейны выше WALL_PLANE (мобы, предметы, эффекты), \
+		применяет к ним маску теней стен и выводит в основной игровой мир. \
+		При надевании мезонок маска отключается."
+	plane = RENDER_PLANE_MASKED_WORLD
+	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
+	appearance_flags = PLANE_MASTER
+	blend_mode = BLEND_OVERLAY
+
+/atom/movable/screen/plane_master/rendering_plate/masked_game_hub/show_to(mob/mymob)
 	. = ..()
-	add_filter("vision_cone", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE ))
+	if(!. || !mymob)
+		return
+	RegisterSignal(mymob, SIGNAL_ADDTRAIT(TRAIT_MESON_VISION), PROC_REF(update_wall_fov), override = TRUE)
+	RegisterSignal(mymob, SIGNAL_REMOVETRAIT(TRAIT_MESON_VISION), PROC_REF(update_wall_fov), override = TRUE)
+	update_wall_fov(mymob)
+
+/atom/movable/screen/plane_master/rendering_plate/masked_game_hub/proc/update_wall_fov(mob/source)
+	SIGNAL_HANDLER
+	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE))
 
 // MARK: Shadow-Planes
 
@@ -815,7 +838,6 @@
 		RegisterSignal(new_hud, COMSIG_HUD_Z_CHANGED, PROC_REF(on_offset_change))
 	offset_change(0)
 
-// не уверен в этом месте
 /atom/movable/screen/plane_master/wall_fov/plane11/proc/on_offset_change(datum/source, old_offset = null, new_offset = null)
 	SIGNAL_HANDLER
 	if(new_offset == null)

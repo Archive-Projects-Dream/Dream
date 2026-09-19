@@ -3,8 +3,8 @@
 	icon_state = "wall0"
 	// F4CK SMOTHING-SYSTEM
 	smoothing_flags = NONE
-	smoothing_groups = NONE
-	canSmoothWith = NONE
+	smoothing_groups = null
+	canSmoothWith = null
 	tiles_with = list(/turf/closed/wall/simple)
 
 /turf/closed/wall/simple/Initialize(mapload)
@@ -19,7 +19,6 @@
 	name = "wood"
 	icon = '_horizon/icons/turf/walls/simple_wall/wood.dmi'
 
-
 // MARK: Shadow-atom
 
 /atom/movable/atom_shadow
@@ -29,13 +28,7 @@
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	//mouse_opacity = MOUSE_OPACITY_TRANSPARENT // Debug - Вернуть после тестов
-	tiles_with = list(
-		/atom/movable/atom_shadow,
-		/obj/structure/window/fulltile,
-		/obj/structure/window/reinforced/fulltile,
-		/obj/structure/window/reinforced/plasma/fulltile,
-		/obj/structure/window/reinforced/tinted/fulltile
-		)
+	tiles_with = BASED_TILES
 
 /atom/movable/atom_shadow/Initialize(mapload)
 	. = ..()
