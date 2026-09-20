@@ -1010,45 +1010,6 @@
 	worn_icon = '_horizon/icons/obj/in_mob/belt_mob.dmi'
 	worn_icon_state = "admeme_satchel"
 
-// MARK: Трикодер
-/obj/item/multitool/tricorder
-	name = "tricorder"
-	desc = "A multifunctional device that can perform a wide range of tasks."
-	icon = '_horizon/icons/obj/tools.dmi'
-	icon_state = "tricorder"
-	lefthand_file = '_horizon/icons/obj/in_hands/tools_lefthand.dmi'
-	righthand_file = '_horizon/icons/obj/in_hands/tools_righthand.dmi'
-	usesound = 'sound/items/weapons/etherealhit.ogg'
-	custom_materials = list(/datum/material/iron = 500, /datum/material/silver = 300, /datum/material/gold = 300)
-	item_flags = NOBLUDGEON
-	tool_behaviour = TOOL_MULTITOOL
-	toolspeed = 0.2
-	var/ranged_scan_distance = 1
-	var/medicalTricorder = FALSE	//Set to TRUE for normal medical scanner, set to FALSE for a gutted version
-
-/obj/item/multitool/tricorder/afterattack(atom/target, mob/user, proximity_flag)
-	. = ..()
-	if(mode > 0 && !istype(target, /mob/living))
-		return
-	if(istype(target, /turf/closed/))
-		return
-//	user.changeNext_move(CLICK_CD_RANGE)
-	if(target in view(ranged_scan_distance, get_turf(user)))
-		switch(mode)
-			if(0)
-				atmos_scan(user, (target.return_analyzable_air() ? target : get_turf(target)))
-				playsound(get_turf(user), 'sound/effects/pop.ogg', 50)
-			if(1)
-				healthscan(user, target, scanpower = SCANPOWER_ADVANCED)
-				playsound(src, 'sound/items/healthanalyzer.ogg', 10)
-				if(!proximity_flag)
-					target.Beam(user, icon_state = "medbeam", time = 5, beam_color = "#9ce")
-			if(2)
-				chemscan(user, target)
-				playsound(src, 'sound/items/healthanalyzer.ogg', 10)
-				if(!proximity_flag)
-					target.Beam(user, icon_state = "medbeam", time = 5, beam_color = "#9ce")
-
 /obj/item/construction/rcd/arcd/debug
 	max_matter = INFINITY
 	matter = INFINITY
