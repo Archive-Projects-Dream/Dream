@@ -714,6 +714,7 @@
 	glass_colour_type = /datum/client_colour/glass_colour/red
 	flags_cover = GLASSESCOVERSEYES
 
+// [HORIZON-EDIT] Debug_tools
 /obj/item/clothing/glasses/hud/debug
 	name = "debug glasses"
 	desc = "Medical, security and diagnostic hud."
@@ -742,16 +743,19 @@
 	pickup_sound = SFX_GOGGLES_PICKUP
 	drop_sound = SFX_GOGGLES_DROP
 	equip_sound = SFX_GOGGLES_EQUIP
-
-/obj/item/clothing/glasses/hud/debug/update_icon_state()
-	. = ..()
-	icon_state = length(color_cutoffs) ? initial(icon_state) : "nvgmeson_off"
+// [/HORIZON-EDIT]
 
 /obj/item/clothing/glasses/hud/debug/Initialize(mapload)
 	. = ..()
 	AddElement(/datum/element/adjust_fishing_difficulty, -15)
 
-/obj/item/clothing/glasses/hud/debug/click_alt(mob/user)
+// [HORIZON-ADD] Debug_tools
+/obj/item/clothing/glasses/hud/debug/update_icon_state()
+	. = ..()
+	icon_state = length(color_cutoffs) ? initial(icon_state) : "nvgmeson_off"
+// [/HORIZON-ADD]
+
+/obj/item/clothing/glasses/hud/debug/click_alt(mob/user) // [HORIZON-EDIT]
 	if(!ishuman(user))
 		return CLICK_ACTION_BLOCKING
 	if(xray)

@@ -631,6 +631,7 @@
 	theme = /datum/mod_theme/debug
 	starting_frequency = null
 	applied_core = /obj/item/mod/core/infinite
+	// [HORIZON-EDIT] Debug_tools
 	applied_modules = list( //one of every type of module, for testing if they all work correctly
 		/obj/item/mod/module/storage/bluespace,
 		/obj/item/mod/module/emp_shield/advanced,
@@ -647,6 +648,7 @@
 		/obj/item/mod/module/magboot/advanced,
 		/obj/item/mod/module/jetpack/advanced,
 	)
+	// [/HORIZON-EDIT]
 
 /obj/item/mod/control/pre_equipped/administrative
 	theme = /datum/mod_theme/administrative
