@@ -250,19 +250,6 @@
 
 	var/overlay_state
 	var/mutable_appearance/gun_overlay
-//	var/pocket_storage_component_path = /datum/storage/pockets/tactical_recharger
-	var/static/list/holdable_weapons_list = list(
-		/obj/item/gun/energy/disabler = "disabler",
-		/obj/item/gun/energy/laser = "laser",
-		/obj/item/gun/energy/laser/captain = "cap",
-		/obj/item/gun/energy/e_gun = "egun",
-		/obj/item/gun/energy/e_gun/nuclear = "nuke",
-		/obj/item/gun/energy/e_gun/hos = "hos",
-		/obj/item/gun/energy/e_gun/stun = "egun_taser",
-		/obj/item/gun/energy/e_gun/mini = "pistol",
-		/obj/item/gun/energy/pulse = "pulse",
-		/obj/item/gun/energy/pulse/pistol = "pistol",
-	)
 
 /obj/item/tactical_recharger/examine(mob/user)
 	. = ..()
@@ -271,35 +258,19 @@
 	if(charging)
 		var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
 		. += "</br><span class='notice'>- Заряд оружия: <b>[charging]</b> - <b>[C.percent()]%</b>.</span>"
-/*
-//Параметры кармана
-/datum/component/storage/concrete/pockets/tactical_recharger
-	max_items = 1
-	max_w_class = WEIGHT_CLASS_BULKY
-	rustle_sound = FALSE
-	attack_hand_interact = TRUE
 
-//Тип хранимого
-/datum/component/storage/concrete/pockets/tactical_recharger/Initialize(mapload)
-	. = ..()
-	set_holdable(list(/obj/item/gun/energy))
-*/
-
-//Параметры кармана
 /datum/storage/pockets/tactical_recharger
 	max_slots = 1
 	max_specific_storage = WEIGHT_CLASS_BULKY
 	rustle_sound = FALSE
 	attack_hand_interact = TRUE
 
-//Тип хранимого
 /datum/storage/pockets/tactical_recharger/New(atom/parent, max_slots, max_specific_storage, max_total_storage, numerical_stacking, allow_quick_gather, allow_quick_empty, collection_mode, attack_hand_interact)
 	. = ..()
 	set_holdable(list(
 		/obj/item/gun/energy
 	))
 
-// Инициализация обработки и кармана
 /obj/item/tactical_recharger/Initialize(mapload)
 	. = ..()
 	create_storage(storage_type = /datum/storage/pockets/tactical_recharger)
@@ -307,18 +278,10 @@
 	update_icon()
 	update_appearance()
 
-// Остановка обработки
 /obj/item/tactical_recharger/Destroy()
 	. = ..()
 	return PROCESS_KILL
 
-//Спавн оружия в чехле, пресеты
-/obj/item/tactical_recharger/pulse/Initialize(mapload)
-	. = ..()
-	new /obj/item/gun/energy/pulse(src)
-	update_appearance()
-
-//Быстрое извлечение через ЛКМ, быстрое разоружение через "E" тут code\modules\mob\inventory.dm
 /obj/item/tactical_recharger/attack_hand(mob/user)
 	if(loc != user || user.get_item_by_slot(ITEM_SLOT_SUITSTORE) != src || !user.can_perform_action(src))
 		return ..()
@@ -336,27 +299,14 @@
 
 	return ..()
 
-//Изменение картинки в зависимости от содержания
 /obj/item/tactical_recharger/update_icon_state()
 	icon_state = initial(icon_state)
 //	worn_icon_state = initial(worn_icon_state)
-	cut_overlay(gun_overlay)
+	gun_overlay = null
+	overlay_state = null
 	if(length(contents))
 		var/obj/item/I = contents[1]
-//		worn_icon_state = "full"
 		charging = I
-		if(I.type in holdable_weapons_list)
-			overlay_state = holdable_weapons_list[I.type]
-			gun_overlay = mutable_appearance(icon, overlay_state)
-			add_overlay(gun_overlay)
-		else
-			overlay_state = "box"
-			gun_overlay = mutable_appearance(icon, overlay_state)
-			add_overlay(gun_overlay)
-
-//			var/overlay_state = holdable_weapons_list[I.type]
-//			. += mutable_appearance(icon, overlay_state, layer, plane, alpha)
-//			icon_state = holdable_weapons_list[I.type]
 	else
 		charging = null
 	return ..()
@@ -384,9 +334,16 @@
 						cell_imitator_lvl = 0
 	update_icon()
 
-//  Оверлеи зарядки
 /obj/item/tactical_recharger/update_overlays()
 	. = ..()
+
+	if(length(contents))
+		var/obj/item/I = contents[1]
+		var/mutable_appearance/gun_overlay = mutable_appearance(I.icon, I.icon_state)
+		var/matrix/M = matrix()
+		M.Turn(-90)
+		gun_overlay.transform = M
+		. += gun_overlay
 
 	if(charging)
 		if(using_power)
@@ -442,3 +399,9 @@
 
 	. += mutable_appearance(icon, "toz-c_lvl-[cell_percent]", layer)
 	. += emissive_appearance(icon, "toz-c_lvl-[cell_percent]", src, alpha = src.alpha)
+
+// MARK: Types Rechargers
+/obj/item/tactical_recharger/pulse/Initialize(mapload)
+	. = ..()
+	new /obj/item/gun/energy/pulse(src)
+	update_appearance()
