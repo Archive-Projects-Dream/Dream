@@ -1049,49 +1049,6 @@
 				if(!proximity_flag)
 					target.Beam(user, icon_state = "medbeam", time = 5, beam_color = "#9ce")
 
-// MARK: Дебаг-Аутфит
-/obj/item/multitool/tricorder/ranged
-	name = "long-range tricorder"
-	desc = "A multifunctional device that can perform a wide range of tasks. A hand-held long-range environmental scanner which reports current gas levels."
-	icon_state = "tricorder_ranged"
-	medicalTricorder = TRUE
-	ranged_scan_distance = 15
-	var/modes = "atmos"
-
-/obj/item/multitool/tricorder/ranged/Initialize()
-	. = ..()
-	update_appearance(UPDATE_ICON)
-
-/obj/item/multitool/tricorder/ranged/examine()
-	. = ..()
-	. += span_notice("The mode is: [modes] scan")
-
-/obj/item/multitool/tricorder/ranged/attack_self(mob/user)
-	mode++
-	switch(mode)
-		if(1)
-			modes = "health"
-		if(2)
-			modes = "chem"
-		if(3)
-			mode = 0
-			modes = "atmos"
-
-	playsound(get_turf(user), 'sound/machines/click.ogg', 50, TRUE)
-	balloon_alert(user, "[modes] scan")
-	update_appearance(UPDATE_ICON)
-
-/obj/item/multitool/tricorder/ranged/update_overlays()
-	. = ..()
-	if(modes)
-		switch(mode)
-			if(0)
-				. += "atmos_overlay"
-			if(1)
-				. += "health_overlay"
-			if(2)
-				. += "chem_overlay"
-
 /obj/item/construction/rcd/arcd/debug
 	max_matter = INFINITY
 	matter = INFINITY
