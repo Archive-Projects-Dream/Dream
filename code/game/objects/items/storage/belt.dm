@@ -1022,25 +1022,7 @@
 	power_transfer_multiplier = 5
 	powerdevice = /obj/item/stock_parts/power_store/battery/bluespace
 
-// MARK: Респрайты
-
-/obj/item/multitool
-	//icon_state = "multitool"
-	icon = '_horizon/icons/obj/tools.dmi'
-	//lefthand_file = '_horizon/icons/obj/in_hands/tools_lefthand.dmi'
-	//righthand_file = '_horizon/icons/obj/in_hands/tools_righthand.dmi'
-
-/obj/item/construction/rcd/arcd
-	icon = '_horizon/icons/obj/tools.dmi'
-/*
-/obj/item/construction/plumbing
-	icon = '_horizon/icons/obj/tools.dmi'
-*/
-
 // MARK: Мед-Сканер
-
-/obj/item/healthanalyzer
-	var/ranged_scan_distance
 
 /obj/item/healthanalyzer/range
 	name = "long-range health analyzer"
@@ -1054,33 +1036,9 @@
 //	reagentmode = "ranged_reagent_analyzer"
 //	healthmodeinhand = "ranged_analyzer"
 //	reagentmodeinhand = "ranged_reagent_analyzer"
-	ranged_scan_distance = 15
+	reach = 3
 	custom_premium_price = 1000
 
-/obj/item/healthanalyzer/afterattack(mob/living/M, mob/living/carbon/human/user, adjacent, params)
-	if(adjacent || !istype(M))
-		return ..()
-	if(ranged_scan_distance)
-		M.Beam(user, icon_state = "med_scan", time = 5)
-		attack(M, user)
-		//playsound(src, 'white/Feline/sounds/pip.ogg', 25, FALSE, 2)
-		return
-	return ..()
-
-/obj/item/healthanalyzer/advanced
-	ranged_scan_distance = 15
-
-/obj/item/healthanalyzer/afterattack(mob/living/M, mob/living/carbon/human/user, adjacent, params)
-	. = ..()
-	if(adjacent || !ranged_scan_distance)
-		return .
-	if(!istype(M))
-		return
-	if(can_see(user, M, ranged_scan_distance))
-//		user.changeNext_move(CLICK_CD_RANGE)
-		M.Beam(user, icon_state = "medbeam", time = 5, beam_color = "#9ce")
-		attack(M, user)
-		return
 
 // MARK: Bluespace-RPD
 /*
