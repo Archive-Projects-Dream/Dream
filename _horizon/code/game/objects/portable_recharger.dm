@@ -682,7 +682,12 @@
 		gun_overlay.transform = M
 		. += gun_overlay
 
-	if(charging && !panel_open)
+	if(panel_open)
+		. += mutable_appearance(icon, cell ? "toz-panel-open" : "toz-panel-empty", layer)
+		return
+	. += mutable_appearance(icon, "toz-overlay", layer)
+
+	if(charging)
 		if(using_power)
 			. += mutable_appearance(icon, "toz-charge", layer)
 			. += emissive_appearance(icon, "toz-charge", src, alpha = src.alpha)
@@ -718,22 +723,20 @@
 		. += emissive_appearance(icon, "toz-w_lvl-[w_cell_percent]", src, alpha = src.alpha)
 
 	var/cell_percent
-	if(cell && !panel_open)
+	if(cell)
 		switch(cell.percent())
-			if(0 to 14)
-				cell_percent = "1"
 			if(15 to 28)
-				cell_percent = "2"
+				cell_percent = "1"
 			if(29 to 42)
-				cell_percent = "3"
+				cell_percent = "2"
 			if(43 to 56)
-				cell_percent = "4"
+				cell_percent = "3"
 			if(57 to 70)
-				cell_percent = "5"
+				cell_percent = "4"
 			if(71 to 84)
-				cell_percent = "6"
+				cell_percent = "5"
 			if(85 to 100)
-				cell_percent = "7"
+				cell_percent = "6"
 		. += mutable_appearance(icon, "toz-c_lvl-[cell_percent]", layer)
 		. += emissive_appearance(icon, "toz-c_lvl-[cell_percent]", src, alpha = src.alpha)
 
