@@ -93,6 +93,7 @@
 	base_icon_state = "sec"
 	circuit = /obj/item/circuitboard/machine/portable_recharger
 	use_power = NO_POWER_USE
+	anchored = TRUE
 	var/obj/item/charging2 = null
 	var/using_power2 = FALSE
 	var/deploying = FALSE
@@ -349,14 +350,12 @@
 	if(machine_stat & BROKEN || !anchored || deploying)
 		return
 
-	var/area/a = get_area(src)
-	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in component_parts
-
 	if(panel_open)
 		. += mutable_appearance(icon, "[base_icon_state]-open", layer)
-		. += emissive_appearance(icon, "[base_icon_state]-open", src, alpha = src.alpha)
 		return
 
+	var/area/a = get_area(src)
+	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in component_parts
 	if(port_cell)
 		var/cell_percent
 		switch(round(port_cell.percent()))
@@ -455,6 +454,10 @@
 			if(!isarea(a) || a.power_equip == 0)
 				. += mutable_appearance(icon, "[base_icon_state]-p2-cell-fail", layer)
 				. += emissive_appearance(icon, "[base_icon_state]-p2-cell-fail", src, alpha = src.alpha)
+
+/obj/machinery/recharger/portable/wrench_act(mob/living/user, obj/item/tool)
+	to_chat(user, span_notice("[src] is permanently deployed and cannot be anchored or moved with a wrench."))
+	return ITEM_INTERACT_BLOCKING
 
 // MARK: Tactical Recharger
 /obj/item/tactical_recharger
