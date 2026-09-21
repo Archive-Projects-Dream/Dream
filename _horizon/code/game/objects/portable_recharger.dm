@@ -1,4 +1,4 @@
-// MARK: Portable Recharger
+// MARK: Portable Recharger Item
 /obj/item/recharger_item
 	name = "portable recharging station"
 	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. To begin operation, deploy it in any suitable location."
@@ -51,7 +51,7 @@
 	R.add_fingerprint(user)
 	user.visible_message(span_notice("[user] deploys the recharging station."), span_notice("You deploy the recharging station."))
 	flick("sec-deploy", R)
-	playsound(R, '_horizon/sound/recharger_deploy.ogg', 60, FALSE)
+	playsoundtoken(R, '_horizon/sound/recharger_deploy.ogg', 40, SOUND_RANGE)
 	qdel(src)
 
 /obj/item/recharger_item/examine(mob/user)
@@ -61,6 +61,18 @@
 		return
 	. += "<span class='notice'>Display:</span>"
 	. += "<span class='notice'>- Battery level: <b>[cell_charge*100/cell_maxcharge]%</b>.</span>"
+
+/obj/item/circuitboard/machine/portable_recharger
+	name = "portable recharging station"
+	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. To begin operation, deploy it in any suitable location."
+	greyscale_colors = CIRCUIT_COLOR_SECURITY
+	build_path = /obj/machinery/recharger/portable
+	req_components = list(
+		/obj/item/stock_parts/capacitor = 2,
+		/obj/item/stock_parts/power_store/cell = 1,
+		)
+	def_components = list(/obj/item/stock_parts/power_store/cell = /obj/item/stock_parts/power_store/cell/high)
+	needs_anchored = FALSE
 
 // MARK: Portable Recharger Machine
 /obj/machinery/recharger/portable
@@ -73,20 +85,6 @@
 	use_power = NO_POWER_USE
 	var/obj/item/charging2 = null
 	var/using_power2 = FALSE
-	var/portable = TRUE
-
-// Микросхема
-/obj/item/circuitboard/machine/portable_recharger
-	name = "portable recharging station"
-	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. To begin operation, deploy it in any suitable location."
-	greyscale_colors = CIRCUIT_COLOR_SECURITY
-	build_path = /obj/machinery/recharger/portable
-	req_components = list(
-		/obj/item/stock_parts/capacitor = 2,
-		/obj/item/stock_parts/power_store/cell = 1,
-		)
-	def_components = list(/obj/item/stock_parts/power_store/cell = /obj/item/stock_parts/power_store/cell/high)
-	needs_anchored = FALSE
 
 /obj/machinery/recharger/portable/process(seconds_per_tick)
 	if(machine_stat & BROKEN || !anchored)
@@ -103,12 +101,10 @@
 	if(port_cell && port_cell.charge < port_cell.maxcharge && has_grid_power)
 		port_cell.give(port_cell.chargerate * recharge_coeff * seconds_per_tick / 12)
 
-	// Первый порт.
-	if(charging)
+	if(charging) // Charging Port 1
 		using_power = process_charging_port(charging, seconds_per_tick, port_cell, has_grid_power)
 
-	// Второй порт.
-	if(charging2)
+	if(charging2) // Charging Port 2
 		using_power2 = process_charging_port(charging2, seconds_per_tick, port_cell, has_grid_power)
 
 	update_appearance()
@@ -120,7 +116,6 @@
 	if(!charging_item)
 		return FALSE
 
-	// Обычная батарея предмета.
 	var/obj/item/stock_parts/power_store/cell/charging_cell = charging_item.get_cell()
 	if(charging_cell)
 		if(charging_cell.charge >= charging_cell.maxcharge)
@@ -148,7 +143,6 @@
 		charging_item.update_appearance()
 		return TRUE
 
-	// Перезаряжаемый магазин.
 	if(istype(charging_item, /obj/item/ammo_box/magazine/recharge))
 		var/obj/item/ammo_box/magazine/recharge/power_pack = charging_item
 		for(var/charge_iterations in 1 to recharge_coeff)
@@ -175,7 +169,6 @@
 		charging_item.update_appearance()
 		return power_pack.stored_ammo.len < power_pack.max_ammo
 
-	// Боевой винтовочный recalibration.
 	if(istype(charging_item, /obj/item/gun/ballistic/automatic/battle_rifle))
 		var/obj/item/gun/ballistic/automatic/battle_rifle/recalibrating_gun = charging_item
 
@@ -229,8 +222,7 @@
 	if(!is_type_in_typecache(arrived, allowed_devices))
 		return
 
-	// Первый порт.
-	if(isnull(charging))
+	if(isnull(charging)) // Charging Port 1
 		charging = arrived
 		START_PROCESSING(SSmachines, src)
 		update_use_power(ACTIVE_POWER_USE)
@@ -238,8 +230,7 @@
 		update_appearance()
 		return
 
-	// Второй порт.
-	if(isnull(charging2))
+	if(isnull(charging2)) // Charging Port 2
 		charging2 = arrived
 		START_PROCESSING(SSmachines, src)
 		update_use_power(ACTIVE_POWER_USE)
@@ -248,36 +239,23 @@
 		return
 
 /obj/machinery/recharger/portable/Exited(atom/movable/gone, direction)
-	// Первый порт.
-	if(gone == charging)
+	if(gone == charging) // Charging Port 1
 		if(!QDELING(gone))
 			gone.update_appearance()
 
 		charging = null
 		using_power = FALSE
-
-		// Если второй порт занят — станция всё ещё активна.
-		if(charging2)
-			update_use_power(ACTIVE_POWER_USE)
-		else
-			update_use_power(IDLE_POWER_USE)
-
+		update_use_power(charging2 ? ACTIVE_POWER_USE : IDLE_POWER_USE)
 		update_appearance()
 		return
 
-	// Второй порт обрабатываем отдельно.
-	if(gone == charging2)
+	if(gone == charging2) // Charging Port 2
 		if(!QDELING(gone))
 			gone.update_appearance()
 
 		charging2 = null
 		using_power2 = FALSE
-
-		if(charging)
-			update_use_power(ACTIVE_POWER_USE)
-		else
-			update_use_power(IDLE_POWER_USE)
-
+		update_use_power(charging ? ACTIVE_POWER_USE : IDLE_POWER_USE)
 		update_appearance()
 		return
 
@@ -318,7 +296,6 @@
 
 	charging.forceMove(drop_location())
 
-// MARK: Второго слота ПКМ
 /obj/machinery/recharger/portable/attack_hand_secondary(mob/user, list/modifiers)
 	if(charging2)
 		add_fingerprint(user)
@@ -340,7 +317,7 @@
 	user.visible_message(span_notice("[user] folds up the recharging station."), span_notice("You fold up the recharging station."))
 	var/obj/item/recharger_item/B = new /obj/item/recharger_item(src.drop_location())
 	flick("sec-move", B)
-	playsound(B, '_horizon/sound/recharger_go.ogg', 60, FALSE)
+	playsoundtoken(B, '_horizon/sound/recharger_go.ogg', 40, SOUND_RANGE)
 	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in component_parts
 	if(port_cell)
 		B.cell_maxcharge = port_cell.maxcharge
@@ -356,7 +333,6 @@
 /obj/machinery/recharger/portable/can_crowbar_deconstruct()
 	return ..() && !charging && !charging2
 
-//  Оверлеи зарядки
 /obj/machinery/recharger/portable/update_overlays()
 	. = ..()
 	var/area/a = get_area(src)
@@ -553,7 +529,6 @@
 		charging = null
 	return ..()
 
-// Процесс зарядки
 /obj/item/tactical_recharger/process(seconds_per_tick)
 	using_power = FALSE
 	if(length(contents))
