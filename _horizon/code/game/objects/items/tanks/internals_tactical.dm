@@ -1,8 +1,8 @@
 // MARK: Тактический Кислородный Баллон
 
 /obj/item/tank/internals/tactical
-	name = "Тактический кислородный баллон"
-	desc = "Кислородный баллон военно-космического назначения. Конструкция весьма массивна и может быть закреплена только на скафандрах и тяжелой верхней одежде. Представляет собой систему магнитных креплений и стабилизирующих ремней для фиксации большинства стандартных видов вооружения. В комплект также входит универсальный оружейный кейс для нестандартных образцов."
+	name = "tactical oxygen tank"
+	desc = "A military-grade oxygen tank for space operations. The construction is rather bulky and can only be mounted on hardsuits and heavy outerwear. It features a system of magnetic mounts and stabilizing straps to secure most standard weapon types. A universal weapon case for non-standard models is also included."
 	icon = '_horizon/icons/obj/tank_tactical.dmi'
 	icon_state = "tank"
 	worn_icon = '_horizon/icons/obj/in_mob/tank_tactical_back.dmi'
@@ -45,12 +45,12 @@
 
 	if(length(contents))
 		var/obj/item/I = contents[1]
-		user.visible_message(span_notice("[user] достаёт [I] из [src]."), span_notice("Достаю [I] из [src]."))
+		user.visible_message(span_notice("[user] draws [I] from [src]."), span_notice("You draw [I] from [src]."))
 		user.put_in_hands(I)
 		update_appearance()
 		user.update_suit_storage()
 	else
-		to_chat(user, span_warning("Крепления расстегнуты, [capitalize(src.name)] пуст."))
+		to_chat(user, span_warning("The straps are unfastened, [capitalize(src.name)] is empty."))
 	return ..()
 
 /obj/item/tank/internals/tactical/update_icon_state()

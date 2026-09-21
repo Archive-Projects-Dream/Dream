@@ -2,8 +2,8 @@
 /*
 //	Переносной зарядник - предмет для переноски
 /obj/item/recharger_item
-	name = "портативная зарядная станция"
-	desc = "Переносной двухпортовый оружейный зарядник. Питание осуществляется от станционной сети. В качестве резервного источника питания используется встроенная батарея. Для начала работы необходимо разложить в любом подходящем месте."
+	name = "portable recharging station"
+	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. To begin operation, deploy it in any suitable location."
 	icon = 'white/Feline/icons/sec_recharger.dmi'
 	icon_state = "case"
 	inhand_icon_state = "toolbox_default"
@@ -59,8 +59,8 @@
 
 //	Переносной зарядник - развернутая машина
 /obj/machinery/recharger/portable
-	name = "портативная зарядная станция"
-	desc = "Переносной двухпортовый оружейный зарядник. Питание осуществляется от станционной сети. В качестве резервного источника питания используется встроенная батарея. При необходимости может быть свернут для транспортировки."
+	name = "portable recharging station"
+	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. It can be folded up for transport when needed."
 	icon = 'white/Feline/icons/sec_recharger.dmi'
 	icon_state = "sec"
 	base_icon_state = "sec"
@@ -70,8 +70,8 @@
 
 //  Микросхема
 /obj/item/circuitboard/machine/portable_recharger
-	name = "портативная зарядная станция"
-	desc = "Переносной двухпортовый оружейный зарядник. Питание осуществляется от станционной сети. В качестве резервного источника питания используется встроенная батарея. Для начала работы необходимо разложить в любом подходящем месте."
+	name = "portable recharging station"
+	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. To begin operation, deploy it in any suitable location."
 	greyscale_colors = CIRCUIT_COLOR_SECURITY
 	build_path = /obj/machinery/recharger/portable
 	req_components = list(
@@ -228,8 +228,8 @@
 
 //  Тактический наспинный зарядник
 /obj/item/tactical_recharger
-	name = "тактический оружейный зарядник"
-	desc = "Продвинутая переносная зарядная станция для энергетического оружия. Скорость зарядки немного ниже по сравнению с более крупными образцами, однако ее использование все равно значительно расширяет общую потенциальную емкость энергетического оружия."
+	name = "tactical weapon recharger"
+	desc = "An advanced portable recharging station for energy weapons. Its charging rate is slightly lower than that of larger models, but using it still significantly extends the overall potential capacity of any energy weapon."
 	icon = '_horizon/icons/obj/tactical_recharger.dmi'
 	icon_state = "toz"
 	worn_icon = '_horizon/icons/obj/in_mob/tactical_recharger_body.dmi'
@@ -253,11 +253,11 @@
 
 /obj/item/tactical_recharger/examine(mob/user)
 	. = ..()
-	. += "<hr><span class='notice'>Дисплей:</span>"
-	. += "</br><span class='notice'>- Уроверь батареи: <b>[cell_imitator_lvl*100/cell_imitator_max]%</b>.</span>"
+	. += "<hr><span class='notice'>Display:</span>"
+	. += "<span class='notice'>- Battery level: <b>[cell_imitator_lvl*100/cell_imitator_max]%</b>.</span>"
 	if(charging)
 		var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
-		. += "</br><span class='notice'>- Заряд оружия: <b>[charging]</b> - <b>[C.percent()]%</b>.</span>"
+		. += "<span class='notice'>- Weapon charge: <b>[charging]</b> - <b>[C.percent()]%</b>.</span>"
 
 /datum/storage/pockets/tactical_recharger
 	max_slots = 1
@@ -288,7 +288,8 @@
 
 	if(length(contents))
 		var/obj/item/I = contents[1]
-		user.visible_message(span_notice("[user] достаёт из тактического зарядника [I]."), span_notice("Достаю из тактического зарядника [I]."))
+		user.visible_message(
+		user.visible_message(span_notice("[user] draws [I] from the tactical recharger."), span_notice("You draw [I] from the tactical recharger."))
 		I.forceMove(get_turf(loc))
 		user.put_in_hands(I)
 		update_appearance()
