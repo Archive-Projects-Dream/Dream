@@ -331,16 +331,13 @@
 
 	return ..()
 
-/obj/machinery/recharger/portable/MouseDrop(over_object, src_location, over_location)
-	. = ..()
-	if(.)
+/obj/machinery/recharger/portable/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
+	if(!ishuman(user) || !user.can_perform_action(src))
 		return
-	if(!ishuman(usr) || !usr.can_perform_action(src))
-		return FALSE
 	if(charging || charging2)
-		to_chat(usr, span_warning("Remove the charging items first!"))
-		return FALSE
-	usr.visible_message(span_notice("[usr] folds up the recharging station."), span_notice("You fold up the recharging station."))
+		to_chat(user, span_warning("Remove the charging items first!"))
+		return
+	user.visible_message(span_notice("[user] folds up the recharging station."), span_notice("You fold up the recharging station."))
 	var/obj/item/recharger_item/B = new /obj/item/recharger_item(src.drop_location())
 	flick("sec-move", B)
 	playsound(B, '_horizon/sound/recharger_go.ogg', 60, FALSE)
