@@ -288,7 +288,6 @@
 
 	if(length(contents))
 		var/obj/item/I = contents[1]
-		user.visible_message(
 		user.visible_message(span_notice("[user] draws [I] from the tactical recharger."), span_notice("You draw [I] from the tactical recharger."))
 		I.forceMove(get_turf(loc))
 		user.put_in_hands(I)
