@@ -521,6 +521,7 @@
 	var/obj/item/stock_parts/power_store/cell/cell
 	/// Minimum maxcharge a cell must have to be accepted (mirrors defib behavior).
 	var/min_cell_maxcharge = 2500
+	var/panel_open = FALSE
 
 /obj/item/tactical_recharger/examine(mob/user)
 	. = ..()
@@ -529,6 +530,10 @@
 		. += "<span class='notice'>- Battery level: <b>[cell.percent()]%</b>.</span>"
 	else
 		. += "<span class='warning'>- No cell installed! Use a power cell on [src] to install one.</span>"
+	if(panel_open)
+		. += "<span class='notice'>The service panel is open. Use a crowbar to pry out the cell, or click with a power cell to install one.</span>"
+	else
+		. += "<span class='notice'>The service panel is closed. Use a screwdriver to open it.</span>"
 	if(charging)
 		var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
 		. += "<span class='notice'>- Weapon charge: <b>[charging]</b> - <b>[C.percent()]%</b>.</span>"
@@ -562,42 +567,62 @@
 /obj/item/tactical_recharger/item_interaction(mob/living/user, obj/item/item, list/modifiers)
 	if(!istype(item, /obj/item/stock_parts/power_store/cell))
 		return NONE
+
+	if(!panel_open)
+		balloon_alert(user, "panel closed!")
+		return ITEM_INTERACT_BLOCKING
+
 	var/obj/item/stock_parts/power_store/cell/new_cell = item
 	if(new_cell.maxcharge < min_cell_maxcharge)
 		to_chat(user, span_notice("[src] requires a higher capacity cell."))
 		return ITEM_INTERACT_BLOCKING
+
 	var/obj/item/old_cell = cell
 	if(old_cell)
 		old_cell.forceMove(get_turf(src))
 		to_chat(user, span_notice("You swap [old_cell] out of [src]."))
+
 	if(!user.temporarilyRemoveItemFromInventory(item))
 		return NONE
 	item.moveToNullspace()
 	cell = item
+
 	if(!old_cell)
 		to_chat(user, span_notice("You install [item] in [src]."))
 	playsound(src, 'sound/machines/click.ogg', 50, TRUE, SILENCED_SOUND_EXTRARANGE)
 	update_appearance()
 	return ITEM_INTERACT_SUCCESS
 
-// Remove the cell with AltClick.
-/obj/item/tactical_recharger/click_alt(mob/user)
+/obj/item/tactical_recharger/screwdriver_act(mob/living/user, obj/item/tool)
+	. = ..()
+	if(.)
+		return TRUE
+	panel_open = !panel_open
+	balloon_alert(user, "panel [panel_open ? "open" : "closed"]")
+	tool.play_tool_sound(src, 50)
+	update_appearance()
+	return TRUE
+
+/obj/item/tactical_recharger/crowbar_act(mob/living/user, obj/item/tool)
+	. = TRUE
+	if(!panel_open)
+		balloon_alert(user, "panel closed!")
+		return
 	if(!cell)
-		to_chat(user, span_warning("[src] has no cell!"))
-		return CLICK_ACTION_BLOCKING
-	if(!user.can_perform_action(src))
-		return CLICK_ACTION_BLOCKING
-	user.visible_message(
-		span_notice("[user] removes [cell] from [src]."),
-		span_notice("You remove [cell] from [src]."),
-	)
-	playsound(src, 'sound/machines/click.ogg', 50, TRUE, SILENCED_SOUND_EXTRARANGE)
+		balloon_alert(user, "no cell!")
+		return
+	balloon_alert(user, "prying out cell...")
+	tool.play_tool_sound(src, 50)
+	if(!tool.use_tool(src, user, 3 SECONDS))
+		return
 	var/obj/item/cell_to_move = cell
 	cell = null
 	cell_to_move.forceMove(get_turf(src))
 	user.put_in_hands(cell_to_move)
+	balloon_alert(user, "cell removed")
+	playsound(src, 'sound/machines/click.ogg', 50, TRUE, SILENCED_SOUND_EXTRARANGE)
 	update_appearance()
-	return CLICK_ACTION_SUCCESS
+	return
 
 /obj/item/tactical_recharger/attack_hand(mob/user)
 	if(loc != user || user.get_item_by_slot(ITEM_SLOT_SUITSTORE) != src || !user.can_perform_action(src))
@@ -632,7 +657,8 @@
 		charging = contents[1]
 	else
 		charging = null
-	if(!charging || !cell)
+
+	if(!charging || !cell || panel_open)
 		return
 	var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
 	if(!C || C.charge >= C.maxcharge)
@@ -656,7 +682,7 @@
 		gun_overlay.transform = M
 		. += gun_overlay
 
-	if(charging)
+	if(charging && !panel_open)
 		if(using_power)
 			. += mutable_appearance(icon, "toz-charge", layer)
 			. += emissive_appearance(icon, "toz-charge", src, alpha = src.alpha)
@@ -692,7 +718,7 @@
 		. += emissive_appearance(icon, "toz-w_lvl-[w_cell_percent]", src, alpha = src.alpha)
 
 	var/cell_percent
-	if(cell)
+	if(cell && !panel_open)
 		switch(cell.percent())
 			if(0 to 14)
 				cell_percent = "1"
