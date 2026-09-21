@@ -49,10 +49,20 @@
 		port_cell.charge = cell_charge
 	R.recharge_coeff = cond_tier
 	R.add_fingerprint(user)
-	user.visible_message(span_notice("[user] deploys the recharging station."), span_notice("You deploy the recharging station."))
+	R.deploying = TRUE
+	R.update_appearance(UPDATE_OVERLAYS)
 	flick("sec-deploy", R)
+	addtimer(CALLBACK(R, TYPE_PROC_REF(/obj/machinery/recharger/portable, finish_deployment)), 35) // Animation time
+	user.visible_message(span_notice("[user] deploys the recharging station."), span_notice("You deploy the recharging station."))
 	playsoundtoken(R, '_horizon/sound/recharger_deploy.ogg', 40, SOUND_RANGE)
 	qdel(src)
+
+/obj/machinery/recharger/portable/proc/finish_deployment()
+	if(QDELETED(src))
+		return
+
+	deploying = FALSE
+	update_appearance(UPDATE_OVERLAYS)
 
 /obj/item/recharger_item/examine(mob/user)
 	. = ..()
@@ -85,6 +95,7 @@
 	use_power = NO_POWER_USE
 	var/obj/item/charging2 = null
 	var/using_power2 = FALSE
+	var/deploying = FALSE
 
 /obj/machinery/recharger/portable/process(seconds_per_tick)
 	if(machine_stat & BROKEN || !anchored)
@@ -137,10 +148,10 @@
 		if(charging_cell.charge >= charging_cell.maxcharge)
 			playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
 			say("[charging_item] has finished recharging!")
-			charging_item.update_appearance()
+			charging_item.update_appearance(UPDATE_OVERLAYS)
 			return FALSE
 
-		charging_item.update_appearance()
+		charging_item.update_appearance(UPDATE_OVERLAYS)
 		return TRUE
 
 	if(istype(charging_item, /obj/item/ammo_box/magazine/recharge))
@@ -163,10 +174,10 @@
 		if(power_pack.stored_ammo.len >= power_pack.max_ammo)
 			playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
 			say("[charging_item] has finished recharging!")
-			charging_item.update_appearance()
+			charging_item.update_appearance(UPDATE_OVERLAYS)
 			return FALSE
 
-		charging_item.update_appearance()
+		charging_item.update_appearance(UPDATE_OVERLAYS)
 		return power_pack.stored_ammo.len < power_pack.max_ammo
 
 	if(istype(charging_item, /obj/item/gun/ballistic/automatic/battle_rifle))
@@ -187,7 +198,7 @@
 				port_cell.use(recalibration_cost)
 				recalibrating_gun.attempt_recalibration(FALSE)
 
-			charging_item.update_appearance()
+			charging_item.update_appearance(UPDATE_OVERLAYS)
 			return TRUE
 
 		if(recalibrating_gun.shots_before_degradation < recalibrating_gun.max_shots_before_degradation)
@@ -208,10 +219,10 @@
 			if(recalibrating_gun.shots_before_degradation >= recalibrating_gun.max_shots_before_degradation)
 				playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
 				say("[charging_item] has finished recalibrating!")
-				charging_item.update_appearance()
+				charging_item.update_appearance(UPDATE_OVERLAYS)
 				return FALSE
 
-			charging_item.update_appearance()
+			charging_item.update_appearance(UPDATE_OVERLAYS)
 			return TRUE
 
 		return FALSE
@@ -227,7 +238,7 @@
 		START_PROCESSING(SSmachines, src)
 		update_use_power(ACTIVE_POWER_USE)
 		using_power = TRUE
-		update_appearance()
+		update_appearance(UPDATE_OVERLAYS)
 		return
 
 	if(isnull(charging2)) // Charging Port 2
@@ -235,28 +246,28 @@
 		START_PROCESSING(SSmachines, src)
 		update_use_power(ACTIVE_POWER_USE)
 		using_power2 = TRUE
-		update_appearance()
+		update_appearance(UPDATE_OVERLAYS)
 		return
 
 /obj/machinery/recharger/portable/Exited(atom/movable/gone, direction)
 	if(gone == charging) // Charging Port 1
 		if(!QDELING(gone))
-			gone.update_appearance()
+			gone.update_appearance(UPDATE_OVERLAYS)
 
 		charging = null
 		using_power = FALSE
 		update_use_power(charging2 ? ACTIVE_POWER_USE : IDLE_POWER_USE)
-		update_appearance()
+		update_appearance(UPDATE_OVERLAYS)
 		return
 
 	if(gone == charging2) // Charging Port 2
 		if(!QDELING(gone))
-			gone.update_appearance()
+			gone.update_appearance(UPDATE_OVERLAYS)
 
 		charging2 = null
 		using_power2 = FALSE
 		update_use_power(charging ? ACTIVE_POWER_USE : IDLE_POWER_USE)
-		update_appearance()
+		update_appearance(UPDATE_OVERLAYS)
 		return
 
 /obj/machinery/recharger/portable/item_interaction(mob/living/user, obj/item/tool, list/modifiers)
@@ -335,11 +346,12 @@
 
 /obj/machinery/recharger/portable/update_overlays()
 	. = ..()
+	if(machine_stat & BROKEN || !anchored || deploying)
+		return
+
 	var/area/a = get_area(src)
 	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in component_parts
 
-	if(machine_stat & BROKEN || !anchored)
-		return
 	if(panel_open)
 		. += mutable_appearance(icon, "[base_icon_state]-open", layer)
 		. += emissive_appearance(icon, "[base_icon_state]-open", src, alpha = src.alpha)
