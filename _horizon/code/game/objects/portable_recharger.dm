@@ -42,25 +42,24 @@
 	return ITEM_INTERACT_SUCCESS
 
 /obj/item/recharger_item/proc/deploy_recharger(mob/user, atom/location)
-	var/obj/machinery/recharger/portable/R = new /obj/machinery/recharger/portable(location)
-	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in R.component_parts
+	var/obj/machinery/recharger/portable/station_machine = new /obj/machinery/recharger/portable(location)
+	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in station_machine.component_parts
 	if(port_cell)
 		port_cell.maxcharge = cell_maxcharge
 		port_cell.charge = cell_charge
-	R.recharge_coeff = cond_tier
-	R.add_fingerprint(user)
-	R.deploying = TRUE
-	R.update_appearance(UPDATE_OVERLAYS)
-	flick("sec-deploy", R)
-	addtimer(CALLBACK(R, TYPE_PROC_REF(/obj/machinery/recharger/portable, finish_deployment)), 35) // Animation time
+	station_machine.recharge_coeff = cond_tier
+	station_machine.add_fingerprint(user)
+	station_machine.deploying = TRUE
+	station_machine.update_appearance(UPDATE_OVERLAYS)
+	flick("sec-deploy", station_machine)
+	addtimer(CALLBACK(station_machine, TYPE_PROC_REF(/obj/machinery/recharger/portable, finish_deployment)), 35) // Animation time
 	user.visible_message(span_notice("[user] deploys the recharging station."), span_notice("You deploy the recharging station."))
-	playsoundtoken(R, '_horizon/sound/recharger_deploy.ogg', 40, SOUND_RANGE)
+	playsoundtoken(station_machine, '_horizon/sound/recharger_deploy.ogg', 40, SOUND_RANGE)
 	qdel(src)
 
 /obj/machinery/recharger/portable/proc/finish_deployment()
 	if(QDELETED(src))
 		return
-
 	deploying = FALSE
 	update_appearance(UPDATE_OVERLAYS)
 
@@ -97,6 +96,28 @@
 	var/obj/item/charging2 = null
 	var/using_power2 = FALSE
 	var/deploying = FALSE
+
+/obj/machinery/recharger/portable/examine(mob/user)
+	. = ..()
+	if(!in_range(user, src) && !issilicon(user) && !isobserver(user))
+		. += span_warning("You're too far away to examine [src]'s contents and display!")
+		return
+
+	if(charging2)
+		var/obj/item/stock_parts/power_store/charging_cell2 = charging2.get_cell()
+		if(charging_cell2)
+			. += span_notice("- \The [charging2]'s cell is at <b>[charging_cell2.percent()]%</b>.")
+			return
+		if(istype(charging2, /obj/item/ammo_box/magazine/recharge))
+			var/obj/item/ammo_box/magazine/recharge/power_pack2 = charging2
+			. += span_notice("- \The [charging2]'s cell is at <b>[PERCENT(power_pack2.stored_ammo.len/power_pack2.max_ammo)]%</b>.")
+			return
+		if(istype(charging2, /obj/item/gun/ballistic/automatic/battle_rifle))
+			var/obj/item/gun/ballistic/automatic/battle_rifle/recalibrating_gun2 = charging2
+			. += span_notice("- \The [charging2]'s system degradation is at stage [recalibrating_gun2.degradation_stage] of [recalibrating_gun2.degradation_stage_max].")
+			. += span_notice("- \The [charging2]'s degradation buffer is at <b>[PERCENT(recalibrating_gun2.shots_before_degradation/recalibrating_gun2.max_shots_before_degradation)]%</b>.")
+			return
+		. += span_notice("- \The [charging2] is not reporting a power level.")
 
 /obj/machinery/recharger/portable/process(seconds_per_tick)
 	if(machine_stat & BROKEN || !anchored)
@@ -282,6 +303,10 @@
 	if(panel_open)
 		return ITEM_INTERACT_BLOCKING
 
+	if(deploying)
+		to_chat(user, span_notice("[src] is still deploying!"))
+		return ITEM_INTERACT_BLOCKING
+
 	if(charging && charging2)
 		return ITEM_INTERACT_BLOCKING
 
@@ -327,15 +352,22 @@
 		to_chat(user, span_warning("Remove the charging items first!"))
 		return
 	user.visible_message(span_notice("[user] folds up the recharging station."), span_notice("You fold up the recharging station."))
-	var/obj/item/recharger_item/B = new /obj/item/recharger_item(src.drop_location())
-	flick("sec-move", B)
-	playsoundtoken(B, '_horizon/sound/recharger_go.ogg', 40, SOUND_RANGE)
+	var/obj/item/recharger_item/station_case = new /obj/item/recharger_item(src.drop_location())
+	station_case.anchored = TRUE
+	addtimer(CALLBACK(station_case, TYPE_PROC_REF(/obj/item/recharger_item, finish_undeployment)), 35) // Animation time
+	flick("sec-move", station_case)
+	playsoundtoken(station_case, '_horizon/sound/recharger_go.ogg', 40, SOUND_RANGE)
 	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in component_parts
 	if(port_cell)
-		B.cell_maxcharge = port_cell.maxcharge
-		B.cell_charge = port_cell.charge
-	B.cond_tier = recharge_coeff
+		station_case.cell_maxcharge = port_cell.maxcharge
+		station_case.cell_charge = port_cell.charge
+	station_case.cond_tier = recharge_coeff
 	qdel(src)
+
+/obj/item/recharger_item/proc/finish_undeployment()
+	if(QDELETED(src))
+		return
+	anchored = FALSE
 
 /obj/machinery/recharger/portable/screwdriver_act(mob/living/user, obj/item/tool)
 	if(charging || charging2)
