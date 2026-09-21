@@ -295,7 +295,7 @@
 		update_icon()
 		user.update_suit_storage()
 	else
-		to_chat(user, span_warning("Крепления расстегнуты, [capitalize(src.name)] пуст."))
+		to_chat(user, span_warning("The straps are unfastened, [capitalize(src.name)] is empty."))
 
 	return ..()
 
