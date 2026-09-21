@@ -321,7 +321,7 @@
 	return ..()
 
 /obj/machinery/recharger/portable/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
-	if(!ishuman(user) || !user.can_perform_action(src))
+	if(!ishuman(user) || !user.can_perform_action(src) || deploying)
 		return
 	if(charging || charging2)
 		to_chat(user, span_warning("Remove the charging items first!"))
