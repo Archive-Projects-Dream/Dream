@@ -509,8 +509,6 @@
 	slot_flags = ITEM_SLOT_SUITSTORE
 	equip_sound = 'sound/items/equip/toolbelt_equip.ogg'
 
-	var/cell_imitator_lvl = 2500
-	var/cell_imitator_max = 2500
 	var/chargerate = 100
 
 	var/obj/item/charging = null
@@ -519,11 +517,18 @@
 
 	var/overlay_state
 	var/mutable_appearance/gun_overlay
+	/// Installed power cell. Lives in nullspace so it does not show up in the storage UI.
+	var/obj/item/stock_parts/power_store/cell/cell
+	/// Minimum maxcharge a cell must have to be accepted (mirrors defib behavior).
+	var/min_cell_maxcharge = 2500
 
 /obj/item/tactical_recharger/examine(mob/user)
 	. = ..()
 	. += "<hr><span class='notice'>Display:</span>"
-	. += "<span class='notice'>- Battery level: <b>[cell_imitator_lvl*100/cell_imitator_max]%</b>.</span>"
+	if(cell)
+		. += "<span class='notice'>- Battery level: <b>[cell.percent()]%</b>.</span>"
+	else
+		. += "<span class='warning'>- No cell installed! Use a power cell on [src] to install one.</span>"
 	if(charging)
 		var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
 		. += "<span class='notice'>- Weapon charge: <b>[charging]</b> - <b>[C.percent()]%</b>.</span>"
@@ -540,16 +545,59 @@
 		/obj/item/gun/energy
 	))
 
+/obj/item/tactical_recharger/get_cell()
+	return cell
+
 /obj/item/tactical_recharger/Initialize(mapload)
 	. = ..()
 	create_storage(storage_type = /datum/storage/pockets/tactical_recharger)
+	cell = new /obj/item/stock_parts/power_store/cell/high(null)
 	START_PROCESSING(SSmachines, src)
-	update_icon()
 	update_appearance()
 
 /obj/item/tactical_recharger/Destroy()
-	. = ..()
-	return PROCESS_KILL
+	QDEL_NULL(cell)
+	return ..()
+
+/obj/item/tactical_recharger/item_interaction(mob/living/user, obj/item/item, list/modifiers)
+	if(!istype(item, /obj/item/stock_parts/power_store/cell))
+		return NONE
+	var/obj/item/stock_parts/power_store/cell/new_cell = item
+	if(new_cell.maxcharge < min_cell_maxcharge)
+		to_chat(user, span_notice("[src] requires a higher capacity cell."))
+		return ITEM_INTERACT_BLOCKING
+	var/obj/item/old_cell = cell
+	if(old_cell)
+		old_cell.forceMove(get_turf(src))
+		to_chat(user, span_notice("You swap [old_cell] out of [src]."))
+	if(!user.temporarilyRemoveItemFromInventory(item))
+		return NONE
+	item.moveToNullspace()
+	cell = item
+	if(!old_cell)
+		to_chat(user, span_notice("You install [item] in [src]."))
+	playsound(src, 'sound/machines/click.ogg', 50, TRUE, SILENCED_SOUND_EXTRARANGE)
+	update_appearance()
+	return ITEM_INTERACT_SUCCESS
+
+// Remove the cell with AltClick.
+/obj/item/tactical_recharger/click_alt(mob/user)
+	if(!cell)
+		to_chat(user, span_warning("[src] has no cell!"))
+		return CLICK_ACTION_BLOCKING
+	if(!user.can_perform_action(src))
+		return CLICK_ACTION_BLOCKING
+	user.visible_message(
+		span_notice("[user] removes [cell] from [src]."),
+		span_notice("You remove [cell] from [src]."),
+	)
+	playsound(src, 'sound/machines/click.ogg', 50, TRUE, SILENCED_SOUND_EXTRARANGE)
+	var/obj/item/cell_to_move = cell
+	cell = null
+	cell_to_move.forceMove(get_turf(src))
+	user.put_in_hands(cell_to_move)
+	update_appearance()
+	return CLICK_ACTION_SUCCESS
 
 /obj/item/tactical_recharger/attack_hand(mob/user)
 	if(loc != user || user.get_item_by_slot(ITEM_SLOT_SUITSTORE) != src || !user.can_perform_action(src))
@@ -563,8 +611,6 @@
 		update_appearance()
 		update_icon()
 		user.update_suit_storage()
-	else
-		to_chat(user, span_warning("The straps are unfastened, [capitalize(src.name)] is empty."))
 
 	return ..()
 
@@ -583,24 +629,20 @@
 /obj/item/tactical_recharger/process(seconds_per_tick)
 	using_power = FALSE
 	if(length(contents))
-		var/obj/item/I = contents[1]
-		charging = I
+		charging = contents[1]
 	else
 		charging = null
-
-	if(charging)
-		var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
-		if(C)
-			if(C.charge < C.maxcharge)
-				using_power = TRUE
-				if(cell_imitator_lvl > 0)
-					cell_imitator_lvl = cell_imitator_lvl - (C.chargerate * recharge_coeff * seconds_per_tick / 2)
-					C.give(C.chargerate * recharge_coeff * seconds_per_tick / 2)
-					charging.update_icon()
-				else
-					if(cell_imitator_lvl < 0)	// защита от отрицательных значений
-						cell_imitator_lvl = 0
-	update_icon()
+	if(!charging || !cell)
+		return
+	var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
+	if(!C || C.charge >= C.maxcharge)
+		return
+	using_power = TRUE
+	var/delta = C.chargerate * recharge_coeff * seconds_per_tick / 2
+	cell.use(delta)
+	C.give(delta)
+	charging.update_icon()
+	update_appearance()
 
 /obj/item/tactical_recharger/update_overlays()
 	. = ..()
@@ -650,24 +692,24 @@
 		. += emissive_appearance(icon, "toz-w_lvl-[w_cell_percent]", src, alpha = src.alpha)
 
 	var/cell_percent
-	switch(cell_imitator_lvl*100/cell_imitator_max)
-		if(0 to 14)
-			cell_percent = "1"
-		if(15 to 28)
-			cell_percent = "2"
-		if(29 to 42)
-			cell_percent = "3"
-		if(43 to 56)
-			cell_percent = "4"
-		if(57 to 70)
-			cell_percent = "5"
-		if(71 to 84)
-			cell_percent = "6"
-		if(85 to 100)
-			cell_percent = "7"
-
-	. += mutable_appearance(icon, "toz-c_lvl-[cell_percent]", layer)
-	. += emissive_appearance(icon, "toz-c_lvl-[cell_percent]", src, alpha = src.alpha)
+	if(cell)
+		switch(cell.percent())
+			if(0 to 14)
+				cell_percent = "1"
+			if(15 to 28)
+				cell_percent = "2"
+			if(29 to 42)
+				cell_percent = "3"
+			if(43 to 56)
+				cell_percent = "4"
+			if(57 to 70)
+				cell_percent = "5"
+			if(71 to 84)
+				cell_percent = "6"
+			if(85 to 100)
+				cell_percent = "7"
+		. += mutable_appearance(icon, "toz-c_lvl-[cell_percent]", layer)
+		. += emissive_appearance(icon, "toz-c_lvl-[cell_percent]", src, alpha = src.alpha)
 
 // MARK: Types Rechargers
 /obj/item/tactical_recharger/pulse/Initialize(mapload)
