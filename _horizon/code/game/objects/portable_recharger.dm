@@ -35,11 +35,11 @@
 	if(!user.Adjacent(target_turf))
 		return NONE
 	if(target_turf.is_blocked_turf(source_atom = src))
-		balloon_alert(user, "No space to deploy here.")
+		balloon_alert(user, "no space to deploy here.")
 		return ITEM_INTERACT_BLOCKING
 
 	if(locate(/obj/machinery/recharger) in target_turf)
-		balloon_alert(user, "The area is occupied by machinery.")
+		balloon_alert(user, "the area is occupied by machinery.")
 		return ITEM_INTERACT_BLOCKING
 
 	deploy_recharger(user, target_turf)
