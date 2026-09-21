@@ -2,7 +2,7 @@
 /obj/item/recharger_item
 	name = "portable recharging station"
 	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. To begin operation, deploy it in any suitable location."
-	icon = '_horizon/code/game/objects/structures/sec_recharger.dmi'
+	icon = '_horizon/icons/obj/sec_recharger_portable.dmi'
 	icon_state = "case"
 	inhand_icon_state = "toolbox_default"
 	lefthand_file = 'icons/mob/inhands/equipment/toolbox_lefthand.dmi'
@@ -66,7 +66,7 @@
 /obj/machinery/recharger/portable
 	name = "portable recharging station"
 	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. It can be folded up for transport when needed."
-	icon = '_horizon/code/game/objects/structures/sec_recharger.dmi'
+	icon = '_horizon/icons/obj/sec_recharger_portable.dmi'
 	icon_state = "sec"
 	base_icon_state = "sec"
 	circuit = /obj/item/circuitboard/machine/portable_recharger
@@ -223,12 +223,6 @@
 
 		return FALSE
 
-	// Tactical recharger.
-	if(istype(charging_item, /obj/item/tactical_recharger))
-		var/obj/item/tactical_recharger/tactical_recharger = charging_item
-		if(tactical_recharger.cell_imitator_lvl < tactical_recharger.cell_imitator_max)
-			return TRUE
-
 	return FALSE
 
 /obj/machinery/recharger/portable/Entered(atom/movable/arrived, atom/old_loc, list/atom/old_locs)
@@ -380,7 +374,7 @@
 
 	if(port_cell)
 		var/cell_percent
-		switch(port_cell.percent())
+		switch(round(port_cell.percent()))
 			if(0 to 14)
 				cell_percent = "1"
 			if(15 to 28)
@@ -417,16 +411,9 @@
 		if(port_cell && port_cell.percent() != 0)
 			var/port_1_cell_percent
 			var/port_1_cell_percent_num
-			if(istype(charging, /obj/item/tactical_recharger))	// вычисление % заряда имитатора
-				var/obj/item/tactical_recharger/tactical_recharger = charging
-				port_1_cell_percent_num = tactical_recharger.cell_imitator_lvl*100/tactical_recharger.cell_imitator_max
-			else
-				var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()	// запрос к реальной батарее
-				if(C)
-					port_1_cell_percent_num = C.percent()
-				else
-					port_1_cell_percent_num = 0
-			switch(port_1_cell_percent_num)		// процент заряда оружия
+			var/obj/item/stock_parts/power_store/cell/charging_port1 = charging.get_cell()	// запрос к реальной батарее
+			port_1_cell_percent_num = charging_port1 ? charging_port1.percent() : 0
+			switch(round(port_1_cell_percent_num))
 				if(0 to 14)
 					port_1_cell_percent = "1"
 				if(15 to 28)
@@ -459,16 +446,9 @@
 		if(port_cell && port_cell.percent() != 0)
 			var/port_2_cell_percent
 			var/port_2_cell_percent_num
-			if(istype(charging2, /obj/item/tactical_recharger))
-				var/obj/item/tactical_recharger/CI2 = charging2
-				port_2_cell_percent_num = CI2.cell_imitator_lvl*100/CI2.cell_imitator_max
-			else
-				var/obj/item/stock_parts/power_store/cell/charging_port2 = charging2.get_cell()
-				if(charging_port2)
-					port_2_cell_percent_num = charging_port2.percent()
-				else
-					port_2_cell_percent_num = 0
-			switch(port_2_cell_percent_num)
+			var/obj/item/stock_parts/power_store/cell/charging_port2 = charging2.get_cell()
+			port_2_cell_percent_num = charging_port2 ? charging_port2.percent() : 0
+			switch(round(port_2_cell_percent_num))
 				if(0 to 14)
 					port_2_cell_percent = "1"
 				if(15 to 28)
