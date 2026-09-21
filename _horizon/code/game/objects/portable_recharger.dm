@@ -27,7 +27,6 @@
 	var/cond_tier = 1
 
 //	Разворачивание станции
-
 /obj/item/recharger_item/interact_with_atom(atom/interacting_with, mob/living/user, list/modifiers)
 	if(!isopenturf(interacting_with))
 		return NONE
@@ -44,8 +43,10 @@
 
 /obj/item/recharger_item/proc/deploy_recharger(mob/user, atom/location)
 	var/obj/machinery/recharger/portable/R = new /obj/machinery/recharger/portable(location)
-	R.cell_charge = cell_charge
-	R.cell_maxcharge = cell_maxcharge
+	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in R.component_parts
+	if(port_cell)
+		port_cell.maxcharge = cell_maxcharge
+		port_cell.charge = cell_charge
 	R.recharge_coeff = cond_tier
 	R.add_fingerprint(user)
 	user.visible_message(span_notice("[user] deploys the recharging station."), span_notice("You deploy the recharging station."))
@@ -70,13 +71,11 @@
 	base_icon_state = "sec"
 	circuit = /obj/item/circuitboard/machine/portable_recharger
 	use_power = NO_POWER_USE
-	var/obj/item/charging_port2 = null
+	var/obj/item/charging2 = null
 	var/using_power2 = FALSE
 	var/portable = TRUE
-	var/cell_charge = 0
-	var/cell_maxcharge = 0
 
-//  Микросхема
+// Микросхема
 /obj/item/circuitboard/machine/portable_recharger
 	name = "portable recharging station"
 	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. To begin operation, deploy it in any suitable location."
@@ -89,25 +88,148 @@
 	def_components = list(/obj/item/stock_parts/power_store/cell = /obj/item/stock_parts/power_store/cell/high)
 	needs_anchored = FALSE
 
-/obj/machinery/recharger/portable/process(delta_time)
-    . = ..()
+/obj/machinery/recharger/portable/process(seconds_per_tick)
+	if(machine_stat & BROKEN || !anchored)
+		return PROCESS_KILL
 
-    if(charging_port2)
-        var/obj/item/stock_parts/power_store/cell/C2 = charging_port2.get_cell()
+	using_power = FALSE
+	using_power2 = FALSE
 
-        if(C2 && C2.charge < C2.maxcharge)
-            using_power2 = TRUE
+	var/area/a = get_area(src)
+	var/has_grid_power = isarea(a) && a.power_equip != 0
 
-            var/charge_amount = C2.chargerate * recharge_coeff * delta_time
-            C2.give(charge_amount)
-            charging_port2.update_appearance()
-        else
-            using_power2 = FALSE
+	// Встроенная батарея станции. // Подзарядка встроенной батареи от сети.
+	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in component_parts
+	if(port_cell && port_cell.charge < port_cell.maxcharge && has_grid_power)
+		port_cell.give(port_cell.chargerate * recharge_coeff * seconds_per_tick / 12)
 
-    else
-        using_power2 = FALSE
+	// Первый порт.
+	if(charging)
+		using_power = process_charging_port(charging, seconds_per_tick, port_cell, has_grid_power)
 
-    update_appearance()
+	// Второй порт.
+	if(charging2)
+		using_power2 = process_charging_port(charging2, seconds_per_tick, port_cell, has_grid_power)
+
+	update_appearance()
+
+	if(!charging && !charging2)
+		return PROCESS_KILL
+
+/obj/machinery/recharger/portable/proc/process_charging_port(obj/item/charging_item, seconds_per_tick, obj/item/stock_parts/power_store/cell/port_cell, has_grid_power)
+	if(!charging_item)
+		return FALSE
+
+	// Обычная батарея предмета.
+	var/obj/item/stock_parts/power_store/cell/charging_cell = charging_item.get_cell()
+	if(charging_cell)
+		if(charging_cell.charge >= charging_cell.maxcharge)
+			return FALSE
+
+		var/charge_amount = charging_cell.chargerate * recharge_coeff * seconds_per_tick
+
+		if(has_grid_power)
+			use_energy(active_power_usage * recharge_coeff * seconds_per_tick)
+			charging_cell.give(charge_amount)
+		else
+			if(!port_cell || port_cell.charge <= 0)
+				return FALSE
+
+			var/backup_charge = min(charge_amount, port_cell.charge)
+			port_cell.use(backup_charge)
+			charging_cell.give(backup_charge)
+
+		if(charging_cell.charge >= charging_cell.maxcharge)
+			playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
+			say("[charging_item] has finished recharging!")
+			charging_item.update_appearance()
+			return FALSE
+
+		charging_item.update_appearance()
+		return TRUE
+
+	// Перезаряжаемый магазин.
+	if(istype(charging_item, /obj/item/ammo_box/magazine/recharge))
+		var/obj/item/ammo_box/magazine/recharge/power_pack = charging_item
+		for(var/charge_iterations in 1 to recharge_coeff)
+			if(power_pack.stored_ammo.len >= power_pack.max_ammo)
+				break
+			if(has_grid_power)
+				power_pack.stored_ammo += new power_pack.ammo_type(power_pack)
+				use_energy(active_power_usage * seconds_per_tick)
+			else
+				if(!port_cell || port_cell.charge <= 0)
+					break
+				var/ammo_charge_cost = active_power_usage * seconds_per_tick
+				if(port_cell.charge < ammo_charge_cost)
+					break
+				port_cell.use(ammo_charge_cost)
+				power_pack.stored_ammo += new power_pack.ammo_type(power_pack)
+
+		if(power_pack.stored_ammo.len >= power_pack.max_ammo)
+			playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
+			say("[charging_item] has finished recharging!")
+			charging_item.update_appearance()
+			return FALSE
+
+		charging_item.update_appearance()
+		return power_pack.stored_ammo.len < power_pack.max_ammo
+
+	// Боевой винтовочный recalibration.
+	if(istype(charging_item, /obj/item/gun/ballistic/automatic/battle_rifle))
+		var/obj/item/gun/ballistic/automatic/battle_rifle/recalibrating_gun = charging_item
+
+		if(recalibrating_gun.degradation_stage)
+			if(has_grid_power)
+				recalibrating_gun.attempt_recalibration(FALSE)
+				use_energy(active_power_usage * recharge_coeff * seconds_per_tick)
+			else
+				if(!port_cell || port_cell.charge <= 0)
+					return FALSE
+
+				var/recalibration_cost = active_power_usage * recharge_coeff * seconds_per_tick
+				if(port_cell.charge < recalibration_cost)
+					return FALSE
+
+				port_cell.use(recalibration_cost)
+				recalibrating_gun.attempt_recalibration(FALSE)
+
+			charging_item.update_appearance()
+			return TRUE
+
+		if(recalibrating_gun.shots_before_degradation < recalibrating_gun.max_shots_before_degradation)
+			if(has_grid_power)
+				recalibrating_gun.attempt_recalibration(TRUE, recharge_coeff)
+				use_energy(active_power_usage * recharge_coeff * seconds_per_tick)
+			else
+				if(!port_cell || port_cell.charge <= 0)
+					return FALSE
+
+				var/recalibration_cost = active_power_usage * recharge_coeff * seconds_per_tick
+				if(port_cell.charge < recalibration_cost)
+					return FALSE
+
+				port_cell.use(recalibration_cost)
+				recalibrating_gun.attempt_recalibration(TRUE, recharge_coeff)
+
+			if(recalibrating_gun.shots_before_degradation >= recalibrating_gun.max_shots_before_degradation)
+				playsound(src, 'sound/machines/ping.ogg', 30, TRUE)
+				say("[charging_item] has finished recalibrating!")
+				charging_item.update_appearance()
+				return FALSE
+
+			charging_item.update_appearance()
+			return TRUE
+
+		return FALSE
+
+	// Tactical recharger.
+	if(istype(charging_item, /obj/item/tactical_recharger))
+		var/obj/item/tactical_recharger/tactical_recharger = charging_item
+		if(tactical_recharger.cell_imitator_lvl < tactical_recharger.cell_imitator_max)
+			return TRUE
+
+	return FALSE
 
 /obj/machinery/recharger/portable/Entered(atom/movable/arrived, atom/old_loc, list/atom/old_locs)
 	if(!is_type_in_typecache(arrived, allowed_devices))
@@ -123,8 +245,8 @@
 		return
 
 	// Второй порт.
-	if(isnull(charging_port2))
-		charging_port2 = arrived
+	if(isnull(charging2))
+		charging2 = arrived
 		START_PROCESSING(SSmachines, src)
 		update_use_power(ACTIVE_POWER_USE)
 		using_power2 = TRUE
@@ -132,23 +254,6 @@
 		return
 
 /obj/machinery/recharger/portable/Exited(atom/movable/gone, direction)
-	// Второй порт обрабатываем отдельно.
-	if(gone == charging_port2)
-		if(!QDELING(gone))
-			gone.update_appearance()
-
-		charging_port2 = null
-		using_power2 = FALSE
-
-		// Первый порт всё ещё может работать.
-		if(charging)
-			update_use_power(ACTIVE_POWER_USE)
-		else
-			update_use_power(IDLE_POWER_USE)
-
-		update_appearance()
-		return
-
 	// Первый порт.
 	if(gone == charging)
 		if(!QDELING(gone))
@@ -158,7 +263,23 @@
 		using_power = FALSE
 
 		// Если второй порт занят — станция всё ещё активна.
-		if(charging_port2)
+		if(charging2)
+			update_use_power(ACTIVE_POWER_USE)
+		else
+			update_use_power(IDLE_POWER_USE)
+
+		update_appearance()
+		return
+
+	// Второй порт обрабатываем отдельно.
+	if(gone == charging2)
+		if(!QDELING(gone))
+			gone.update_appearance()
+
+		charging2 = null
+		using_power2 = FALSE
+
+		if(charging)
 			update_use_power(ACTIVE_POWER_USE)
 		else
 			update_use_power(IDLE_POWER_USE)
@@ -177,13 +298,7 @@
 	if(panel_open)
 		return ITEM_INTERACT_BLOCKING
 
-	// Оба порта заняты.
-	if(charging && charging_port2)
-		return ITEM_INTERACT_BLOCKING
-
-	var/area/our_area = get_area(src)
-	if(!isarea(our_area) || our_area.power_equip == 0)
-		to_chat(user, span_notice("[src] blinks red as you try to insert [tool]."))
+	if(charging && charging2)
 		return ITEM_INTERACT_BLOCKING
 
 	if(istype(tool, /obj/item/gun/energy))
@@ -209,25 +324,26 @@
 
 	charging.forceMove(drop_location())
 
+// MARK: Второго слота ПКМ
 /obj/machinery/recharger/portable/attack_hand_secondary(mob/user, list/modifiers)
-	if(charging_port2)
+	if(charging2)
 		add_fingerprint(user)
 
-		if(user.put_in_hands(charging_port2))
+		if(user.put_in_hands(charging2))
 			return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
 
-		charging_port2.forceMove(drop_location())
+		charging2.forceMove(drop_location())
 		return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
 
 	return ..()
 
-/obj/machinery/recharger/portable/MouseDrop(atom/over_object)
+/obj/machinery/recharger/portable/MouseDrop(over_object, src_location, over_location)
 	. = ..()
 	if(.)
 		return
 	if(!ishuman(usr) || !usr.can_perform_action(src))
 		return FALSE
-	if(charging || charging_port2)
+	if(charging || charging2)
 		to_chat(usr, span_warning("Remove the charging items first!"))
 		return FALSE
 	usr.visible_message(span_notice("[usr] folds up the recharging station."), span_notice("You fold up the recharging station."))
@@ -242,12 +358,12 @@
 	qdel(src)
 
 /obj/machinery/recharger/portable/screwdriver_act(mob/living/user, obj/item/tool)
-	if(charging || charging_port2)
+	if(charging || charging2)
 		return ITEM_INTERACT_BLOCKING
 	return ..()
 
 /obj/machinery/recharger/portable/can_crowbar_deconstruct()
-	return ..() && !charging && !charging_port2
+	return ..() && !charging && !charging2
 
 //  Оверлеи зарядки
 /obj/machinery/recharger/portable/update_overlays()
@@ -255,7 +371,7 @@
 	var/area/a = get_area(src)
 	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in component_parts
 
-	if(machine_stat & (NOPOWER|BROKEN) || !anchored)
+	if(machine_stat & BROKEN || !anchored)
 		return
 	if(panel_open)
 		. += mutable_appearance(icon, "[base_icon_state]-open", layer)
@@ -302,8 +418,8 @@
 			var/port_1_cell_percent
 			var/port_1_cell_percent_num
 			if(istype(charging, /obj/item/tactical_recharger))	// вычисление % заряда имитатора
-				var/obj/item/tactical_recharger/CI = charging
-				port_1_cell_percent_num = CI.cell_imitator_lvl*100/CI.cell_imitator_max
+				var/obj/item/tactical_recharger/tactical_recharger = charging
+				port_1_cell_percent_num = tactical_recharger.cell_imitator_lvl*100/tactical_recharger.cell_imitator_max
 			else
 				var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()	// запрос к реальной батарее
 				if(C)
@@ -339,17 +455,17 @@
 				. += mutable_appearance(icon, "[base_icon_state]-p1-cell-fail", layer)
 				. += emissive_appearance(icon, "[base_icon_state]-p1-cell-fail", src, alpha = src.alpha)
 
-	if(charging_port2)
+	if(charging2)
 		if(port_cell && port_cell.percent() != 0)
 			var/port_2_cell_percent
 			var/port_2_cell_percent_num
-			if(istype(charging_port2, /obj/item/tactical_recharger))
-				var/obj/item/tactical_recharger/CI2 = charging_port2
+			if(istype(charging2, /obj/item/tactical_recharger))
+				var/obj/item/tactical_recharger/CI2 = charging2
 				port_2_cell_percent_num = CI2.cell_imitator_lvl*100/CI2.cell_imitator_max
 			else
-				var/obj/item/stock_parts/power_store/cell/C2 = charging_port2.get_cell()
-				if(C2)
-					port_2_cell_percent_num = C2.percent()
+				var/obj/item/stock_parts/power_store/cell/charging_port2 = charging2.get_cell()
+				if(charging_port2)
+					port_2_cell_percent_num = charging_port2.percent()
 				else
 					port_2_cell_percent_num = 0
 			switch(port_2_cell_percent_num)
@@ -467,7 +583,7 @@
 	return ..()
 
 // Процесс зарядки
-/obj/item/tactical_recharger/process(delta_time)
+/obj/item/tactical_recharger/process(seconds_per_tick)
 	using_power = FALSE
 	if(length(contents))
 		var/obj/item/I = contents[1]
@@ -481,8 +597,8 @@
 			if(C.charge < C.maxcharge)
 				using_power = TRUE
 				if(cell_imitator_lvl > 0)
-					cell_imitator_lvl = cell_imitator_lvl - (C.chargerate * recharge_coeff * delta_time / 2)
-					C.give(C.chargerate * recharge_coeff * delta_time / 2)
+					cell_imitator_lvl = cell_imitator_lvl - (C.chargerate * recharge_coeff * seconds_per_tick / 2)
+					C.give(C.chargerate * recharge_coeff * seconds_per_tick / 2)
 					charging.update_icon()
 				else
 					if(cell_imitator_lvl < 0)	// защита от отрицательных значений
