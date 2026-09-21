@@ -38,6 +38,10 @@
 		balloon_alert(user, "No space to deploy here.")
 		return ITEM_INTERACT_BLOCKING
 
+	if(locate(/obj/machinery/recharger) in target_turf)
+		balloon_alert(user, "The area is occupied by machinery.")
+		return ITEM_INTERACT_BLOCKING
+
 	deploy_recharger(user, target_turf)
 	return ITEM_INTERACT_SUCCESS
 
