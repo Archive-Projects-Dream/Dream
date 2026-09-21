@@ -431,12 +431,9 @@
 			. += mutable_appearance(icon, "[base_icon_state]-p1-cell-[port_1_cell_percent]", layer)
 			. += emissive_appearance(icon, "[base_icon_state]-p1-cell-[port_1_cell_percent]", src, alpha = src.alpha)
 
-			if(using_power)
-				. += mutable_appearance(icon, "[base_icon_state]-p1-charging", layer)
-				. += emissive_appearance(icon, "[base_icon_state]-p1-charging", src, alpha = src.alpha)
-			else
-				. += mutable_appearance(icon, "[base_icon_state]-p1-full", layer)
-				. += emissive_appearance(icon, "[base_icon_state]-p1-full", src, alpha = src.alpha)
+			var/icon_to_use = "[base_icon_state]-p1-[using_power ? "charging" : "full"]"
+			. += mutable_appearance(icon, icon_to_use, layer)
+			. += emissive_appearance(icon, icon_to_use, src, alpha = src.alpha)
 		else
 			if(!isarea(a) || a.power_equip == 0)
 				. += mutable_appearance(icon, "[base_icon_state]-p1-cell-fail", layer)
@@ -466,12 +463,9 @@
 			. += mutable_appearance(icon, "[base_icon_state]-p2-cell-[port_2_cell_percent]", layer)
 			. += emissive_appearance(icon, "[base_icon_state]-p2-cell-[port_2_cell_percent]", src, alpha = src.alpha)
 
-			if(using_power2)
-				. += mutable_appearance(icon, "[base_icon_state]-p2-charging", layer)
-				. += emissive_appearance(icon, "[base_icon_state]-p2-charging", src, alpha = src.alpha)
-			else
-				. += mutable_appearance(icon, "[base_icon_state]-p2-full", layer)
-				. += emissive_appearance(icon, "[base_icon_state]-p2-full", src, alpha = src.alpha)
+			var/icon_to_use2 = "[base_icon_state]-p2-[using_power2 ? "charging" : "full"]"
+			. += mutable_appearance(icon, icon_to_use2, layer)
+			. += emissive_appearance(icon, icon_to_use2, src, alpha = src.alpha)
 		else
 			if(!isarea(a) || a.power_equip == 0)
 				. += mutable_appearance(icon, "[base_icon_state]-p2-cell-fail", layer)
