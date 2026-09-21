@@ -7,6 +7,7 @@
 	icon_state = "tank"
 	worn_icon = '_horizon/icons/obj/in_mob/tank_tactical_back.dmi'
 	worn_icon_state = "empty"
+	icon_status_overlay = '_horizon/icons/obj/tank_tactical.dmi'
 	tank_holder_icon_state = null
 	distribute_pressure = TANK_DEFAULT_RELEASE_PRESSURE
 	force = 15
@@ -66,14 +67,16 @@
 /obj/item/tank/internals/tactical/update_overlays()
 	. = ..()
 	if(!length(contents))
+		. += mutable_appearance(icon, "straps-open", layer)
 		return
 	var/obj/item/I = contents[1]
 	var/mutable_appearance/gun_overlay = mutable_appearance(I.icon, I.icon_state)
 	var/matrix/M = matrix()
 	M.Turn(-90)
-	M.Translate(4, 0)
+	M.Translate(2, 0)
 	gun_overlay.transform = M
 	. += gun_overlay
+	. += mutable_appearance(icon, "straps-closed", layer)
 
 // MARK: Tactical Tanks
 /obj/item/tank/internals/tactical/wt550/Initialize(mapload)

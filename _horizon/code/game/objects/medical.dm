@@ -1,9 +1,7 @@
-
 // MARK: Пеналы
-
 /obj/item/storage/belt/medipenal
-	name = "пенал для медипенов"
-	desc = "Компактный и очень удобный пенал вмещающий до 5 медипенов, специальная клипса позволяет закрепить его на карманах или поясе, а с его маленькими габаритами он поместится в коробке или аптечке."
+	name = "medipen case"
+	desc = "A compact and very convenient case that holds up to 5 medipens. A special clip lets it be attached to a pocket or a belt, and thanks to its small size it fits inside a box or a medkit."
 	icon = '_horizon/icons/obj/medipenal.dmi'
 	icon_state = "penal"
 	slot_flags = ITEM_SLOT_BELT | ITEM_SLOT_POCKETS
@@ -31,15 +29,15 @@
 /obj/item/storage/belt/medipenal/attack_hand(mob/user, list/modifiers)
 	if(loc == user)
 		if((user.get_item_by_slot(ITEM_SLOT_BELT) == src) || (user.get_item_by_slot(ITEM_SLOT_LPOCKET) == src) || (user.get_item_by_slot(ITEM_SLOT_RPOCKET) == src))
-			if(!user.can_perform_action(src)) // !user.canUseTopic(src, BE_CLOSE, NO_DEXTERITY, FALSE, TRUE))
+			if(!user.can_perform_action(src))
 				return
 			atom_storage?.show_contents(user)
 	else ..()
 	return
 
 /obj/item/storage/medkit/field_surgery
-	name = "укладка полевого хирурга"
-	desc = "Компактный набор самых необходимых медицинских инструментов для неотложного хирургического вмешательства в полевых условиях."
+	name = "field surgery kit"
+	desc = "A compact set of the most essential medical instruments for emergency surgical intervention in the field."
 	icon_state = "medkit_tactical"
 	inhand_icon_state = "medkit-tactical"
 	damagetype_healed = HEAL_ALL_DAMAGE
@@ -65,8 +63,8 @@
 
 // MARK: Дыхательная груша
 /obj/item/breathing_bag
-	name = "дыхательная груша"
-	desc = "Она же мешок Амбу — механическое ручное устройство для выполнения искусственной вентиляции лёгких."
+	name = "breathing bag"
+	desc = "Also known as an Ambu bag - a manual, mechanical device used to perform artificial ventilation of the lungs."
 	icon = '_horizon/icons/obj/med_items.dmi'
 	icon_state = "breathing_bag"
 	lefthand_file = 'icons/mob/inhands/clothing/masks_lefthand.dmi'
@@ -80,36 +78,21 @@
 	if(M == user)
 		return
 	if (M.is_mouth_covered())
-		to_chat(user, span_warning("Для произведения ИВЛ с пациента надо снять маску!"))
+		to_chat(user, span_warning("Remove the patient's mask to perform artificial ventilation!"))
 		return
-	to_chat(user, span_notice("Прикладываю дыхательную маску к лицу [M.name].")) // [skloname(M.name, RODITELNI, M.gender)]."))
+	to_chat(user, span_notice("You press the breathing mask against [M.name]'s face."))
 	if(!do_after(user, 30, user))
-		to_chat(user, span_warning("Не получается!"))
+		to_chat(user, span_warning("It's not working!"))
 		return
 	. = ..()
 	playsound(user,'_horizon/sound/breathing_bag.ogg', 100, TRUE)
 	for(var/ivl in 1 to 15)
 		if(!do_after(user, 10, user))
 			return
-		to_chat(user, span_notice("Произвожу искуственную вентиляцию легких!"))
+		to_chat(user, span_notice("You perform artificial ventilation of the lungs!"))
 		M.adjust_oxy_loss(-15)
 
-/obj/item/storage/box/traitorbundledebug
-	name = "box of traitor"
-	icon_state = "syndiebox"
-	illustration = "writing_syndie"
-
-/obj/item/storage/box/traitorbundledebug/PopulateContents()
-	var/static/items_inside = list(
-		/obj/item/card/emag=1,\
-		/obj/item/uplink/debug=1,\
-		/obj/item/uplink/nuclear/debug=1,\
-		/obj/item/flashlight/emp/debug=1,\
-	)
-	generate_items_inside(items_inside,src)
-
 // MARK: Мед-Сканер
-
 /obj/item/healthanalyzer/range
 	name = "long-range health analyzer"
 	desc = "A handheld body scanner capable of accurately detecting the patient's vital signs from a distance."
@@ -117,10 +100,5 @@
 	lefthand_file = '_horizon/icons/obj/in_hands/tools_lefthand.dmi'
 	righthand_file = '_horizon/icons/obj/in_hands/tools_righthand.dmi'
 	icon_state = "ranged_analyzer"
-//	item_state = "ranged_analyzer"
-//	healthmode = "ranged_analyzer"
-//	reagentmode = "ranged_reagent_analyzer"
-//	healthmodeinhand = "ranged_analyzer"
-//	reagentmodeinhand = "ranged_reagent_analyzer"
 	reach = 3
 	custom_premium_price = 1000

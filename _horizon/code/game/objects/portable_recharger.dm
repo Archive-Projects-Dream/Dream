@@ -1,10 +1,9 @@
 // Экипировка СБ
-/*
 //	Переносной зарядник - предмет для переноски
 /obj/item/recharger_item
 	name = "portable recharging station"
 	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. To begin operation, deploy it in any suitable location."
-	icon = 'white/Feline/icons/sec_recharger.dmi'
+	icon = '_horizon/code/game/objects/structures/sec_recharger.dmi'
 	icon_state = "case"
 	inhand_icon_state = "toolbox_default"
 	lefthand_file = 'icons/mob/inhands/equipment/toolbox_lefthand.dmi'
@@ -15,11 +14,11 @@
 	throw_range = 7
 	w_class = WEIGHT_CLASS_BULKY
 	custom_materials = list(/datum/material/iron = 500)
-	attack_verb_continuous = list("робастит")
-	attack_verb_simple = list("робастит")
-	hitsound = 'sound/weapons/smash.ogg'
-	drop_sound = 'sound/items/handling/toolbox_drop.ogg'
-	pickup_sound =  'sound/items/handling/toolbox_pickup.ogg'
+	attack_verb_continuous = list("robusts")
+	attack_verb_simple = list("robust")
+	hitsound = 'sound/items/weapons/smash.ogg'
+	drop_sound = 'sound/items/handling/toolbox/toolbox_drop.ogg'
+	pickup_sound =  'sound/items/handling/toolbox/toolbox_pickup.ogg'
 	max_integrity = 200
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 100, RAD = 100, FIRE = 100, ACID = 30)
 	resistance_flags = FIRE_PROOF
@@ -43,25 +42,25 @@
 	R.port_cell.charge = cell_charge
 	R.recharge_coeff = cond_tier
 	R.add_fingerprint(user)
-	user.visible_message(span_notice("[user] разворачивает зарядную станцию.") , span_notice("Разворачиваю зарядную станцию."))
+	user.visible_message(span_notice("[user] deploys the recharging station."), span_notice("You deploy the recharging station."))
 	flick("sec-deploy", R)
-	playsound(R,'white/Feline/sounds/recharger_deploy.ogg', 60, FALSE)
+	playsound(R,'_horizon/sound/recharger_deploy.ogg', 60, FALSE)
 	qdel(src)
 
 //	Осмотр чемоданчика
 /obj/item/recharger_item/examine(mob/user)
 	. = ..()
 	if(!in_range(user, src) && !issilicon(user) && !isobserver(user))
-		. += "<hr><span class='warning'>Слишком далеко, чтобы рассмотреть дисплей зарядной станции!</span>"
+		. += "<hr><span class='warning'>Too far away to make out the recharging station's display!</span>"
 		return
-	. += "<hr><span class='notice'>Дисплей:</span>"
-	. += "</br><span class='notice'>- Уроверь батареи <b>[cell_charge*100/cell_maxcharge]%</b>.</span>"
+	. += "<span class='notice'>Display:</span>"
+	. += "<span class='notice'>- Battery level: <b>[cell_charge*100/cell_maxcharge]%</b>.</span>"
 
 //	Переносной зарядник - развернутая машина
 /obj/machinery/recharger/portable
 	name = "portable recharging station"
 	desc = "A portable dual-port weapon recharger. It draws power from the station grid, with a built-in battery serving as a backup. It can be folded up for transport when needed."
-	icon = 'white/Feline/icons/sec_recharger.dmi'
+	icon = '_horizon/code/game/objects/structures/sec_recharger.dmi'
 	icon_state = "sec"
 	base_icon_state = "sec"
 	circuit = /obj/item/circuitboard/machine/portable_recharger
@@ -89,12 +88,12 @@
 		if(!ishuman(usr) || !usr.can_perform_action(src, BE_CLOSE))
 			return FALSE
 		if(charging || charging_port2)
-			to_chat(usr, span_warning("Невозможно свернуть зарядную станцию в процессе зарядки!"))
+			to_chat(usr, span_warning("You can't fold up the recharging station while it's charging!"))
 			return FALSE
-		usr.visible_message(span_notice("[usr] сворачивает зарядную станцию.") , span_notice("Сворачиваю зарядную станцию."))
+		usr.visible_message(span_notice("[usr] folds up the recharging station."), span_notice("You fold up the recharging station."))
 		var/obj/item/recharger_item/B = new /obj/item/recharger_item(src.drop_location())
 		flick("sec-move", B)
-		playsound(B, 'white/Feline/sounds/recharger_go.ogg', 60, FALSE)
+		playsound(B, '_horizon/sound/recharger_go.ogg', 60, FALSE)
 		B.cell_maxcharge = port_cell.maxcharge
 		B.cell_charge = port_cell.charge
 		B.cond_tier = recharge_coeff
@@ -106,12 +105,12 @@
 	var/area/a = get_area(src)
 	if(machine_stat & (NOPOWER|BROKEN) || !anchored)
 		return
-	if(panel_open)						// панель снята
+	if(panel_open)
 		. += mutable_appearance(icon, "[base_icon_state]-open", layer)
 		. += emissive_appearance(icon, "[base_icon_state]-open", src, alpha = src.alpha)
 		return
 
-	if(port_cell)						// уровень батареи
+	if(port_cell)
 		var/cell_percent
 		switch(port_cell.percent())
 			if(0 to 14)
@@ -133,7 +132,7 @@
 		. += emissive_appearance(icon, "[base_icon_state]-charge-[cell_percent]", src, alpha = src.alpha)
 
 		var/power_net
-		if(port_cell.percent() != 0)	// рабочая сеть
+		if(port_cell.percent() != 0)
 			if(!isarea(a) || a.power_equip == 0)
 				power_net = "cell"
 			else
@@ -146,7 +145,7 @@
 		. += mutable_appearance(icon, "[base_icon_state]-power-[power_net]", layer)
 		. += emissive_appearance(icon, "[base_icon_state]-power-[power_net]", src, alpha = src.alpha)
 
-	if(charging)							// порт 1
+	if(charging)
 		if(port_cell.percent() != 0)
 			var/port_1_cell_percent
 			var/port_1_cell_percent_num
@@ -224,7 +223,6 @@
 			if(!isarea(a) || a.power_equip == 0)	// питания нет, внутренняя батарея пуста
 				. += mutable_appearance(icon, "[base_icon_state]-p2-cell-fail", layer)
 				. += emissive_appearance(icon, "[base_icon_state]-p2-cell-fail", src, alpha = src.alpha)
-*/
 
 //  Тактический наспинный зарядник
 /obj/item/tactical_recharger
@@ -342,6 +340,7 @@
 		var/mutable_appearance/gun_overlay = mutable_appearance(I.icon, I.icon_state)
 		var/matrix/M = matrix()
 		M.Turn(-90)
+		M.Translate(2, 0)
 		gun_overlay.transform = M
 		. += gun_overlay
 

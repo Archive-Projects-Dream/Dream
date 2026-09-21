@@ -25,6 +25,7 @@
 #include "code\game\aesthetics\item.dm"
 #include "code\game\aesthetics\structure.dm"
 #include "code\game\aesthetics\wallmounts.dm"
+#include "code\game\objects\debug_stuff.dm"
 #include "code\game\objects\engineer.dm"
 #include "code\game\objects\medical.dm"
 #include "code\game\objects\portable_recharger.dm"
