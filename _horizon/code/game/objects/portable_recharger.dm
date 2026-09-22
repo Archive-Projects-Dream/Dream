@@ -697,7 +697,7 @@
 
 		var/w_cell_percent
 		var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
-		switch(C.percent())
+		switch(round(C.percent()))
 			if(0 to 10)
 				w_cell_percent = "1"
 			if(11 to 20)
@@ -724,7 +724,7 @@
 
 	var/cell_percent
 	if(cell)
-		switch(cell.percent())
+		switch(round(cell.percent()))
 			if(15 to 28)
 				cell_percent = "1"
 			if(29 to 42)
