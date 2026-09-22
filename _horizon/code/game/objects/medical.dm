@@ -9,7 +9,7 @@
 	max_integrity = 300
 	equip_sound = 'sound/items/equip/toolbelt_equip.ogg'
 
-/obj/item/storage/belt/medipenal/Initialize()
+/obj/item/storage/belt/medipenal/Initialize(mapload)
 	. = ..()
 	atom_storage.max_slots = 5
 	atom_storage.max_specific_storage = WEIGHT_CLASS_NORMAL
