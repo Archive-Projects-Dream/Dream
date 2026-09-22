@@ -217,6 +217,13 @@
 	var/force_string
 	var/last_force_string_check = 0
 	var/tip_timer
+	// [HORIZON-ADD]
+	/// Temp ref to the hand HUD slot currently showing our pickup-preview
+	/// ghost (set in MouseEntered, cleared in MouseExited via clear_pickup_preview).
+	/// Lets MouseExited clear the correct slot even if the player swapped
+	/// active hands mid-hover. Never serialized - transient UI state.
+	var/atom/movable/screen/inventory/_pickup_preview_slot
+	// [/HORIZON-ADD]
 
 	///Determines who can shoot this
 	var/trigger_guard = TRIGGER_GUARD_NONE
@@ -1206,6 +1213,18 @@ GAME_VERB_SRC(/obj/item, verb_pickup, oview(1), "Pick up", null)
 				apply_outline(COLOR_RED_GRAY) //if they're dead or handcuffed, let's show the outline as red to indicate that they can't interact with that right now
 			else
 				apply_outline() //if the player's alive and well we send the command with no color set, so it uses the theme's color
+	// [HORIZON-ADD] pickup-preview ghost in active hand HUD slot when item is on a turf
+	// Reverse of /atom/movable/screen/inventory/add_overlays (which handles
+	// item-in-hand -> hover over slot). Mirrors goonstation's hand_ghosts.
+	if(!QDELETED(src) && isturf(loc) && isliving(usr) && !isobserver(usr))
+		var/mob/living/L2 = usr
+		var/hand_index = L2.active_hand_index
+		if(hand_index && L2.hud_used)
+			var/atom/movable/screen/inventory/hand/hand_slot = L2.hud_used.screen_objects[HUD_KEY_HAND_SLOT(hand_index)]
+			if(istype(hand_slot))
+				_pickup_preview_slot = hand_slot //remember which slot to clear on MouseExited
+				hand_slot.show_pickup_preview(src, L2)
+	// [/HORIZON-ADD]
 // [/HORIZON-EDIT]
 
 /obj/item/base_mouse_drop_handler(atom/over, src_location, over_location, params)
@@ -1219,6 +1238,11 @@ GAME_VERB_SRC(/obj/item, verb_pickup, oview(1), "Pick up", null)
 	deltimer(tip_timer) //delete any in-progress timer if the mouse is moved off the item before it finishes
 	closeToolTip(usr)
 	remove_filter(HOVER_OUTLINE_FILTER)
+	// [HORIZON-ADD] clear pickup-preview ghost from the hand HUD slot that was showing it
+	if(_pickup_preview_slot)
+		_pickup_preview_slot.clear_pickup_preview()
+		_pickup_preview_slot = null
+	// [/HORIZON-ADD]
 
 /obj/item/proc/apply_outline(outline_color = null)
 	if(((get(src, /mob) != usr) && !loc?.atom_storage && !(item_flags & IN_STORAGE)) || QDELETED(src) || isobserver(usr)) //cancel if the item isn't in an inventory, is being deleted, or if the person hovering is a ghost (so that people spectating you don't randomly make your items glow)

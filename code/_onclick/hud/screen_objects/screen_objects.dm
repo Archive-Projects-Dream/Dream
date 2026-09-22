@@ -196,6 +196,14 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 	var/icon_full
 	/// The overlay when hovering over with an item in your hand
 	var/image/object_overlay
+	// [HORIZON-ADD]
+	/// Reverse-direction preview overlay: shows a translucent ghost of an
+	/// /obj/item the player is hovering over (e.g. lying on the floor),
+	/// rendered in the player's active hand slot. Set/cleared via
+	/// /atom/movable/screen/inventory/hand/proc/show_pickup_preview and
+	/// clear_pickup_preview (called from /obj/item/MouseEntered/MouseExited).
+	var/image/pickup_preview_overlay
+	// [/HORIZON-ADD]
 
 /atom/movable/screen/inventory/Click(location, control, params)
 	// At this point in client Click() code we have passed the 1/10 sec check and little else
@@ -287,6 +295,43 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 
 	if(held_index == hud.mymob.active_hand_index)
 		. += IS_LEFT_INDEX(held_index) ? "lhandactive" : "rhandactive"
+
+// [HORIZON-ADD]
+/**
+ * Show a translucent ghost preview of the hovered item's icon on this hand
+ * slot, mirroring goonstation's /datum/hud/human/moused_over but adapted
+ * to the existing /atom/movable/screen/inventory/add_overlays pattern.
+ *
+ * Color convention matches add_overlays(): green if the user can put the
+ * item in this hand, red otherwise. Uses image() like add_overlays does,
+ * layered via add_overlay / removed via cut_overlay.
+ *
+ * Caller: /obj/item/MouseEntered, when the item is on a turf (in the world)
+ * and usr is a living, non-observer mob.
+ */
+/atom/movable/screen/inventory/hand/proc/show_pickup_preview(obj/item/I, mob/user)
+	if(!istype(I) || QDELETED(I) || !istype(user) || !held_index)
+		return
+	var/image/preview = image(I)
+	preview.alpha = 92
+	var/can_pickup = user.can_put_in_hand(I, held_index)
+	preview.color = can_pickup ? "#00ff00" : COLOR_RED
+	cut_overlay(pickup_preview_overlay)
+	pickup_preview_overlay = preview
+	add_overlay(pickup_preview_overlay)
+
+/**
+ * Clear the pickup-preview overlay from this hand slot. Idempotent.
+ * Caller: /obj/item/MouseExited (and any other cleanup paths).
+ *
+ * The slot is resolved at exit time via the temp var
+ * /obj/item/var/_pickup_preview_slot stored at MouseEntered time, so the
+ * correct slot is cleared even if the player swapped active hands mid-hover.
+ */
+/atom/movable/screen/inventory/hand/proc/clear_pickup_preview()
+	cut_overlay(pickup_preview_overlay)
+	QDEL_NULL(pickup_preview_overlay)
+// [/HORIZON-ADD]
 
 /atom/movable/screen/inventory/hand/Click(location, control, params)
 	// At this point in client Click() code we have passed the 1/10 sec check and little else
