@@ -662,7 +662,7 @@
 		return
 	using_power = TRUE
 	var/delta = weapon_cell.chargerate * recharge_coeff * seconds_per_tick / 2
-	internal_cell.use(delta * 3)
+	internal_cell.use(delta * 4)
 	weapon_cell.give(delta)
 	charging.update_icon()
 	update_appearance()
