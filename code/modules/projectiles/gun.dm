@@ -11,6 +11,8 @@
 	worn_icon_state = "gun"
 	abstract_type = /obj/item/gun
 	obj_flags = CONDUCTS_ELECTRICITY
+	// [HORIZON-ADD] - show tooltips when hovering over a gun even if it's on the floor / not in inventory
+	flags_1 = TOOLTIP_ON_HOVER_1
 	appearance_flags = TILE_BOUND|PIXEL_SCALE|LONG_GLIDE|KEEP_TOGETHER
 	slot_flags = ITEM_SLOT_BELT
 	custom_materials = list(/datum/material/iron=SHEET_MATERIAL_AMOUNT)

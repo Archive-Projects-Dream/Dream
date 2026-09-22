@@ -69,6 +69,15 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 /// This atom does not need to generate its own preview icon for GAGS
 #define NO_NEW_GAGS_PREVIEW_1 (1<<18)
 
+// [HORIZON-ADD]
+/// If set on an /obj/item (or other atom), hover tooltips will be shown for it
+/// even when it is not currently held/stored by the user (e.g. when lying on
+/// the floor in the world). Without this flag, hover tooltips only fire for
+/// items inside the user's mob inventory or atom_storage. Shift-examine hover
+/// bypasses this check entirely and always opens a tooltip immediately.
+#define TOOLTIP_ON_HOVER_1 (1<<19)
+// [/HORIZON-ADD]
+
 // Update flags for [/atom/proc/update_appearance]
 /// Update the atom's name
 #define UPDATE_NAME (1<<0)
