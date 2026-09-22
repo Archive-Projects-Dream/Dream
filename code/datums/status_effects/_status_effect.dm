@@ -136,6 +136,23 @@
 	return null
 
 /**
+ * Called by [/atom/movable/screen/alert/status_effect/MouseEntered] to build
+ * the hover tooltip content for the linked alert. Mirrors goonstation's
+ * [/datum/statusEffect/proc/getTooltip] API.
+ *
+ * Override on subtypes to provide dynamic content (current stacks, current
+ * intensity, related cooldowns, etc.) without having to subclass the alert.
+ *
+ * Return value:
+ *   - non-empty string -> used as the tooltip body, replacing the alert's static `desc`
+ *   - null / ""       -> the alert falls back to its own `desc` var (preserves
+ *                        the legacy behavior of mutating alert.desc in alert
+ *                        subtypes such as [/atom/movable/screen/alert/status_effect/his_grace])
+ */
+/datum/status_effect/proc/getTooltip(mob/examiner)
+	return null
+
+/**
  * Called every tick from process().
  * This is only called of tick_interval is not -1.
  *
@@ -278,3 +295,33 @@
 /atom/movable/screen/alert/status_effect/Destroy()
 	attached_effect = null //Don't keep a ref now
 	return ..()
+
+/**
+ * Hover handler that opens a tooltip populated from the linked status effect,
+ * mirroring goonstation's [/datum/statusEffect] hover-tooltip behavior:
+ *
+ *   - title   -> the alert's current `name` (alert subtypes may mutate it pre-`..()`,
+ *               e.g. [/atom/movable/screen/alert/status_effect/his_grace])
+ *   - content -> [/datum/status_effect/proc/getTooltip] result if non-empty,
+ *               otherwise the alert's current `desc` (also possibly mutated pre-`..()`),
+ *               followed by the remaining duration in seconds for non-permanent effects
+ *   - theme  -> the alert's `alerttooltipstyle` if explicitly set, otherwise `"stamina"`
+ *               (matches goonstation's hardcoded stamina theme for status-effect tooltips)
+ *
+ * Falls back to the parent [/atom/movable/screen/alert/MouseEntered] when there is
+ * no client tooltip system or no linked status effect, preserving legacy behavior.
+ */
+/atom/movable/screen/alert/status_effect/MouseEntered(location, control, params)
+	if(!usr.client?.tooltips || !attached_effect || QDELETED(attached_effect))
+		return ..()
+
+	var/datum/status_effect/effect = attached_effect
+	var/title = name
+	var/content = effect.getTooltip(usr)
+	if(!content)
+		content = desc
+	if(effect.duration != STATUS_EFFECT_PERMANENT && effect.duration > 0)
+		content = "[content]<br>[round(effect.duration / 10)] sec."
+
+	var/theme = alerttooltipstyle || "stamina"
+	openToolTip(usr, src, params, title = title, content = content, theme = theme)
