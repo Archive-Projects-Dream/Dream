@@ -73,3 +73,7 @@
 
 /turf/cordon/secret/attack_ghost(mob/dead/observer/user)
 	return FALSE
+
+/turf/cordon/secret/absolute/CanPass(atom/movable/mover, border_dir)
+	SHOULD_CALL_PARENT(FALSE)
+	return FALSE
