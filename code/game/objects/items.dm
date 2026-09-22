@@ -222,7 +222,7 @@
 	/// ghost (set in MouseEntered, cleared in MouseExited via clear_pickup_preview).
 	/// Lets MouseExited clear the correct slot even if the player swapped
 	/// active hands mid-hover. Never serialized - transient UI state.
-	var/atom/movable/screen/inventory/_pickup_preview_slot
+	var/atom/movable/screen/inventory/hand/_pickup_preview_slot
 	// [/HORIZON-ADD]
 
 	///Determines who can shoot this
