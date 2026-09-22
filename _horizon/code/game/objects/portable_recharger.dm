@@ -387,7 +387,7 @@
 		return
 
 	if(panel_open)
-		. += mutable_appearance(icon, "[base_icon_state]-open", layer)
+		. += mutable_appearance(icon, "[base_icon_state]-open")
 		return
 
 	var/area/a = get_area(src)
@@ -410,7 +410,7 @@
 			if(85 to 100)
 				cell_percent = "7"
 
-		. += mutable_appearance(icon, "[base_icon_state]-charge-[cell_percent]", layer)
+		. += mutable_appearance(icon, "[base_icon_state]-charge-[cell_percent]")
 		. += emissive_appearance(icon, "[base_icon_state]-charge-[cell_percent]", src, alpha = src.alpha)
 
 		var/power_net
@@ -424,7 +424,7 @@
 					power_net = "net"
 		else
 			power_net = "dead"
-		. += mutable_appearance(icon, "[base_icon_state]-power-[power_net]", layer)
+		. += mutable_appearance(icon, "[base_icon_state]-power-[power_net]")
 		. += emissive_appearance(icon, "[base_icon_state]-power-[power_net]", src, alpha = src.alpha)
 
 	if(charging)
@@ -448,15 +448,15 @@
 					port_1_cell_percent = "6"
 				if(85 to 100)
 					port_1_cell_percent = "7"
-			. += mutable_appearance(icon, "[base_icon_state]-p1-cell-[port_1_cell_percent]", layer)
+			. += mutable_appearance(icon, "[base_icon_state]-p1-cell-[port_1_cell_percent]")
 			. += emissive_appearance(icon, "[base_icon_state]-p1-cell-[port_1_cell_percent]", src, alpha = src.alpha)
 
 			var/icon_to_use = "[base_icon_state]-p1-[using_power ? "charging" : "full"]"
-			. += mutable_appearance(icon, icon_to_use, layer)
+			. += mutable_appearance(icon, icon_to_use)
 			. += emissive_appearance(icon, icon_to_use, src, alpha = src.alpha)
 		else
 			if(!isarea(a) || a.power_equip == 0)
-				. += mutable_appearance(icon, "[base_icon_state]-p1-cell-fail", layer)
+				. += mutable_appearance(icon, "[base_icon_state]-p1-cell-fail")
 				. += emissive_appearance(icon, "[base_icon_state]-p1-cell-fail", src, alpha = src.alpha)
 
 	if(charging2)
@@ -480,15 +480,15 @@
 					port_2_cell_percent = "6"
 				if(85 to 100)
 					port_2_cell_percent = "7"
-			. += mutable_appearance(icon, "[base_icon_state]-p2-cell-[port_2_cell_percent]", layer)
+			. += mutable_appearance(icon, "[base_icon_state]-p2-cell-[port_2_cell_percent]")
 			. += emissive_appearance(icon, "[base_icon_state]-p2-cell-[port_2_cell_percent]", src, alpha = src.alpha)
 
 			var/icon_to_use2 = "[base_icon_state]-p2-[using_power2 ? "charging" : "full"]"
-			. += mutable_appearance(icon, icon_to_use2, layer)
+			. += mutable_appearance(icon, icon_to_use2)
 			. += emissive_appearance(icon, icon_to_use2, src, alpha = src.alpha)
 		else
 			if(!isarea(a) || a.power_equip == 0)
-				. += mutable_appearance(icon, "[base_icon_state]-p2-cell-fail", layer)
+				. += mutable_appearance(icon, "[base_icon_state]-p2-cell-fail")
 				. += emissive_appearance(icon, "[base_icon_state]-p2-cell-fail", src, alpha = src.alpha)
 
 /obj/machinery/recharger/portable/wrench_act(mob/living/user, obj/item/tool)
@@ -515,13 +515,12 @@
 	var/using_power = FALSE
 	var/recharge_coeff = 0.5
 
-	var/overlay_state
-	var/mutable_appearance/gun_overlay
-	/// Installed power cell. Lives in nullspace so it does not show up in the storage UI.
 	var/obj/item/stock_parts/power_store/cell/cell
-	/// Minimum maxcharge a cell must have to be accepted (mirrors defib behavior).
 	var/min_cell_maxcharge = 2500
 	var/panel_open = FALSE
+
+	var/overlay_state
+	var/mutable_appearance/gun_overlay
 
 /obj/item/tactical_recharger/examine(mob/user)
 	. = ..()
@@ -546,9 +545,7 @@
 
 /datum/storage/pockets/tactical_recharger/New(atom/parent, max_slots, max_specific_storage, max_total_storage, numerical_stacking, allow_quick_gather, allow_quick_empty, collection_mode, attack_hand_interact)
 	. = ..()
-	set_holdable(list(
-		/obj/item/gun/energy
-	))
+	set_holdable(list(/obj/item/gun/energy))
 
 /obj/item/tactical_recharger/get_cell()
 	return cell
@@ -670,6 +667,8 @@
 	charging.update_icon()
 	update_appearance()
 
+#define ALPHA_OVERLAYS 120
+
 /obj/item/tactical_recharger/update_overlays()
 	. = ..()
 
@@ -683,17 +682,17 @@
 		. += gun_overlay
 
 	if(panel_open)
-		. += mutable_appearance(icon, cell ? "toz-panel-open" : "toz-panel-empty", layer)
+		. += mutable_appearance(icon, cell ? "toz-panel-open" : "toz-panel-empty")
 		return
-	. += mutable_appearance(icon, "toz-overlay", layer)
+	. += mutable_appearance(icon, "toz-overlay")
 
 	if(charging)
 		if(using_power)
-			. += mutable_appearance(icon, "toz-charge", layer)
-			. += emissive_appearance(icon, "toz-charge", src, alpha = src.alpha)
+			. += mutable_appearance(icon, "toz-charge")
+			. += emissive_appearance(icon, "toz-charge", src, alpha = ALPHA_OVERLAYS)
 		else
-			. += mutable_appearance(icon, "toz-full", layer)
-			. += emissive_appearance(icon, "toz-full", src, alpha = src.alpha)
+			. += mutable_appearance(icon, "toz-full")
+			. += emissive_appearance(icon, "toz-full", src, alpha = ALPHA_OVERLAYS)
 
 		var/w_cell_percent
 		var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
@@ -719,8 +718,8 @@
 			if(91 to 100)
 				w_cell_percent = "10"
 
-		. += mutable_appearance(icon, "toz-w_lvl-[w_cell_percent]", layer)
-		. += emissive_appearance(icon, "toz-w_lvl-[w_cell_percent]", src, alpha = src.alpha)
+		. += mutable_appearance(icon, "toz-w_lvl-[w_cell_percent]")
+		. += emissive_appearance(icon, "toz-w_lvl-[w_cell_percent]", src, alpha = ALPHA_OVERLAYS)
 
 	var/cell_percent
 	if(cell)
@@ -737,8 +736,10 @@
 				cell_percent = "5"
 			if(85 to 100)
 				cell_percent = "6"
-		. += mutable_appearance(icon, "toz-c_lvl-[cell_percent]", layer)
-		. += emissive_appearance(icon, "toz-c_lvl-[cell_percent]", src, alpha = src.alpha)
+		. += mutable_appearance(icon, "toz-c_lvl-[cell_percent]")
+		. += emissive_appearance(icon, "toz-c_lvl-[cell_percent]", src, alpha = ALPHA_OVERLAYS)
+
+#undef ALPHA_OVERLAYS
 
 // MARK: Types Rechargers
 /obj/item/tactical_recharger/pulse/Initialize(mapload)
