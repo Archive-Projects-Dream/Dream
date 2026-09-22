@@ -558,6 +558,7 @@
 	update_appearance()
 
 /obj/item/tactical_recharger/Destroy()
+	STOP_PROCESSING(SSmachines, src)
 	QDEL_NULL(internal_cell)
 	return ..()
 
@@ -583,6 +584,9 @@
 		return NONE
 	item.moveToNullspace()
 	internal_cell = item
+	// process() may have returned PROCESS_KILL on the previous tick when
+	// the old cell ran dry. Restart processing now that we have a fresh cell.
+	START_PROCESSING(SSmachines, src)
 
 	if(!old_cell)
 		to_chat(user, span_notice("You install [item] in [src]."))
@@ -660,10 +664,19 @@
 	var/obj/item/stock_parts/power_store/cell/weapon_cell = charging.get_cell()
 	if(!weapon_cell || weapon_cell.charge >= weapon_cell.maxcharge)
 		return
-	using_power = TRUE
 	var/delta = weapon_cell.chargerate * recharge_coeff * seconds_per_tick / 2
-	internal_cell.use(delta * 4)
-	weapon_cell.give(delta)
+	// force=TRUE so the cell drains to 0 instead of getting stuck at
+	// ~0.25% when charge < delta*4 (see /obj/item/stock_parts/power_store/use:
+	//   if(!force && charge < used) return 0  // does not drain).
+	// Only give the weapon what was actually drained from our cell,
+	// scaled by the 4:1 drain/charge ratio the user picked.
+	var/actually_drained = internal_cell.use(delta * 4, force = TRUE)
+	if(!actually_drained)
+		// Cell is empty — stop processing until the user swaps the cell.
+		// item_interaction / crowbar_act restart processing via START_PROCESSING.
+		return PROCESS_KILL
+	using_power = TRUE
+	weapon_cell.give(actually_drained / 4)
 	charging.update_icon()
 	update_appearance()
 
