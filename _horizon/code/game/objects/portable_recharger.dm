@@ -393,25 +393,25 @@
 	var/area/a = get_area(src)
 	var/obj/item/stock_parts/power_store/cell/port_cell = locate(/obj/item/stock_parts/power_store/cell) in component_parts
 	if(port_cell)
-		var/cell_percent
+		var/cell_state
 		switch(round(port_cell.percent()))
 			if(0 to 14)
-				cell_percent = "1"
+				cell_state = "1"
 			if(15 to 28)
-				cell_percent = "2"
+				cell_state = "2"
 			if(29 to 42)
-				cell_percent = "3"
+				cell_state = "3"
 			if(43 to 56)
-				cell_percent = "4"
+				cell_state = "4"
 			if(57 to 70)
-				cell_percent = "5"
+				cell_state = "5"
 			if(71 to 84)
-				cell_percent = "6"
+				cell_state = "6"
 			if(85 to 100)
-				cell_percent = "7"
+				cell_state = "7"
 
-		. += mutable_appearance(icon, "[base_icon_state]-charge-[cell_percent]")
-		. += emissive_appearance(icon, "[base_icon_state]-charge-[cell_percent]", src, alpha = src.alpha)
+		. += mutable_appearance(icon, "[base_icon_state]-charge-[cell_state]")
+		. += emissive_appearance(icon, "[base_icon_state]-charge-[cell_state]", src, alpha = src.alpha)
 
 		var/power_net
 		if(port_cell.percent() != 0)
@@ -515,7 +515,7 @@
 	var/using_power = FALSE
 	var/recharge_coeff = 0.5
 
-	var/obj/item/stock_parts/power_store/cell/cell
+	var/obj/item/stock_parts/power_store/cell/internal_cell
 	var/min_cell_maxcharge = 2500
 	var/panel_open = FALSE
 
@@ -525,8 +525,8 @@
 /obj/item/tactical_recharger/examine(mob/user)
 	. = ..()
 	. += "<hr><span class='notice'>Display:</span>"
-	if(cell)
-		. += "<span class='notice'>- Battery level: <b>[cell.percent()]%</b>.</span>"
+	if(internal_cell)
+		. += "<span class='notice'>- Battery level: <b>[internal_cell.percent()]%</b>.</span>"
 	else
 		. += "<span class='warning'>- No cell installed! Use a power cell on [src] to install one.</span>"
 	if(panel_open)
@@ -534,8 +534,8 @@
 	else
 		. += "<span class='notice'>The service panel is closed. Use a screwdriver to open it.</span>"
 	if(charging)
-		var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
-		. += "<span class='notice'>- Weapon charge: <b>[charging]</b> - <b>[C.percent()]%</b>.</span>"
+		var/obj/item/stock_parts/power_store/cell/weapon_cell = charging.get_cell()
+		. += "<span class='notice'>- Weapon charge: <b>[charging]</b> - <b>[weapon_cell.percent()]%</b>.</span>"
 
 /datum/storage/pockets/tactical_recharger
 	max_slots = 1
@@ -548,17 +548,17 @@
 	set_holdable(list(/obj/item/gun/energy))
 
 /obj/item/tactical_recharger/get_cell()
-	return cell
+	return internal_cell
 
 /obj/item/tactical_recharger/Initialize(mapload)
 	. = ..()
 	create_storage(storage_type = /datum/storage/pockets/tactical_recharger)
-	cell = new /obj/item/stock_parts/power_store/cell/high(null)
+	internal_cell = new /obj/item/stock_parts/power_store/cell/high(null)
 	START_PROCESSING(SSmachines, src)
 	update_appearance()
 
 /obj/item/tactical_recharger/Destroy()
-	QDEL_NULL(cell)
+	QDEL_NULL(internal_cell)
 	return ..()
 
 /obj/item/tactical_recharger/item_interaction(mob/living/user, obj/item/item, list/modifiers)
@@ -574,7 +574,7 @@
 		to_chat(user, span_notice("[src] requires a higher capacity cell."))
 		return ITEM_INTERACT_BLOCKING
 
-	var/obj/item/old_cell = cell
+	var/obj/item/old_cell = internal_cell
 	if(old_cell)
 		old_cell.forceMove(get_turf(src))
 		to_chat(user, span_notice("You swap [old_cell] out of [src]."))
@@ -582,7 +582,7 @@
 	if(!user.temporarilyRemoveItemFromInventory(item))
 		return NONE
 	item.moveToNullspace()
-	cell = item
+	internal_cell = item
 
 	if(!old_cell)
 		to_chat(user, span_notice("You install [item] in [src]."))
@@ -605,15 +605,15 @@
 	if(!panel_open)
 		balloon_alert(user, "panel closed!")
 		return
-	if(!cell)
+	if(!internal_cell)
 		balloon_alert(user, "no cell!")
 		return
 	balloon_alert(user, "prying out cell...")
 	tool.play_tool_sound(src, 50)
 	if(!tool.use_tool(src, user, 3 SECONDS))
 		return
-	var/obj/item/cell_to_move = cell
-	cell = null
+	var/obj/item/cell_to_move = internal_cell
+	internal_cell = null
 	cell_to_move.forceMove(get_turf(src))
 	user.put_in_hands(cell_to_move)
 	balloon_alert(user, "cell removed")
@@ -655,15 +655,15 @@
 	else
 		charging = null
 
-	if(!charging || !cell || panel_open)
+	if(!charging || !internal_cell || panel_open)
 		return
-	var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
-	if(!C || C.charge >= C.maxcharge)
+	var/obj/item/stock_parts/power_store/cell/weapon_cell = charging.get_cell()
+	if(!weapon_cell || weapon_cell.charge >= weapon_cell.maxcharge)
 		return
 	using_power = TRUE
-	var/delta = C.chargerate * recharge_coeff * seconds_per_tick / 2
-	cell.use(delta)
-	C.give(delta)
+	var/delta = weapon_cell.chargerate * recharge_coeff * seconds_per_tick / 2
+	internal_cell.use(delta * 3)
+	weapon_cell.give(delta)
 	charging.update_icon()
 	update_appearance()
 
@@ -682,7 +682,7 @@
 		. += gun_overlay
 
 	if(panel_open)
-		. += mutable_appearance(icon, cell ? "toz-panel-open" : "toz-panel-empty")
+		. += mutable_appearance(icon, internal_cell ? "toz-panel-open" : "toz-panel-empty")
 		return
 	. += mutable_appearance(icon, "toz-overlay")
 
@@ -694,50 +694,50 @@
 			. += mutable_appearance(icon, "toz-full")
 			. += emissive_appearance(icon, "toz-full", src, alpha = ALPHA_OVERLAYS)
 
-		var/w_cell_percent
-		var/obj/item/stock_parts/power_store/cell/C = charging.get_cell()
-		switch(round(C.percent()))
+		var/weapon_cell_state
+		var/obj/item/stock_parts/power_store/cell/weapon_cell = charging.get_cell()
+		switch(round(weapon_cell.percent()))
 			if(0 to 10)
-				w_cell_percent = "1"
+				weapon_cell_state = "1"
 			if(11 to 20)
-				w_cell_percent = "2"
+				weapon_cell_state = "2"
 			if(21 to 30)
-				w_cell_percent = "3"
+				weapon_cell_state = "3"
 			if(31 to 40)
-				w_cell_percent = "4"
+				weapon_cell_state = "4"
 			if(41 to 50)
-				w_cell_percent = "5"
+				weapon_cell_state = "5"
 			if(51 to 60)
-				w_cell_percent = "6"
+				weapon_cell_state = "6"
 			if(61 to 70)
-				w_cell_percent = "7"
+				weapon_cell_state = "7"
 			if(71 to 80)
-				w_cell_percent = "8"
+				weapon_cell_state = "8"
 			if(81 to 90)
-				w_cell_percent = "9"
+				weapon_cell_state = "9"
 			if(91 to 100)
-				w_cell_percent = "10"
+				weapon_cell_state = "10"
 
-		. += mutable_appearance(icon, "toz-w_lvl-[w_cell_percent]")
-		. += emissive_appearance(icon, "toz-w_lvl-[w_cell_percent]", src, alpha = ALPHA_OVERLAYS)
+		. += mutable_appearance(icon, "toz-w_lvl-[weapon_cell_state]")
+		. += emissive_appearance(icon, "toz-w_lvl-[weapon_cell_state]", src, alpha = ALPHA_OVERLAYS)
 
-	var/cell_percent
-	if(cell)
-		switch(round(cell.percent()))
+	var/cell_state
+	if(internal_cell)
+		switch(round(internal_cell.percent()))
 			if(15 to 28)
-				cell_percent = "1"
+				cell_state = "1"
 			if(29 to 42)
-				cell_percent = "2"
+				cell_state = "2"
 			if(43 to 56)
-				cell_percent = "3"
+				cell_state = "3"
 			if(57 to 70)
-				cell_percent = "4"
+				cell_state = "4"
 			if(71 to 84)
-				cell_percent = "5"
+				cell_state = "5"
 			if(85 to 100)
-				cell_percent = "6"
-		. += mutable_appearance(icon, "toz-c_lvl-[cell_percent]")
-		. += emissive_appearance(icon, "toz-c_lvl-[cell_percent]", src, alpha = ALPHA_OVERLAYS)
+				cell_state = "6"
+		. += mutable_appearance(icon, "toz-c_lvl-[cell_state]")
+		. += emissive_appearance(icon, "toz-c_lvl-[cell_state]", src, alpha = ALPHA_OVERLAYS)
 
 #undef ALPHA_OVERLAYS
 
