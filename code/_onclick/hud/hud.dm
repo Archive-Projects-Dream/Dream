@@ -6,7 +6,7 @@
 
 // The default UI style is the first one in the list
 GLOBAL_LIST_INIT(available_ui_styles, list(
-	"Midnight" = 'icons/hud/screen_midnight.dmi',
+	"Midnight" = '_horizon/icons/ui/screen_midnight.dmi',
 	//"Retro" = 'icons/hud/screen_retro.dmi',
 	"Plasmafire" = 'icons/hud/screen_plasmafire.dmi',
 	"Slimecore" = 'icons/hud/screen_slimecore.dmi',
@@ -483,7 +483,7 @@ GLOBAL_LIST_INIT(available_hands_icons, list(
 		hand_box.icon_state = "hand_[mymob.held_index_to_dir(i)]"
 		hand_box.held_index = i
 		hand_box.update_appearance()
-
+/*
 	var/num_of_swaps = 0
 	for(var/atom/movable/screen/swap_hand/swap_hands in screen_groups[HUD_GROUP_STATIC])
 		num_of_swaps += 1
@@ -504,7 +504,7 @@ GLOBAL_LIST_INIT(available_hands_icons, list(
 			hand_ind = IS_LEFT_INDEX(hand_num) ? LEFT_HANDS : RIGHT_HANDS
 		swap_hands.screen_loc = ui_swaphand_position(mymob, hand_ind)
 		hand_num += 1
-
+*/
 	if(update_hud && mymob?.hud_used == src)
 		show_hud(hud_version)
 

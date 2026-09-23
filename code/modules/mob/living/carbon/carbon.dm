@@ -632,7 +632,7 @@
 	if(!client || !hud_used)
 		return
 
-	var/atom/movable/screen/healths/health_hud = hud_used.screen_objects[HUD_MOB_HEALTH]
+	var/atom/movable/screen/healths/carbon/health_hud = hud_used.screen_objects[HUD_MOB_HEALTH] // [HORIZON-EDIT]
 
 	if (!health_hud)
 		return

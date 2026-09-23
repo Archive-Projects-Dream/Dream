@@ -405,7 +405,7 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen) // I hate this place
 		return
 
 	if(!flashy)
-		flashy = mutable_appearance('icons/hud/screen_gen.dmi', "togglefull_flash")
+		flashy = mutable_appearance('_horizon/icons/ui/screen_gen.dmi', "togglefull_flash")
 		flashy.color = "#C62727"
 	. += flashy
 
