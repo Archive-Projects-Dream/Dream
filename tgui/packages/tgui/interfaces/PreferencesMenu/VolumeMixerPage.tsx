@@ -212,7 +212,7 @@ const VolumeSlider = (props: { channel: Channel }) => {
             maxValue={100}
             fontSize="0.65rem"
             stepPixelSize={2}
-             onChange={(v) => act('volume', { channel: channel.num, volume: v })}
+            onChange={(_, value) => act('volume', {channel: channel.num, volume: Math.round(value)})}
           />
         </Stack.Item>
         <Stack.Item ml="2px">
