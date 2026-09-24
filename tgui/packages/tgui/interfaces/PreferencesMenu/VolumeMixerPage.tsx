@@ -144,7 +144,7 @@ export const VolumeMixerPage = () => {
         })}
       </Stack>
 
-      <Stack
+      <Box
         fontSize="0.95rem"
         bold
         color="label"
@@ -152,7 +152,7 @@ export const VolumeMixerPage = () => {
         style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.2)', marginTop: '10px' }}
       >
         Sound Options
-      </Stack>
+      </Box>
 
       <Stack wrap>
         <Stack.Item grow={1} basis="48%" style={{ minWidth: '250px' }}>

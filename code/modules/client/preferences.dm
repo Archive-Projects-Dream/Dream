@@ -211,7 +211,6 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			var/volume = channel_volume["[channel]"]
 			if(isnull(volume) || !isnum(volume))
 				volume = 100
-				channel_volume["[channel]"] = volume
 			var/list/channel_info = get_channel_info(channel)
 			channels += list(list(
 				"num" = channel,
@@ -269,7 +268,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	if(mixer_channel_affected(CHANNEL_AMBIENCE, changed_channel))
 		parent.update_ambience_pref()
 
-/datum/preferences/proc/set_channel_volume(channel, vol)
+/datum/preferences/proc/update_channel_volume(channel)
 	//we gotta take into account existing sounds repeating/waiting, otherwise we completely wipe looping sounds (such as whitenoise).
 	for(var/sound/S in parent.SoundQuery())
 		var/sound_channel = S.channel
@@ -390,11 +389,11 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				CHANNEL_INSTRUMENTS,
 			)
 			if(!(channel in GLOB.proxy_sound_channels))
-				set_channel_volume(channel, volume)
+				update_channel_volume(channel)
 			else if((channel in instrument_channels))
 				var/datum/song/holder_song = new
 				for(var/used_channel in holder_song.channels_playing)
-					set_channel_volume(used_channel, volume)
+					update_channel_volume(used_channel)
 
 			if(channel == CHANNEL_MASTER_VOLUME)
 				update_test_sound(master_changed = TRUE)
@@ -410,7 +409,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 				channel_volume["[channel]"] = 100
 
 			save_preferences()
-			set_channel_volume(CHANNEL_MASTER_VOLUME, 100)
+			update_channel_volume(CHANNEL_MASTER_VOLUME)
 			update_test_sound(master_changed = TRUE)
 			on_mixer_volume_changed(changed_channel = CHANNEL_MASTER_VOLUME)
 			return TRUE
@@ -423,8 +422,10 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 			if(!isnull(channel_num) && (channel_num in GLOB.used_sound_channels))
 				var/sound_file
-				var/vol = 100
+				var/vol = 100 // У некоторых звуков отличается параметр грокмости при воспроизведении, вытаскивать из каждого вызова перебор - это упрощение
 				switch(channel_num)
+					if(CHANNEL_MASTER_VOLUME)
+						sound_file = 'sound/music/elevator/robocop-short.ogg'
 					if(CHANNEL_SOUND_EFFECTS)
 						sound_file = "sound/items/weapons/punch[rand(1,4)].ogg"
 					if(CHANNEL_AMBIENCE)
@@ -486,8 +487,8 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 					else
 						sound_file = 'sound/machines/ping.ogg'
 
-				test_sound_channels["[CHANNEL_TEST_SOUND]"] = list("mixer_channel" = channel_num, "base_volume" = 100)
-				usr.playsound_local(get_turf(usr), sound_file, vol, channel = CHANNEL_TEST_SOUND, mixer_channel = channel_num)
+				test_sound_channels["[CHANNEL_TEST_SOUND]"] = list("mixer_channel" = channel_num, "base_volume" = vol)
+				parent.mob.playsound_local(get_turf(parent.mob), sound_file, vol, channel = CHANNEL_TEST_SOUND, mixer_channel = channel_num)
 
 			return TRUE
 
@@ -510,7 +511,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	QDEL_NULL(character_preview_view)
 	cached_character_profiles = null
 
-	// [HORIZON-ADD]
+	// [HORIZON-ADD] Master_Sounds
 	if(test_sound_channels)
 		user.stop_sound_channel(CHANNEL_TEST_SOUND)
 		test_sound_channels.Cut()
@@ -796,7 +797,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 	return default_randomization
 
-// [HORIZON-ADD]
+// [HORIZON-ADD] Master_Sounds
 /datum/preferences/proc/update_test_sound(mixer_channel_changed = null, master_changed = FALSE)
 	var/list/test_info = test_sound_channels["[CHANNEL_TEST_SOUND]"]
 	if(!test_info)

@@ -200,7 +200,6 @@
 
 	return jointext(returnable_strings, "")
 
-
 // [HORIZON-EDIT] Master_Sounds
 /// Proc that just dispatches the announcement to our applicable audience. Only the announcement is a mandatory arg.
 /// `should_play_sound` can also be a callback, if you want to only play the sound to specific players.
