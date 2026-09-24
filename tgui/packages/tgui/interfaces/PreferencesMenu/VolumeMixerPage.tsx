@@ -33,16 +33,24 @@ export const VolumeMixerPage = () => {
 
   const groupedChannels = groupChannelsByCategory(otherChannels);
 
-  const categories = Object.keys(groupedChannels).sort((a, b) => {
-    const countA = groupedChannels[a].length;
-    const countB = groupedChannels[b].length;
-
-    if (countA !== countB) {
-      return countB - countA;
-    }
-
-    return a.localeCompare(b);
-  });
+  // Fixed display order — adding/removing channels in get_channel_info()
+  // must NOT silently reshuffle the UI sections the player is used to.
+  // Any category not listed here falls through to a stable alphabetic tail.
+  const CATEGORY_ORDER = [
+    'General',
+    'Environment',
+    'Player & Mobs',
+    'Announcements & Voices',
+    'Music & Instruments',
+    'Admin',
+  ];
+  const presentCategories = Object.keys(groupedChannels);
+  const categories = [
+    ...CATEGORY_ORDER.filter((c) => presentCategories.includes(c)),
+    ...presentCategories
+      .filter((c) => !CATEGORY_ORDER.includes(c))
+      .sort((a, b) => a.localeCompare(b)),
+  ];
 
   const halfIndex = Math.ceil(SOUND_OPTIONS.length / 2);
   const leftOptions = SOUND_OPTIONS.slice(0, halfIndex);

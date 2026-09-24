@@ -422,7 +422,7 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 			if(!isnull(channel_num) && (channel_num in GLOB.used_sound_channels))
 				var/sound_file
-				var/vol = 100 // У некоторых звуков отличается параметр грокмости при воспроизведении, вытаскивать из каждого вызова перебор - это упрощение
+				var/vol = 100 // Some sounds play at a lower volume than 100 (e.g. breath = 7, voices = 40). Per-case overrides below set `vol` before storing it in test_sound_channels, so update_test_sound recalculates with the correct base.
 				switch(channel_num)
 					if(CHANNEL_MASTER_VOLUME)
 						sound_file = 'sound/music/elevator/robocop-short.ogg'
