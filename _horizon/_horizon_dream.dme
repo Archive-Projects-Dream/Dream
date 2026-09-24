@@ -20,8 +20,13 @@
 // BEGIN_INCLUDE
 #include "code\SSdebugview.dm"
 #include "code\__HELPERS\size_icons.dm"
+#include "code\datums\particles\leaves.dm"
 #include "code\elements\directional_attack.dm"
+#include "code\game\aesthetics\structure.dm"
+#include "code\game\aesthetics\wallmounts.dm"
 #include "code\game\objects\items\overlay_internals_tank.dm"
+#include "code\game\objects\structures\flora.dm"
+#include "code\game\objects\structures\markings.dm"
 #include "code\modules\admin\all_verb_panel.dm"
 #include "code\modules\buildmode\building_options.dm"
 #include "code\modules\buildmode\buildmode_assets.dm"
