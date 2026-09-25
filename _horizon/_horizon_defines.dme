@@ -17,4 +17,5 @@
 #include "code\__DEFINES\keybinding.dm"
 #include "code\__DEFINES\particles.dm"
 #include "code\__DEFINES\physics.dm"
+#include "code\__DEFINES\tgui.dm"
 // END_INCLUDE

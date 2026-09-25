@@ -1,0 +1,1 @@
+#define LOBBY_FADE_OUT_TIME (0.8 SECONDS)

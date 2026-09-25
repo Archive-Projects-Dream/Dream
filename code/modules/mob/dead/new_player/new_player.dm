@@ -116,7 +116,7 @@
 	observer.update_appearance()
 	observer.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	deadchat_broadcast(" has observed.", "<b>[observer.real_name]</b>", follow_target = observer, turf_target = get_turf(observer), message_type = DEADCHAT_DEATHRATTLE)
-	hide_lobby_browser()
+	hide_lobby_browser(fade_out = TRUE) // [HORIZON-EDIT] HorizonLobby
 	QDEL_NULL(mind)
 	qdel(src)
 	return TRUE
@@ -203,7 +203,7 @@
 	var/mob/living/character = create_character(destination, forced_slot = client.prefs.default_slot)
 	if(!character)
 		CRASH("Failed to create a character for latejoin.")
-	transfer_character()
+	transfer_character(fade_out = TRUE) // [HORIZON-EDIT] HorizonLobby
 
 	SSjob.equip_rank(character, job, character.client)
 	job.after_latejoin_spawn(character)
@@ -310,11 +310,11 @@
 	new_character = .
 
 
-/mob/dead/new_player/proc/transfer_character()
+/mob/dead/new_player/proc/transfer_character(fade_out = FALSE) // [HORIZON-EDIT] HorizonLobby
 	. = new_character
 	if(!.)
 		return
-	hide_lobby_browser()
+	hide_lobby_browser(fade_out) // [HORIZON-EDIT] HorizonLobby
 	new_character.PossessByPlayer(key) //Manually transfer the key to log them in,
 	new_character.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	var/area/joined_area = get_area(new_character.loc)
@@ -432,7 +432,14 @@ GAME_VERB_PROC(/mob/dead/new_player, reset_menu_hud, "Reset Lobby Menu HUD", "OO
 /// Hides the lobby browser and restores the status bar, cleaning up the TGUI window.
 /// Must close the /datum/tgui UI so SStgui.on_logout() doesn't call
 /// browse(null) AFTER winset("is-visible=false"), which would re-show the browser.
-/mob/dead/new_player/proc/hide_lobby_browser()
+/mob/dead/new_player/proc/hide_lobby_browser(fade_out = FALSE)
+// [HORIZON-ADD] HorizonLobby
+	if(fade_out && lobby_window)
+		lobby_window.send_message("lobbyFadeOut")
+		sleep(LOBBY_FADE_OUT_TIME)
+		if(QDELETED(src))
+			return
+// [/HORIZON-ADD]
 	// Close the TGUI UI first — removes it from SStgui lists so
 	// on_logout() won't call window.close() -> browse(null) later.
 	var/datum/tgui/ui = SStgui.get_open_ui(src, src)
@@ -547,6 +554,6 @@ GAME_VERB_PROC(/mob/dead/new_player, reset_menu_hud, "Reset Lobby Menu HUD", "OO
 
 		if("keyboard")
 			if(client)
-				SEND_SOUND(client, sound(get_sfx("keyboard"), volume = 20))
+				SEND_SOUND(client, sound(get_sfx(SFX_KEYBOARD_CLICKS), volume = 20)) // [HORIZON-ADD] HorizonLobby
 
 #undef RESET_HUD_INTERVAL

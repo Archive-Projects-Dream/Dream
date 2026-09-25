@@ -15,6 +15,7 @@ import { useBackend } from 'tgui/backend';
 import {
   Box,
   Button as NativeButton,
+  Modal,
   Section,
   Stack,
 } from 'tgui-core/components';
@@ -71,6 +72,14 @@ export const LobbyMenu = () => {
 
   const [hidden, setHidden] = useState<boolean>(false);
 
+  const [fadingOut, setFadingOut] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Smoothly fade the lobby out when the player enters the game.
+    // Sent by hide_lobby_browser() right before the window is torn down.
+    Byond.subscribeTo('lobbyFadeOut', () => setFadingOut(true));
+  }, []);
+
   if (themeDisabled === undefined) {
     return (
       <Window fitted>
@@ -103,6 +112,7 @@ export const LobbyMenu = () => {
             setModal: setModal,
           }}
         >
+          {!!modal && <Modal>{modal}</Modal>}
           <Box
             height="100%"
             width="100%"
@@ -195,6 +205,7 @@ export const LobbyMenu = () => {
               ))}
             </Stack>
           </Box>
+          {fadingOut && <Box className="lobbyFadeOut" />}
         </LobbyContext.Provider>
       </Window.Content>
     </Window>

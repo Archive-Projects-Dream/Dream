@@ -194,3 +194,26 @@
 .noAnimation {
   animation-delay: 0s !important;
 }
+
+.lobbyFadeOut {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: black;
+  opacity: 0;
+  z-index: 9999;
+  pointer-events: none;
+  animation: lobby-fade-out 0.5s ease-in forwards;
+}
+
+@keyframes lobby-fade-out {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
