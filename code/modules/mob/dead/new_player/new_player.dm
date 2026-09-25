@@ -21,11 +21,12 @@
 	///Cooldown for the Reset Lobby Menu HUD verb
 	COOLDOWN_DECLARE(reset_hud_cooldown)
 
-	/// The window that we display the main menu in
-	var/datum/tgui_window/lobby_window
-	/// Stores the ckey persistently so we can look up the client in Logout()
-	/// after the key has been transferred to a new mob (where ckey becomes null).
-	var/persistent_ckey
+	// [HORIZON-EDIT] HorizonLobby - lobby_window and persistent_ckey moved
+	// to /datum/lobby_menu (owned by /client). See
+	// code/modules/lobby_menu/lobby_menu.dm. The mob is no longer the owner
+	// of the TGUI window, so it survives mob transfer and can be properly
+	// fade-out + closed before the client.mob changes.
+	// [/HORIZON-EDIT]
 
 /mob/dead/new_player/Initialize(mapload)
 	if(client && SSticker.state == GAME_STATE_STARTUP)
@@ -116,7 +117,7 @@
 	observer.update_appearance()
 	observer.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	deadchat_broadcast(" has observed.", "<b>[observer.real_name]</b>", follow_target = observer, turf_target = get_turf(observer), message_type = DEADCHAT_DEATHRATTLE)
-	hide_lobby_browser(fade_out = TRUE) // [HORIZON-EDIT] HorizonLobby
+	client?.lobby_menu?.hide(fade_out = TRUE) // [HORIZON-EDIT] HorizonLobby
 	QDEL_NULL(mind)
 	qdel(src)
 	return TRUE
@@ -314,7 +315,9 @@
 	. = new_character
 	if(!.)
 		return
-	hide_lobby_browser(fade_out) // [HORIZON-EDIT] HorizonLobby
+	client?.lobby_menu?.hide(fade_out) // [HORIZON-EDIT] HorizonLobby
+	if(QDELETED(src)) // hide() may have slept for the fade animation
+		return
 	new_character.PossessByPlayer(key) //Manually transfer the key to log them in,
 	new_character.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	var/area/joined_area = get_area(new_character.loc)
@@ -395,8 +398,8 @@ GAME_VERB_PROC(/mob/dead/new_player, reset_menu_hud, "Reset Lobby Menu HUD", "OO
 	create_mob_hud()
 	to_chat(new_player, span_info("Lobby Menu HUD reset. You may reset the HUD again in <b>[DisplayTimeText(RESET_HUD_INTERVAL)]</b>."))
 	hud_used.show_hud(hud_used.hud_version)
-	// Reinitialize the TGUI lobby screen
-	initialize_lobby_screen()
+	// [HORIZON-EDIT] HorizonLobby - re-show the lobby via the client datum
+	client?.lobby_menu?.show()
 
 ///Auto deadmins an admin when they click to toggle the ready button or join game button in the menu
 /mob/dead/new_player/proc/auto_deadmin_on_ready_or_latejoin()
@@ -405,64 +408,28 @@ GAME_VERB_PROC(/mob/dead/new_player, reset_menu_hud, "Reset Lobby Menu HUD", "OO
 	if(CONFIG_GET(flag/auto_deadmin_on_ready_or_latejoin) || (client.prefs.read_preference(/datum/preference/toggle/auto_deadmin_on_ready_or_latejoin)) || (client.prefs?.toggles & DEADMIN_ALWAYS))
 		return client.holder.auto_deadmin()
 
-/**
- * Initializes the lobby screen: shows the lobby_browser over the map and
- * opens the TGUI LobbyMenu interface inside it.
- */
-/mob/dead/new_player/proc/initialize_lobby_screen()
-	if(!client)
-		return
-
-	var/datum/tgui/ui = SStgui.get_open_ui(src, src)
-	if(ui)
-		ui.close()
-
-	winset(src, "lobby_browser", "is-disabled=false;is-visible=true")
-	winset(src, "mapwindow.status_bar", "is-visible=false")
-	lobby_window = new(client, "lobby_browser")
-	lobby_window.initialize(
-		assets = list(
-			get_asset_datum(/datum/asset/simple/tgui),
-			get_asset_datum(/datum/asset/simple/namespaced/chakrapetch)
-		)
-	)
-
-	ui_interact(src)
-
-/// Hides the lobby browser and restores the status bar, cleaning up the TGUI window.
-/// Must close the /datum/tgui UI so SStgui.on_logout() doesn't call
-/// browse(null) AFTER winset("is-visible=false"), which would re-show the browser.
-/mob/dead/new_player/proc/hide_lobby_browser(fade_out = FALSE)
-// [HORIZON-ADD] HorizonLobby
-	if(fade_out && lobby_window)
-		lobby_window.send_message("lobbyFadeOut")
-		sleep(LOBBY_FADE_OUT_TIME)
-		if(QDELETED(src))
-			return
-// [/HORIZON-ADD]
-	// Close the TGUI UI first — removes it from SStgui lists so
-	// on_logout() won't call window.close() -> browse(null) later.
-	var/datum/tgui/ui = SStgui.get_open_ui(src, src)
-	if(ui)
-		ui.close(can_be_suspended = FALSE)
-	// Now close the window datum (sends browse(null) to clear content)
-	if(lobby_window)
-		lobby_window.unsubscribe()
-		lobby_window.close(FALSE)
-		lobby_window = null
-	// Hide the browser element. Must happen AFTER all browse() calls.
-	// Use persistent_ckey because client is null in Logout() after key transfer.
-	var/client/exiting_client = client || GLOB.directory[persistent_ckey]
-	if(exiting_client)
-		winset(exiting_client, "lobby_browser", "is-disabled=true;is-visible=false")
-		winset(exiting_client, "mapwindow.status_bar", "is-visible=true")
+// [HORIZON-EDIT] HorizonLobby
+// initialize_lobby_screen() and hide_lobby_browser() procs were moved to
+// /datum/lobby_menu (owned by /client). The lobby is now signal-driven:
+// it auto-shows when client.mob becomes a /mob/dead/new_player via
+// COMSIG_CLIENT_MOB_LOGIN, and auto-hides when client.mob changes to
+// anything else. Explicit hide-with-fade calls in transfer_character() and
+// make_me_an_observer() remain, since they need the fade-out BEFORE the
+// mob transfer (the signal fires AFTER, which would skip the animation).
+//
+// ui_interact below still uses client.lobby_menu.lobby_window as the
+// tgui_window to render into.
+// [/HORIZON-EDIT]
 
 /mob/dead/new_player/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui && lobby_window)
+	// [HORIZON-EDIT] HorizonLobby - resolve the tgui_window from the
+	// client-owned /datum/lobby_menu, not from a var on the mob.
+	if(!ui && user.client?.lobby_menu?.lobby_window)
 		ui = new(user, src, "LobbyMenu")
-		ui.window = lobby_window
+		ui.window = user.client.lobby_menu.lobby_window
 		ui.open(preinitialized = TRUE)
+	// [/HORIZON-EDIT]
 
 /mob/dead/new_player/ui_state(mob/user)
 	return GLOB.always_state

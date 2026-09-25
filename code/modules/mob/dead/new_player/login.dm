@@ -52,12 +52,11 @@
 		register_for_interview()
 		return
 
-	// Store ckey persistently so hide_lobby_browser() can find the client
-	// in Logout() after the key has been transferred to a new mob.
-	persistent_ckey = client.ckey
-
-	// Initialize the TGUI lobby screen
-	initialize_lobby_screen()
+	// [HORIZON-EDIT] HorizonLobby - lobby init is now signal-driven.
+	// /datum/lobby_menu (owned by /client) hooks COMSIG_CLIENT_MOB_LOGIN
+	// and auto-shows when client.mob becomes a /mob/dead/new_player.
+	// No explicit call needed here.
+	// [/HORIZON-EDIT]
 
 	if(SSticker.current_state < GAME_STATE_SETTING_UP)
 		var/tl = SSticker.GetTimeLeft()

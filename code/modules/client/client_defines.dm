@@ -116,6 +116,10 @@
 
 	///datum that controls the displaying and hiding of tooltips
 	var/datum/tooltip/tooltips
+	// [HORIZON-ADD] HorizonLobby - owns the lobby TGUI window lifecycle.
+	///Lobby menu datum, created on login, destroyed on disconnect.
+	var/datum/lobby_menu/lobby_menu
+	// [/HORIZON-ADD]
 
 	///Last ping of the client
 	var/lastping = 0

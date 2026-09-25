@@ -578,6 +578,11 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 	//This is down here because of the browse() calls in tooltip/New()
 	if(!tooltips)
 		tooltips = new /datum/tooltip(src)
+	// [HORIZON-ADD] HorizonLobby - create the lobby menu datum on login.
+	// Signal-driven: shows when client.mob becomes /mob/dead/new_player.
+	if(!lobby_menu)
+		lobby_menu = new(src)
+	// [/HORIZON-ADD]
 
 	loot_panel = new(src)
 
