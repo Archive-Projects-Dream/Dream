@@ -623,12 +623,17 @@
 
 #define FOV_WALL_ICON '_horizon/icons/walls_fov_wide.dmi'
 
-// [HORIZON-ADD]
 /atom/movable/screen/plane_master/mob
 	name = "Mob"
 	plane = MOB_PLANE
 	render_relay_planes = list(RENDER_PLANE_MASKED_WORLD)
-// [/HORIZON-ADD]
+
+/atom/movable/screen/plane_master/wall_top
+    name = "Wall Top"
+    documentation = "Wall overlays that render above mobs. Bypasses the WALLS_FOV alpha mask in masked_game_hub — wall overlays sit at wall positions and the mask would otherwise hide them."
+    plane = WALL_TOP_PLANE
+    appearance_flags = PLANE_MASTER|NO_CLIENT_COLOR
+    render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
 
 /atom/movable/screen/plane_master/rendering_plate/masked_game_hub
 	name = "Masked Game Hub"

@@ -98,6 +98,8 @@
 #undef CORNER_CLOCKWISE
 
 /turf/closed/mineral
+	plane = WALL_PLANE
+	layer = CLOSED_TURF_LAYER
 
 /turf/closed/mineral/update_icon()
 	. = ..()
@@ -106,8 +108,6 @@
 
 	overlays.Cut()
 	icon_state = "blank"
-	var/image/I
+
 	for(var/i in 1 to 4)
-		I = image(icon, "wall[wall_connections[i]]", dir = 1<<(i-1))
-		I.plane = GAME_PLANE
-		overlays += I
+		overlays += get_wall_object(icon, "wall[wall_connections[i]]", 1<<(i-1), plane = WALL_TOP_PLANE, layer = EDGED_TURF_LAYER, offset_spokesman = src)
