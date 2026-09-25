@@ -32,6 +32,9 @@
 #include "code\modules\buildmode\buildmode_assets.dm"
 #include "code\modules\buildmode\tgui_browser.dm"
 #include "code\modules\buildmode\submodes\builder.dm"
+// [HORIZON-ADD] HorizonLobby - lobby menu lifecycle (owned by /client)
+#include "code\modules\lobby_menu\lobby_menu.dm"
+// [/HORIZON-ADD]
 #include "code\modules\client\preferences\directional_attack.dm"
 #include "code\modules\mob\living\living.dm"
 #include "code\modules\physics\atom_movables.dm"
