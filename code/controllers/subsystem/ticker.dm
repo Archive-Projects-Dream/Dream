@@ -579,18 +579,11 @@ SUBSYSTEM_DEF(ticker)
 
 /datum/controller/subsystem/ticker/proc/transfer_characters()
 	var/list/livings = list()
-	// [HORIZON-ADD] HorizonLobby - batch fade-out via the client-owned
-	// /datum/lobby_menu (not via player.lobby_window, which lives on the
-	// mob and is fragile across mob transfers). The actual lobby close
-	// happens later, when each player's mob transfer triggers
-	// /datum/lobby_menu/hide() via COMSIG_CLIENT_MOB_LOGIN.
-	var/fading_out = FALSE
+	// [HORIZON-ADD] HorizonLobby - send fade-out to all spawning players.
+	// No sleep - the close is scheduled via addtimer in /datum/lobby_menu.
 	for(var/mob/dead/new_player/player as anything in GLOB.new_player_list)
 		if(player.new_character && player.client?.lobby_menu)
 			player.client.lobby_menu.send_fade_out()
-			fading_out = TRUE
-	if(fading_out)
-		sleep(LOBBY_FADE_OUT_TIME)
 	// [/HORIZON-ADD]
 	for(var/mob/dead/new_player/player as anything in GLOB.new_player_list)
 		var/mob/living = player.transfer_character()

@@ -102,6 +102,7 @@ export const LobbyMenu = () => {
           !themeDisabled && 'crtTheme',
           !filterDisabled && 'filterEnabled',
           disableAnimations && 'noAnimation',
+          fadingOut && 'lobbyFadeOut',
         ])}
         fitted
       >
@@ -205,7 +206,6 @@ export const LobbyMenu = () => {
               ))}
             </Stack>
           </Box>
-          {fadingOut && <Box className="lobbyFadeOut" />}
         </LobbyContext.Provider>
       </Window.Content>
     </Window>

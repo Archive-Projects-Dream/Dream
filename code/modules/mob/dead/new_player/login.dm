@@ -52,10 +52,7 @@
 		register_for_interview()
 		return
 
-	// [HORIZON-EDIT] HorizonLobby - lobby init is now signal-driven.
-	// /datum/lobby_menu (owned by /client) hooks COMSIG_CLIENT_MOB_LOGIN
-	// and auto-shows when client.mob becomes a /mob/dead/new_player.
-	// No explicit call needed here.
+	// [HORIZON-EDIT] HorizonLobby - signal-driven via COMSIG_CLIENT_MOB_LOGIN
 	// [/HORIZON-EDIT]
 
 	if(SSticker.current_state < GAME_STATE_SETTING_UP)

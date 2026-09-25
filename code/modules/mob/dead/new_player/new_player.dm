@@ -117,7 +117,7 @@
 	observer.update_appearance()
 	observer.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	deadchat_broadcast(" has observed.", "<b>[observer.real_name]</b>", follow_target = observer, turf_target = get_turf(observer), message_type = DEADCHAT_DEATHRATTLE)
-	client?.lobby_menu?.hide(fade_out = TRUE) // [HORIZON-EDIT] HorizonLobby
+	client?.lobby_menu?.send_fade_out() // [HORIZON-EDIT] HorizonLobby
 	QDEL_NULL(mind)
 	qdel(src)
 	return TRUE
@@ -315,9 +315,10 @@
 	. = new_character
 	if(!.)
 		return
-	client?.lobby_menu?.hide(fade_out) // [HORIZON-EDIT] HorizonLobby
-	if(QDELETED(src)) // hide() may have slept for the fade animation
-		return
+	// [HORIZON-EDIT] HorizonLobby - async fade+close via addtimer, no sleep
+	if(fade_out)
+		client?.lobby_menu?.send_fade_out()
+	// [/HORIZON-EDIT]
 	new_character.PossessByPlayer(key) //Manually transfer the key to log them in,
 	new_character.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	var/area/joined_area = get_area(new_character.loc)
@@ -408,27 +409,18 @@ GAME_VERB_PROC(/mob/dead/new_player, reset_menu_hud, "Reset Lobby Menu HUD", "OO
 	if(CONFIG_GET(flag/auto_deadmin_on_ready_or_latejoin) || (client.prefs.read_preference(/datum/preference/toggle/auto_deadmin_on_ready_or_latejoin)) || (client.prefs?.toggles & DEADMIN_ALWAYS))
 		return client.holder.auto_deadmin()
 
-// [HORIZON-EDIT] HorizonLobby
-// initialize_lobby_screen() and hide_lobby_browser() procs were moved to
-// /datum/lobby_menu (owned by /client). The lobby is now signal-driven:
-// it auto-shows when client.mob becomes a /mob/dead/new_player via
-// COMSIG_CLIENT_MOB_LOGIN, and auto-hides when client.mob changes to
-// anything else. Explicit hide-with-fade calls in transfer_character() and
-// make_me_an_observer() remain, since they need the fade-out BEFORE the
-// mob transfer (the signal fires AFTER, which would skip the animation).
-//
-// ui_interact below still uses client.lobby_menu.lobby_window as the
-// tgui_window to render into.
+// [HORIZON-EDIT] HorizonLobby - lifecycle moved to /datum/lobby_menu
 // [/HORIZON-EDIT]
 
 /mob/dead/new_player/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
-	// [HORIZON-EDIT] HorizonLobby - resolve the tgui_window from the
-	// client-owned /datum/lobby_menu, not from a var on the mob.
+	// [HORIZON-EDIT] HorizonLobby - track ui on datum so we can close it
+	// after the mob is qdeleted (mob is destroyed in transfer_character).
 	if(!ui && user.client?.lobby_menu?.lobby_window)
 		ui = new(user, src, "LobbyMenu")
 		ui.window = user.client.lobby_menu.lobby_window
 		ui.open(preinitialized = TRUE)
+		user.client.lobby_menu.ui = ui
 	// [/HORIZON-EDIT]
 
 /mob/dead/new_player/ui_state(mob/user)
