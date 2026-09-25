@@ -38,6 +38,7 @@ const DEFAULT_SIZE: [number, number] = [400, 600];
 type Props = Partial<{
   buttons: ReactNode;
   canClose: BooleanLike;
+  fitted: boolean;
   height: number;
   theme: string;
   title: string;
@@ -48,6 +49,7 @@ type Props = Partial<{
 export function Window(props: Props) {
   const {
     canClose = true,
+    fitted = false,
     theme,
     title,
     children,
@@ -61,11 +63,15 @@ export function Window(props: Props) {
   const [isReadyToRender, setIsReadyToRender] = useState(false);
 
   // We need to set the window to be invisible before we can set its geometry
-  // Otherwise, we get a flicker effect when the window is first rendered
+  // Otherwise, we get a flicker effect when the window is first rendered.
+  // Skip this for fitted windows (e.g. embedded browser elements) since
+  // setting is-visible on a BROWSER control can cause issues.
   useLayoutEffect(() => {
-    Byond.winset(Byond.windowId, {
-      'is-visible': false,
-    });
+    if (!fitted) {
+      Byond.winset(Byond.windowId, {
+        'is-visible': false,
+      });
+    }
     setIsReadyToRender(true);
   }, []);
 
@@ -104,7 +110,9 @@ export function Window(props: Props) {
         'can-close': Boolean(canClose),
       });
       logger.log('mounting');
-      updateGeometry();
+      if (!fitted) {
+        updateGeometry();
+      }
     }
     return () => {
       cancelled = true;
@@ -121,15 +129,17 @@ export function Window(props: Props) {
 
   return suspended ? null : (
     <Layout className="Window" theme={theme}>
-      <TitleBar
-        title={title || decodeHtmlEntities(config.title)}
-        status={config.status}
-        onDragStart={dragStartHandler}
-        onClose={suspendStart}
-        canClose={canClose}
-      >
-        {buttons}
-      </TitleBar>
+      {!fitted && (
+        <TitleBar
+          title={title || decodeHtmlEntities(config.title)}
+          status={config.status}
+          onDragStart={dragStartHandler}
+          onClose={suspendStart}
+          canClose={canClose}
+        >
+          {buttons}
+        </TitleBar>
+      )}
       <div
         className={classes([
           'Window__rest',
@@ -139,18 +149,22 @@ export function Window(props: Props) {
         {!suspended && children}
         {showDimmer && <div className="Window__dimmer" />}
       </div>
-      <div
-        className="Window__resizeHandle__e"
-        onMouseDown={resizeStartHandler(1, 0) as any}
-      />
-      <div
-        className="Window__resizeHandle__s"
-        onMouseDown={resizeStartHandler(0, 1) as any}
-      />
-      <div
-        className="Window__resizeHandle__se"
-        onMouseDown={resizeStartHandler(1, 1) as any}
-      />
+      {!fitted && (
+        <>
+          <div
+            className="Window__resizeHandle__e"
+            onMouseDown={resizeStartHandler(1, 0) as any}
+          />
+          <div
+            className="Window__resizeHandle__s"
+            onMouseDown={resizeStartHandler(0, 1) as any}
+          />
+          <div
+            className="Window__resizeHandle__se"
+            onMouseDown={resizeStartHandler(1, 1) as any}
+          />
+        </>
+      )}
     </Layout>
   );
 }
@@ -169,7 +183,7 @@ function WindowContent(props: ContentProps) {
   const [altDown, setAltDown] = useState(false);
 
   function dragStartIfAltHeld(event: React.MouseEvent<HTMLDivElement>): void {
-    if (altDown) {
+    if (altDown && !fitted) {
       dragStartHandler(event);
     }
   }

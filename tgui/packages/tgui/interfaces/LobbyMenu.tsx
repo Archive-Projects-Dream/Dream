@@ -73,7 +73,7 @@ export const LobbyMenu = () => {
 
   if (themeDisabled === undefined) {
     return (
-      <Window>
+      <Window fitted>
         <Window.Content fitted>
           <LoadingScreen />
         </Window.Content>
@@ -84,7 +84,8 @@ export const LobbyMenu = () => {
   const themeToUse = themeDisabled ? 'weyland_yutani' : 'crtlobby';
 
   return (
-    <Window theme={themeToUse}>
+    <Window theme={themeToUse} fitted>
+      <style dangerouslySetInnerHTML={{ __html: '.Window .Window__rest { top: 0 !important; bottom: 0 !important; left: 0 !important; right: 0 !important; }' }} />
       <audio src={resolveAsset('load.mp3')} ref={onLoadPlayer} />
       <Window.Content
         className={classes([

@@ -125,11 +125,11 @@
 
 // CRT lobby theme — green-tinted retro terminal look
 .theme-crtlobby:root {
-  --color-base: hsl(120, 30%, 15%);
-  --color-primary: hsl(120, 50%, 40%);
+  --color-base: hsl(220, 30%, 15%);
+  --color-primary: hsl(220, 50%, 40%);
   --secondary-lightness-adjustment: 6.33;
 
-  --button-color-transparent: hsla(120, 50%, 40%, 0.75);
+  --button-color-transparent: hsla(220, 50%, 40%, 0.75);
   --progress-bar-background: hsla(0, 0%, 0%, 0.5);
   --tooltip-background-lightness: 25;
 }

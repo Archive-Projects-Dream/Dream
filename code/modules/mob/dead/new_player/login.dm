@@ -52,6 +52,10 @@
 		register_for_interview()
 		return
 
+	// Store ckey persistently so hide_lobby_browser() can find the client
+	// in Logout() after the key has been transferred to a new mob.
+	persistent_ckey = client.ckey
+
 	// Initialize the TGUI lobby screen
 	initialize_lobby_screen()
 

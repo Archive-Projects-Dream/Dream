@@ -23,6 +23,9 @@
 
 	/// The window that we display the main menu in
 	var/datum/tgui_window/lobby_window
+	/// Stores the ckey persistently so we can look up the client in Logout()
+	/// after the key has been transferred to a new mob (where ckey becomes null).
+	var/persistent_ckey
 
 /mob/dead/new_player/Initialize(mapload)
 	if(client && SSticker.state == GAME_STATE_STARTUP)
@@ -427,18 +430,29 @@ GAME_VERB_PROC(/mob/dead/new_player, reset_menu_hud, "Reset Lobby Menu HUD", "OO
 	ui_interact(src)
 
 /// Hides the lobby browser and restores the status bar, cleaning up the TGUI window.
+/// Must close the /datum/tgui UI so SStgui.on_logout() doesn't call
+/// browse(null) AFTER winset("is-visible=false"), which would re-show the browser.
 /mob/dead/new_player/proc/hide_lobby_browser()
+	// Close the TGUI UI first — removes it from SStgui lists so
+	// on_logout() won't call window.close() -> browse(null) later.
+	var/datum/tgui/ui = SStgui.get_open_ui(src, src)
+	if(ui)
+		ui.close(can_be_suspended = FALSE)
+	// Now close the window datum (sends browse(null) to clear content)
 	if(lobby_window)
 		lobby_window.unsubscribe()
 		lobby_window.close(FALSE)
 		lobby_window = null
-	if(client)
-		winset(src, "lobby_browser", "is-disabled=true;is-visible=false")
-		winset(src, "mapwindow.status_bar", "is-visible=true")
+	// Hide the browser element. Must happen AFTER all browse() calls.
+	// Use persistent_ckey because client is null in Logout() after key transfer.
+	var/client/exiting_client = client || GLOB.directory[persistent_ckey]
+	if(exiting_client)
+		winset(exiting_client, "lobby_browser", "is-disabled=true;is-visible=false")
+		winset(exiting_client, "mapwindow.status_bar", "is-visible=true")
 
 /mob/dead/new_player/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
+	if(!ui && lobby_window)
 		ui = new(user, src, "LobbyMenu")
 		ui.window = lobby_window
 		ui.open(preinitialized = TRUE)
