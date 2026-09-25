@@ -65,10 +65,10 @@
 
 /turf/closed/mineral/random/wasteplanet //
 	icon = MAP_SWITCH('_horizon/icons/turf/walls/rock/wasteplanet.dmi', '_horizon/icons/turf/walls/rock/mapping_wall.dmi')
-
+/*
 /turf/closed/mineral/random/desert //
 	icon = MAP_SWITCH('_horizon/icons/turf/walls/rock/desert.dmi', '_horizon/icons/turf/walls/rock/mapping_wall.dmi')
-
+*/
 /turf/closed/mineral/random/shrouded //
 	icon = MAP_SWITCH('_horizon/icons/turf/walls/rock/shroudedwall.dmi', '_horizon/icons/turf/walls/rock/mapping_wall.dmi')
 

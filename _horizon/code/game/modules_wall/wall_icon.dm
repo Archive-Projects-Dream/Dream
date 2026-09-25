@@ -25,9 +25,9 @@
 	for(var/i in 1 to 4)
 		overlays += get_wall_object(icon, "wall[wall_connections[i]]", 1<<(i-1), plane = WALL_PLANE, offset_spokesman = src)
 
-/turf/closed/wall/proc/update_connections(propagate = 0)
+/turf/closed/proc/update_connections(propagate = 0)
 	var/list/wall_dirs = list()
-	for(var/turf/closed/wall/W in orange(src, 1))
+	for(var/turf/closed/W in orange(src, 1))
 		switch(can_join_with(W))
 			if(FALSE)
 				continue
@@ -57,7 +57,7 @@
 
 	wall_connections = dirs_to_corner_states(wall_dirs)
 
-/turf/closed/wall/proc/can_join_with(turf/closed/wall/W)
+/turf/closed/proc/can_join_with(turf/closed/wall/W)
 	if(W.type == src.type)
 		return 1
 	for(var/wb_type in blend_turfs)
@@ -96,3 +96,18 @@
 #undef CORNER_COUNTERCLOCKWISE
 #undef CORNER_DIAGONAL
 #undef CORNER_CLOCKWISE
+
+/turf/closed/mineral
+
+/turf/closed/mineral/update_icon()
+	. = ..()
+	if(!special_icon)
+		return
+
+	overlays.Cut()
+	icon_state = "blank"
+	var/image/I
+	for(var/i in 1 to 4)
+		I = image(icon, "wall[wall_connections[i]]", dir = 1<<(i-1))
+		I.plane = GAME_PLANE
+		overlays += I
