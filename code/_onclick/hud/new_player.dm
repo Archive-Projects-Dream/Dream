@@ -16,22 +16,14 @@
 	if (!owner?.client || owner.client.interviewee)
 		return
 
-	for (var/atom/movable/screen/lobby/lobbyscreen as anything in subtypesof(/atom/movable/screen/lobby))
-		if (!initial(lobbyscreen.always_available))
-			continue
-		lobbyscreen = add_screen_object(lobbyscreen, HUD_KEY_NEW_PLAYER(lobbyscreen))
-		lobbyscreen.SlowInit()
-		if (!lobbyscreen.always_shown)
-			lobbyscreen.RegisterSignal(src, COMSIG_HUD_LOBBY_COLLAPSED, TYPE_PROC_REF(/atom/movable/screen/lobby, collapse_button))
-			lobbyscreen.RegisterSignal(src, COMSIG_HUD_LOBBY_EXPANDED, TYPE_PROC_REF(/atom/movable/screen/lobby, expand_button))
+	// Lobby screen objects are disabled — the TGUI LobbyMenu interface
+	// (rendered in the lobby_browser) now handles all lobby buttons.
+	// Station trait sign-up buttons are still created dynamically below.
 
 	if (!owner.client.is_localhost())
 		return
 
-	var/atom/movable/screen/lobby/button/start_now/start_button = add_screen_object(/atom/movable/screen/lobby/button/start_now, HUD_NEW_PLAYER_START_NOW)
-	start_button.SlowInit()
-	start_button.RegisterSignal(src, COMSIG_HUD_LOBBY_COLLAPSED, TYPE_PROC_REF(/atom/movable/screen/lobby, collapse_button))
-	start_button.RegisterSignal(src, COMSIG_HUD_LOBBY_EXPANDED, TYPE_PROC_REF(/atom/movable/screen/lobby, expand_button))
+	// Start Now button is also handled via TGUI/admin verbs now.
 
 /datum/hud/new_player/show_hud(version = 0, mob/viewmob)
 	. = ..()

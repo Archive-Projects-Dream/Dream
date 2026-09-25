@@ -21,6 +21,9 @@
 	///Cooldown for the Reset Lobby Menu HUD verb
 	COOLDOWN_DECLARE(reset_hud_cooldown)
 
+	/// The window that we display the main menu in
+	var/datum/tgui_window/lobby_window
+
 /mob/dead/new_player/Initialize(mapload)
 	if(client && SSticker.state == GAME_STATE_STARTUP)
 		var/atom/movable/screen/splash/fade_out = new(null, null, client, TRUE)
@@ -110,6 +113,7 @@
 	observer.update_appearance()
 	observer.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	deadchat_broadcast(" has observed.", "<b>[observer.real_name]</b>", follow_target = observer, turf_target = get_turf(observer), message_type = DEADCHAT_DEATHRATTLE)
+	hide_lobby_browser()
 	QDEL_NULL(mind)
 	qdel(src)
 	return TRUE
@@ -307,6 +311,7 @@
 	. = new_character
 	if(!.)
 		return
+	hide_lobby_browser()
 	new_character.PossessByPlayer(key) //Manually transfer the key to log them in,
 	new_character.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	var/area/joined_area = get_area(new_character.loc)
@@ -387,6 +392,8 @@ GAME_VERB_PROC(/mob/dead/new_player, reset_menu_hud, "Reset Lobby Menu HUD", "OO
 	create_mob_hud()
 	to_chat(new_player, span_info("Lobby Menu HUD reset. You may reset the HUD again in <b>[DisplayTimeText(RESET_HUD_INTERVAL)]</b>."))
 	hud_used.show_hud(hud_used.hud_version)
+	// Reinitialize the TGUI lobby screen
+	initialize_lobby_screen()
 
 ///Auto deadmins an admin when they click to toggle the ready button or join game button in the menu
 /mob/dead/new_player/proc/auto_deadmin_on_ready_or_latejoin()
@@ -394,5 +401,138 @@ GAME_VERB_PROC(/mob/dead/new_player, reset_menu_hud, "Reset Lobby Menu HUD", "OO
 		return TRUE
 	if(CONFIG_GET(flag/auto_deadmin_on_ready_or_latejoin) || (client.prefs.read_preference(/datum/preference/toggle/auto_deadmin_on_ready_or_latejoin)) || (client.prefs?.toggles & DEADMIN_ALWAYS))
 		return client.holder.auto_deadmin()
+
+/**
+ * Initializes the lobby screen: shows the lobby_browser over the map and
+ * opens the TGUI LobbyMenu interface inside it.
+ */
+/mob/dead/new_player/proc/initialize_lobby_screen()
+	if(!client)
+		return
+
+	var/datum/tgui/ui = SStgui.get_open_ui(src, src)
+	if(ui)
+		ui.close()
+
+	winset(src, "lobby_browser", "is-disabled=false;is-visible=true")
+	winset(src, "mapwindow.status_bar", "is-visible=false")
+	lobby_window = new(client, "lobby_browser")
+	lobby_window.initialize(
+		assets = list(
+			get_asset_datum(/datum/asset/simple/tgui),
+			get_asset_datum(/datum/asset/simple/namespaced/chakrapetch)
+		)
+	)
+
+	ui_interact(src)
+
+/// Hides the lobby browser and restores the status bar, cleaning up the TGUI window.
+/mob/dead/new_player/proc/hide_lobby_browser()
+	if(lobby_window)
+		lobby_window.unsubscribe()
+		lobby_window.close(FALSE)
+		lobby_window = null
+	if(client)
+		winset(src, "lobby_browser", "is-disabled=true;is-visible=false")
+		winset(src, "mapwindow.status_bar", "is-visible=true")
+
+/mob/dead/new_player/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "LobbyMenu")
+		ui.window = lobby_window
+		ui.open(preinitialized = TRUE)
+
+/mob/dead/new_player/ui_state(mob/user)
+	return GLOB.always_state
+
+/mob/dead/new_player/ui_data(mob/user)
+	. = ..()
+
+	// If you have a runtime here it likely means your new_player didn't get qdeleted after transfering client off it
+	.["character_name"] = client?.prefs ? client.prefs.read_preference(/datum/preference/name/real_name) : client?.key
+
+	.["round_start"] = !SSticker || SSticker.current_state <= GAME_STATE_PREGAME
+	.["readied"] = ready == PLAYER_READY_TO_PLAY
+
+	.["preference_issues"] = list()
+
+/mob/dead/new_player/ui_assets(mob/user)
+	. = ..()
+
+	. += get_asset_datum(/datum/asset/simple/lobby_files)
+	. += get_asset_datum(/datum/asset/simple/lobby_art)
+
+/mob/dead/new_player/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+
+	if(!ui.user.client || ui.user.client.interviewee || !isnewplayer(ui.user))
+		return TRUE
+
+	switch(action)
+		if("preferences")
+			// Otherwise the preview dummy will runtime
+			// because atoms aren't initialized yet
+			if(SSticker.current_state < GAME_STATE_PREGAME)
+				to_chat(src, span_warning("Game is still starting up, please wait."))
+				return FALSE
+
+			var/datum/preferences/preferences = client.prefs
+			preferences.current_window = PREFERENCE_TAB_CHARACTER_PREFERENCES
+			preferences.update_static_data(src)
+			preferences.ui_interact(src)
+			return TRUE
+
+		if("game_preferences")
+			var/datum/preferences/preferences = client.prefs
+			preferences.current_window = PREFERENCE_TAB_GAME_PREFERENCES
+			preferences.update_static_data(usr)
+			preferences.ui_interact(usr)
+			return TRUE
+
+		if("manifest")
+			ViewManifest()
+			return TRUE
+
+		if("changelog")
+			client?.changelog()
+			return TRUE
+
+		if("late_join")
+			if(!SSticker?.IsRoundInProgress())
+				to_chat(src, span_warning("The round is either not ready, or has already finished..."))
+				return FALSE
+
+			GLOB.latejoin_menu.ui_interact(src)
+			return TRUE
+
+		if("observe")
+			if(!SSticker || SSticker.current_state == GAME_STATE_STARTUP)
+				to_chat(src, span_warning("The game is still setting up, please try again later."))
+				return
+
+			make_me_an_observer()
+			return TRUE
+
+		if("ready")
+			if((SSticker.current_state <= GAME_STATE_PREGAME) && ready == PLAYER_NOT_READY) // Make sure we don't ready up after the round has started
+				auto_deadmin_on_ready_or_latejoin()
+				ready = PLAYER_READY_TO_PLAY
+				if(hud_used)
+					SEND_SIGNAL(hud_used, COMSIG_HUD_PLAYER_READY_TOGGLE)
+
+			return TRUE
+
+		if("unready")
+			if((SSticker.current_state <= GAME_STATE_PREGAME) && ready == PLAYER_READY_TO_PLAY) // Make sure we don't ready up after the round has started
+				ready = PLAYER_NOT_READY
+				if(hud_used)
+					SEND_SIGNAL(hud_used, COMSIG_HUD_PLAYER_READY_TOGGLE)
+
+			return TRUE
+
+		if("keyboard")
+			if(client)
+				SEND_SOUND(client, sound(get_sfx("keyboard"), volume = 20))
 
 #undef RESET_HUD_INTERVAL
