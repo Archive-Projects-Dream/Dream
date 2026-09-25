@@ -79,12 +79,12 @@
 
 /turf/closed/indestructible/riveted/boss
 	icon = '_horizon/icons/turf/walls/boss_wall.dmi'
-
+/*
 /turf/closed/wall/concrete
 	icon = '_horizon/icons/turf/walls/concrete.dmi'
 
 /turf/closed/wall/concrete/reinforced
 	icon = '_horizon/icons/turf/walls/hexacrete.dmi'
-
+*/
 /turf/closed/wall/r_wall
 	icon = '_horizon/icons/turf/walls/rwalls/reinforced_wall.dmi'
