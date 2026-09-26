@@ -618,23 +618,26 @@
 	SIGNAL_HANDLER
 	var/mob/our_mob = home?.our_hud?.mymob
 	hide_plane(our_mob)
-// [HORIZON]
-// MARK: Wall mask FOV
-
-#define FOV_WALL_ICON '_horizon/icons/walls_fov_wide.dmi'
 
 // [HORIZON-ADD]
-/atom/movable/screen/plane_master/mob
-	name = "Mob"
+// MARK: Wall mask FOV
+#define FOV_WALL_ICON '_horizon/icons/walls_fov_wide.dmi'
+
+/atom/movable/screen/plane_master/mobs
+	name = "Mobs Plane"
 	plane = MOB_PLANE
 	render_relay_planes = list(RENDER_PLANE_MASKED_WORLD)
-// [/HORIZON-ADD]
+
+/atom/movable/screen/plane_master/above_floor
+	name = "Above Floor Plane"
+	plane = ABOVE_FLOOR_PLANE
+	render_relay_planes = list(RENDER_PLANE_MASKED_WORLD)
 
 /atom/movable/screen/plane_master/rendering_plate/masked_game_hub
 	name = "Masked Game Hub"
-	documentation = "Собирает в себя все плейны выше WALL_PLANE (мобы, предметы, эффекты), \
-		применяет к ним маску теней стен и выводит в основной игровой мир. \
-		При надевании мезонок маска отключается."
+	documentation = "Collects all planes above WALL_PLANE (mobs, items, effects), \
+		applies a wall shadow mask to them, and brings them into the main game world. \
+		When equipping mesons, the mask is disabled."
 	plane = RENDER_PLANE_MASKED_WORLD
 	render_relay_planes = list(RENDER_PLANE_GAME_WORLD)
 	appearance_flags = PLANE_MASTER
@@ -653,9 +656,8 @@
 	add_filter("wall_fov_mask", 1, alpha_mask_filter(render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_11_RENDER_TARGET, offset), flags = MASK_INVERSE))
 
 // MARK: Shadow-Planes
-
 /atom/movable/screen/plane_master/wall_fov
-	name = "wall fov MATRIX"
+	name = "Master Horizon-Shadows Plane"
 	plane = WALL_FOV_PLANE
 	appearance_flags = PLANE_MASTER|NO_CLIENT_COLOR
 	render_target = WALL_FOV_RENDER_TARGET
@@ -664,7 +666,7 @@
 	color = list(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,2)
 
 /*
-// Под дебаг теней
+// Под дебаг теней / For debug shadows
 /atom/movable/screen/plane_master/wall_fov/show_to(mob/mymob)
 	..()
 	if(!isobserver(mymob))
@@ -679,13 +681,13 @@
 	animate(filter, duration, x = dx, y = dy, easing = LINEAR_EASING)
 
 /atom/movable/screen/plane_master/wall_fov/shadows_plane
-	name = "wall fov shadows plane"
+	name = "Wall Fov Shadows Plane"
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	render_target = ATOMS_FOV_SHADOWS_RENDER_TARGET
 	render_relay_planes = list()
 
 /atom/movable/screen/plane_master/wall_fov/plane0
-	name = "wall fov plane0"
+	name = "Wall Fov - plane0"
 	plane = WALLS_FOV_PLANE_0
 	render_target = WALLS_FOV_PLANE_0_RENDER_TARGET
 
@@ -696,7 +698,7 @@
 	add_filter("wall_alpha", 3, list(type = "alpha", render_source = OFFSET_RENDER_TARGET(ATOMS_FOV_SHADOWS_RENDER_TARGET, offset), flags = MASK_INVERSE))
 
 /atom/movable/screen/plane_master/wall_fov/plane1
-	name = "wall fov plane1"
+	name = "Wall Fov - plane1"
 	plane = WALLS_FOV_PLANE_1
 	render_target = WALLS_FOV_PLANE_1_RENDER_TARGET
 
@@ -707,7 +709,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_0_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane2
-	name = "wall fov plane2"
+	name = "Wall Fov - plane2"
 	plane = WALLS_FOV_PLANE_2
 	render_target = WALLS_FOV_PLANE_2_RENDER_TARGET
 
@@ -718,7 +720,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_1_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane3
-	name = "wall fov plane3"
+	name = "Wall Fov - plane3"
 	plane = WALLS_FOV_PLANE_3
 	render_target = WALLS_FOV_PLANE_3_RENDER_TARGET
 
@@ -729,7 +731,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_2_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane4
-	name = "wall fov plane4"
+	name = "Wall Fov - plane4"
 	plane = WALLS_FOV_PLANE_4
 	render_target = WALLS_FOV_PLANE_4_RENDER_TARGET
 
@@ -740,7 +742,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_3_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane5
-	name = "wall fov plane5"
+	name = "Wall Fov - plane5"
 	plane = WALLS_FOV_PLANE_5
 	render_target = WALLS_FOV_PLANE_5_RENDER_TARGET
 
@@ -751,7 +753,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_4_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane6
-	name = "wall fov plane6"
+	name = "Wall Fov - plane6"
 	plane = WALLS_FOV_PLANE_6
 	render_target = WALLS_FOV_PLANE_6_RENDER_TARGET
 
@@ -762,7 +764,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_5_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane7
-	name = "wall fov plane7"
+	name = "Wall Fov - plane7"
 	plane = WALLS_FOV_PLANE_7
 	render_target = WALLS_FOV_PLANE_7_RENDER_TARGET
 
@@ -773,7 +775,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_6_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane8
-	name = "wall fov plane8"
+	name = "Wall Fov - plane8"
 	plane = WALLS_FOV_PLANE_8
 	render_target = WALLS_FOV_PLANE_8_RENDER_TARGET
 
@@ -784,7 +786,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_7_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane9
-	name = "wall fov plane9"
+	name = "Wall Fov - plane9"
 	plane = WALLS_FOV_PLANE_9
 	render_target = WALLS_FOV_PLANE_9_RENDER_TARGET
 
@@ -795,7 +797,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_8_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane10
-	name = "wall fov plane10"
+	name = "Wall Fov - plane10"
 	plane = WALLS_FOV_PLANE_10
 	render_target = WALLS_FOV_PLANE_10_RENDER_TARGET
 
@@ -806,7 +808,7 @@
 	add_filter("wall_overlay", 3, list(type = "layer", render_source = OFFSET_RENDER_TARGET(WALLS_FOV_PLANE_9_RENDER_TARGET, offset)))
 
 /atom/movable/screen/plane_master/wall_fov/plane11
-	name = "wall fov plane11 (mask base)"
+	name = "Wall Fov - plane11 (mask base)"
 	plane = WALLS_FOV_PLANE_11
 	render_target = WALLS_FOV_PLANE_11_RENDER_TARGET
 	color = null
@@ -860,7 +862,7 @@
 		disable_alpha()
 
 /atom/movable/screen/plane_master/wall_fov/shadow_mask
-	name = "wall fov shadow mask (visuals)"
+	name = "Wall Fov - shadow mask (visuals)"
 	plane = WALLS_FOV_PLANE_12
 	render_target = WALLS_FOV_PLANE_12_RENDER_TARGET
 	render_relay_planes = list(RENDER_PLANE_GAME)
@@ -890,4 +892,4 @@
 		set_alpha(255)
 
 #undef FOV_WALL_ICON
-// [/HORIZON]
+// [/HORIZON-ADD]
