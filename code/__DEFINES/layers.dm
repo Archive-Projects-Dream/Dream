@@ -23,8 +23,8 @@
 
 #define TRANSPARENT_FLOOR_PLANE -10
 
-#define FLOOR_PLANE -8
-
+#define FLOOR_PLANE -9
+#define ABOVE_FLOOR_PLANE -8
 #define WALL_PLANE -7
 #define ABOVE_WALL_PLANE -6
 #define GAME_PLANE -5

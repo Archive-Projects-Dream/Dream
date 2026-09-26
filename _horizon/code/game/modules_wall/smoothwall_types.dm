@@ -27,7 +27,7 @@
 	icon_state = "wall-0"
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
-	//mouse_opacity = MOUSE_OPACITY_TRANSPARENT // Debug - Вернуть после тестов
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	tiles_with = BASED_TILES
 
 /atom/movable/atom_shadow/Initialize(mapload)
