@@ -135,4 +135,4 @@
 				neighbour_wall.update_icon()
 
 /turf/closed/mineral/random/desert
-	icon = '_horizon/icons/turf/walls/modules_wall/stone.dmi'
+	icon = '_horizon/icons/turf/walls/modules_wall/stone2.dmi'
