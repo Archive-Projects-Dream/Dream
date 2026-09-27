@@ -15,6 +15,7 @@
 #include "code\__DEFINES\dir_slash.dm"
 #include "code\__DEFINES\icons.dm"
 #include "code\__DEFINES\keybinding.dm"
+#include "code\__DEFINES\map_switch.dm"
 #include "code\__DEFINES\particles.dm"
 #include "code\__DEFINES\physics.dm"
 // END_INCLUDE
