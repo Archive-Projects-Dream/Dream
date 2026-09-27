@@ -130,5 +130,12 @@
 				hearing_mob.stop_sound_channel(channelnumber)
 		else
 			for(var/mob/hearing_mob as anything in hearing_mobs)
-				var/pref_volume = hearing_mob?.client?.prefs.read_preference(/datum/preference/numeric/volume/sound_instruments)
-				hearing_mob.set_sound_channel_volume(channelnumber, (current_volume * 0.01) * volume * using_instrument.volume_multiplier * (pref_volume / 100))
+				// [HORIZON-EDIT] Master_Sounds
+				if(!hearing_mob?.client)
+					continue
+				var/mixed_volume = calculate_mixed_volume(hearing_mob.client, (current_volume * 0.01) * volume * using_instrument.volume_multiplier, CHANNEL_INSTRUMENTS)
+				if(mixed_volume <= 0)
+					hearing_mob.stop_sound_channel(channelnumber)
+					continue
+				// [/HORIZON-EDIT]
+				hearing_mob.set_sound_channel_volume(channelnumber, mixed_volume)
