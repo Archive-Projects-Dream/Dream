@@ -1,5 +1,5 @@
 
-GLOBAL_LIST_EMPTY_TYPED(proj_by_path_key, /obj/projectile) // A list of projectile objects, which are keyed by their path
+GLOBAL_LIST_EMPTY(proj_by_path_key) // A list of projectile objects, which are keyed by their path
 
 //generator types
 #define GEN_NUM "num"
@@ -76,10 +76,10 @@ GLOBAL_LIST_EMPTY_TYPED(proj_by_path_key, /obj/projectile) // A list of projecti
 #define CALIBER_FLECHETTE "5.56x45 SCF"
 #define CALIBER_54R "762.54R"
 #define CALIBER_51 "7.62x51"
-#define	CALIBER_KS23 "4-guage"
+#define CALIBER_KS23 "4-guage"
 #define CALIBER_ANIQUILADOR ".50 LE"
 #define CALIBER_380 ".380 ACP"
 #define CALIBER_46G "4.6x30 ACP"
 #define CALIBER_500 ".500 magnum"
 #define CALIBER_276 ".276 Federson"
-#define	CALIBER_BATTERY "batteries"
+#define CALIBER_BATTERY "batteries"

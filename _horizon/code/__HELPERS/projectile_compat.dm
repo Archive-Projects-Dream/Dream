@@ -37,41 +37,27 @@
         return
 
 // =============================================================================
-// /turf procs
-// =============================================================================
-
-/// Legacy: get_projectile_hitsound(projectile) returned a sound to play
-/// when a projectile hit this turf. Upstream removed this in favour of
-/// hardcoded hitsound handling in /obj/projectile/on_hit(). We return
-/// null so horizon's _projectile.dm falls back to default behaviour.
-/turf/proc/get_projectile_hitsound(obj/projectile/proj)
-        return null
-
-/turf/closed/wall/get_projectile_hitsound(obj/projectile/proj)
-        return 'sound/items/weapons/gun/general/ricochet.ogg'
-
-/turf/open/floor/get_projectile_hitsound(obj/projectile/proj)
-        return 'sound/items/weapons/gun/general/ricochet.ogg'
-
-/// Legacy: add_dent(dent_type, x, y) added a bullet dent decal to the turf.
-/// Upstream removed this from the base /turf type (only /turf/closed/wall
-/// has it). We provide a no-op stub on /turf and /turf/open/floor so
-/// horizon's _projectile.dm compiles. /turf/closed/wall already has a
-/// real implementation upstream, so we don't override it here.
-/turf/proc/add_dent(dent_type, x, y)
-        return
-
-/turf/open/floor/add_dent(dent_type, x, y)
-        return
-
-// =============================================================================
 // /atom procs
 // =============================================================================
 
-/// Legacy: get_projectile_hitsound(projectile) at the atom level.
-/// Returns null by default; overridden on /turf subtypes above.
+/// Legacy: get_projectile_hitsound(projectile) returned a sound to play
+/// when a projectile hit this atom. Upstream removed this in favour of
+/// hardcoded hitsound handling in /obj/projectile/on_hit(). We return
+/// null by default; overridden on /turf subtypes below.
 /atom/proc/get_projectile_hitsound(obj/projectile/proj)
         return null
+
+/turf/closed/wall/get_projectile_hitsound(obj/projectile/proj)
+        return '_horizon/sound/bullet/ricochet1.wav'
+
+/turf/open/floor/get_projectile_hitsound(obj/projectile/proj)
+        return '_horizon/sound/bullet/ricochet1.wav'
+
+/// Legacy: add_dent(dent_type, x, y) added a bullet dent decal to the turf.
+/// Upstream only defines this on /turf/closed/wall. We provide a no-op stub
+/// on /turf/open/floor so horizon's _projectile.dm compiles.
+/turf/open/floor/add_dent(dent_type, x, y)
+        return
 
 // =============================================================================
 // /obj/item/bodypart procs

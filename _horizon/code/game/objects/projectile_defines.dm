@@ -18,6 +18,9 @@
         /// If this hits a human with no organ armor on the affected body part,
         /// add this to the organ mod.
         var/bare_organ_bonus = 0
+        /// Legacy: wound bonus against bare (unarmored) targets. Read by
+        /// horizon's _ammunition.dm add_notes_ammo() examine UI.
+        var/bare_wound_bonus = 0
 
         /// Legacy embedding list (e.g. list("embed_chance"=35, "fall_chance"=0, ...)).
         /// Upstream /tg/station moved to /datum/embedding (embed_data), but horizon's

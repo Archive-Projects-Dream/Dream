@@ -37,16 +37,14 @@
 // Smoke effect system (legacy smoke_spread/bad)
 // Upstream renamed /datum/effect_system/smoke_spread to
 // /datum/effect_system/fluid_spread/smoke. We alias the legacy path so
-// horizon's launcher.dm compiles, and provide set_up()/start() stubs.
+// horizon's launcher.dm compiles. Upstream's /datum/effect_system already
+// has a start() proc, so we only add set_up() as a stub.
 // =============================================================================
 
 /datum/effect_system/smoke_spread
 /datum/effect_system/smoke_spread/bad
 
 /datum/effect_system/smoke_spread/proc/set_up(amount = 5, silent = FALSE, turf/location)
-        return
-
-/datum/effect_system/smoke_spread/proc/start()
         return
 
 // =============================================================================

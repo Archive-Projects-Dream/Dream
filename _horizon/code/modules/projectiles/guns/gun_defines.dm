@@ -38,11 +38,10 @@
         /// Set automatically by AddComponent(/datum/component/automatic_fire).
         var/datum/component/automatic_fire/autofire_component
 
-// Legacy: fire selector position. 1 = semi, 2 = burst, 3 = full auto.
-// Upstream removed `select` in favour of burst_fire_selection toggle.
-// Horizon's _automatic.dm and rifle.dm read/write `select` directly.
-/obj/item/gun/ballistic/automatic
-        var/select = 1
+        /// Semi-auto cooldown flag. Legacy var read by horizon's on_autofire_start()
+        /// and do_autofire() to bail out early. Defined here (not just on
+        /// /obj/projectile) because _gun.dm checks it on the gun itself.
+        var/semicd = FALSE
 
 // Legacy: recoil buildup when wielded. Read by horizon's rifle.dm.
 /obj/item/gun/ballistic

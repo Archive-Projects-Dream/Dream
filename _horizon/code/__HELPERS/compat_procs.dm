@@ -38,7 +38,7 @@
         return HAS_TRAIT(src, TRAIT_INCAPACITATED)
 
 /mob/living/incapacitated(ignore_restraints = FALSE, ignore_grab = FALSE, ignore_stasis = FALSE)
-        if(stat >= UNCONSCIOUS)
+        if(stat >= SOFT_CRIT)
                 return TRUE
         if(HAS_TRAIT(src, TRAIT_INCAPACITATED))
                 return TRUE
@@ -50,31 +50,18 @@
 // /obj/item/gun helpers
 // =============================================================================
 
-/// Legacy AltClick for ballistic guns (suppressor removal). Upstream uses
-/// /atom/AltClick(mob/user) which calls user.alt_click_on_atom(src).
-/// This override keeps horizon's _ballistic.dm AltClick call working.
-/obj/item/gun/ballistic/AltClick(mob/user)
-        // Forward to the legacy unsuppress path if a suppressor is attached.
-        if(can_unsuppress && suppressed && user.is_holding(src))
-                var/obj/item/suppressor/suppressor = suppressed
-                playsound(user, '_horizon/sound/weapons/guns/silencer_start.ogg', 60, TRUE)
-                to_chat(user, span_notice("I start unscrewing."))
-                if(!do_after(user, 3 SECONDS, src))
-                        return
-                to_chat(user, span_notice("I unscrew [suppressor] from [src]."))
-                playsound(user, '_horizon/sound/weapons/guns/silencer_off.wav', 75, TRUE)
-                user.put_in_hands(suppressor)
-                clear_suppressor()
-                return
-        return ..()
+/// Legacy AltClick base proc. Upstream /tg/station removed /atom/AltClick
+/// in favour of /mob/AltClickOn(atom/target). Horizon's _ballistic.dm,
+/// rifle.dm, and pistol.dm override /obj/item/gun/.../AltClick(mob/user)
+/// and call ..(), so we need this base to exist on /obj/item.
+/obj/item/proc/AltClick(mob/user)
+        return
 
-// =============================================================================
-// /obj/item/gun/rifle helpers
-// =============================================================================
-
-/// Legacy AltClick on rifles - just delegates to the parent ballistic AltClick.
-/obj/item/gun/ballistic/rifle/AltClick(mob/user)
-        return ..()
+/// Legacy: fire selector position. 1 = semi, 2 = burst, 3 = full auto.
+/// Defined here (loaded before _automatic.dm) so `select = 3` in
+/// _automatic.dm doesn't trigger a "var_before_def" warning.
+/obj/item/gun/ballistic/automatic
+        var/select = 1
 
 // =============================================================================
 // /obj/item/gun/ballistic/shotgun helpers

@@ -36,13 +36,18 @@
 /// Returns the weight (in kilograms) this item contributes to a mob's encumbrance.
 /// Defaults to the item's own carry_weight value, plus any weight contributed by
 /// attached storage datums.
-/// NOTE: Upstream /tg/station renamed /datum/component/storage to /datum/storage.
-/// We check for both at runtime to be safe.
 /obj/item/proc/get_carry_weight()
         . = carry_weight || 0
         var/datum/storage/storage = GetComponent(/datum/storage)
         if(storage)
                 . += storage.get_carry_weight()
+
+/// Stub: returns the total carry weight of items inside this storage datum.
+/// Upstream /datum/storage doesn't ship this proc. We return 0 as a no-op
+/// so /obj/item/proc/get_carry_weight() compiles. Override to sum item
+/// weights if you want real encumbrance from storage.
+/datum/storage/proc/get_carry_weight()
+        return 0
 
 /// Cool drop / throw effect: randomises pixel offset and rotation a bit
 /// so dropped items look less stiff. Ported from legacy
