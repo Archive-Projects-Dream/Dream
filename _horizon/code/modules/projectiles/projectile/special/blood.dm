@@ -60,7 +60,7 @@
 		else if(isfloorturf(target_location) && (target == target_location))
 			var/turf/open/floor/floor = target_location
 			floor.sound_hint()
-			final_hitsound = 'modular_septic/sound/effects/blood_splatter1.wav'
+			final_hitsound = 'sound/effects/wounds/blood1.ogg'
 
 			if(final_hitsound)
 				playsound(floor, final_hitsound, hitsound_volume, TRUE, -1)

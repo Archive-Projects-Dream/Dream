@@ -22,7 +22,7 @@
 		'_horizon/sound/weapons/guns/launcher/batata_load2.wav', \
 		'_horizon/sound/weapons/guns/launcher/batata_load3.wav', \
 	)
-	mag_type = /obj/item/ammo_box/magazine/internal/grenadelauncher/batata
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/grenadelauncher/batata
 	pin = /obj/item/firing_pin
 	slot_flags = null
 	can_suppress = FALSE

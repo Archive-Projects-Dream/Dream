@@ -119,7 +119,7 @@
 	rack_sound = '_horizon/sound/weapons/guns/pistol/john_rack.wav'
 	lock_back_sound = '_horizon/sound/weapons/guns/pistol/john_lockback.wav'
 	bolt_drop_sound = '_horizon/sound/weapons/guns/pistol/john_lockin.wav'
-	mag_type = /obj/item/ammo_box/magazine/u45
+	spawn_magazine_type = /obj/item/ammo_box/magazine/u45
 	can_suppress = FALSE
 	force = 15
 	w_class = WEIGHT_CLASS_NORMAL
@@ -143,7 +143,7 @@
 	if(COOLDOWN_FINISHED(src, corruption_cooldown) && human_user.dna?.species?.id == SPECIES_INBORN && !corrupted)
 		var/corruption_chance = GET_MOB_ATTRIBUTE_VALUE(human_user, STAT_INTELLIGENCE)*4.20 // :3
 		human_user.audible_message(span_boldwarning("[human_user] whispers a secret into [src]'s ear."))
-		playsound(human_user, 'modular_septic/sound/effects/whispers.wav', 35, TRUE)
+		playsound(human_user, '_horizon/sound/effects/whispers.wav', 35, TRUE)
 		corrupt(corruption_chance, user)
 		COOLDOWN_START(src, corruption_cooldown, corruption_cooldown_duration)
 
@@ -156,7 +156,7 @@
 		sleep(rand(1 SECONDS, 1.5 SECONDS))
 		visible_message(span_warning("[src] <span class='boldwarning'>CORRUPTS!</span>"))
 		to_chat(inborn, span_notice("I have corrupted the [src]."))
-		playsound(src, 'modular_septic/sound/heart/inborn_combatcocktail.ogg', 80, FALSE)
+		playsound(src, '_horizon/sound/effects/inborn_combatcocktail.ogg', 80, FALSE)
 		name = "\improper Cortraxx .45"
 		desc = "A lavish pistol for a lavish life. <span class='boldwarning'>It has been corrupted.</span>"
 		icon_state = "USP_corrupted"
@@ -191,7 +191,7 @@
 	)
 	force = 10
 	suppressor_x_offset = 12
-	mag_type = /obj/item/ammo_box/magazine/combatmaster9mm
+	spawn_magazine_type = /obj/item/ammo_box/magazine/combatmaster9mm
 	w_class = WEIGHT_CLASS_NORMAL
 	carry_weight = 1 KILOGRAMS
 	custom_price = 4500
@@ -216,7 +216,7 @@
 		"recoil_angle_lower" = -35, \
 	)
 	force = 10
-	mag_type = /obj/item/ammo_box/magazine/glock9mm
+	spawn_magazine_type = /obj/item/ammo_box/magazine/glock9mm
 	mag_display = TRUE
 	can_suppress = TRUE
 	w_class = WEIGHT_CLASS_NORMAL
@@ -250,7 +250,7 @@
 		"strength" = 0.35,
 		"duration" = 2,
 	)
-	mag_type = /obj/item/ammo_box/magazine/ppk22lr
+	spawn_magazine_type = /obj/item/ammo_box/magazine/ppk22lr
 	mag_display = TRUE
 	can_suppress = TRUE
 	w_class = WEIGHT_CLASS_SMALL
@@ -283,7 +283,7 @@
 	aim_spare_sound = '_horizon/sound/weapons/guns/rifle/voice_steyr/spare.wav'
 	force = 10
 	fire_delay = 8
-	mag_type = /obj/item/ammo_box/magazine/aniquilador
+	spawn_magazine_type = /obj/item/ammo_box/magazine/aniquilador
 	w_class = WEIGHT_CLASS_NORMAL
 	can_unsuppress = FALSE
 	verb_say = "ravishes"
@@ -336,7 +336,7 @@
 	bolt_drop_sound = '_horizon/sound/weapons/guns/pistol/john_lockin.wav'
 	force = 15
 	fire_delay = 2
-	mag_type = /obj/item/ammo_box/magazine/john
+	spawn_magazine_type = /obj/item/ammo_box/magazine/john
 	w_class = WEIGHT_CLASS_NORMAL
 	can_unsuppress = FALSE
 	carry_weight = 2 KILOGRAMS
@@ -371,7 +371,7 @@
 	eject_empty_sound = '_horizon/sound/weapons/guns/pistol/pm9_magout.wav'
 	force = 15
 	fire_delay = 2
-	mag_type = /obj/item/ammo_box/magazine/pm9
+	spawn_magazine_type = /obj/item/ammo_box/magazine/pm9
 	bolt_type = BOLT_TYPE_LOCKING
 	w_class = WEIGHT_CLASS_NORMAL
 	suppressor_x_offset = 9

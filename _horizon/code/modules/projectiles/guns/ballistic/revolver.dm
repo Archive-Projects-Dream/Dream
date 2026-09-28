@@ -88,7 +88,7 @@
 		"duration" = 2.5,
 	)
 	safety_flags = GUN_SAFETY_HAS_SAFETY | GUN_SAFETY_ENABLED | GUN_SAFETY_OVERLAY_ENABLED | GUN_SAFETY_OVERLAY_DISABLED
-	mag_type = /obj/item/ammo_box/magazine/internal/cylinder/gado
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/gado
 	carry_weight = 2 KILOGRAMS
 
 // NAMBU REVOLVER
@@ -111,13 +111,13 @@
 	)
 	fire_sound = '_horizon/sound/weapons/guns/revolver/nova.wav'
 	alternative_fire_sound = '_horizon/sound/weapons/guns/revolver/nova_alt.wav'
-	mag_type = /obj/item/ammo_box/magazine/internal/cylinder/nova
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/nova
 	can_modify_ammo = TRUE
 	initial_caliber = CALIBER_38
 	carry_weight = 1.5 KILOGRAMS
 
 /obj/item/gun/ballistic/revolver/nova/pluspee
-	mag_type = /obj/item/ammo_box/magazine/internal/cylinder/nova/pluspee
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/nova/pluspee
 
 // Poppy
 /obj/item/gun/ballistic/revolver/poppy
@@ -146,7 +146,7 @@
 		"strength" = 0.8,
 		"duration" = 3,
 	)
-	mag_type = /obj/item/ammo_box/magazine/internal/cylinder/poppy
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/poppy
 	carry_weight = 3 KILOGRAMS
 	//tetris_width = 64
 	//tetris_height =  = 64
@@ -167,7 +167,7 @@
 										"pixel_y" = 3)
 	recoil_animation_information = list("recoil_angle_upper" = -25,
 										"recoil_angle_lower" = -50)
-	mag_type = /obj/item/ammo_box/magazine/internal/cylinder/poppy
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/poppy
 	carry_weight = 3 KILOGRAMS
 	//tetris_width = 64
 	//tetris_height =  = 64

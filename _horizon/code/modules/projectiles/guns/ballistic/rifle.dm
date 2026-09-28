@@ -24,10 +24,10 @@
 
 
 /obj/item/gun/ballistic/automatic/remis/abyss/warfare
-	icon = 'modular_zebtic/icons/obj/items/guns/48x32.dmi'
-	worn_icon = 'modular_zebtic/icons/obj/items/guns/worn/back.dmi'
-	lefthand_file = 'modular_zebtic/icons/obj/items/guns/inhands/rifle_lefthand.dmi'
-	righthand_file = 'modular_zebtic/icons/obj/items/guns/inhands/rifle_righthand.dmi'
+	icon = '_horizon/icons/obj/items/guns/alter/48x32.dmi'
+	worn_icon = '_horizon/icons/obj/items/guns/alter/worn/back.dmi'
+	lefthand_file = '_horizon/icons/obj/items/guns/alter/inhands/rifle_lefthand.dmi'
+	righthand_file = '_horizon/icons/obj/items/guns/alter/inhands/rifle_righthand.dmi'
 	equip_sound = list('_horizon/sound/weapons/guns/rifle_holster1.ogg', '_horizon/sound/weapons/guns/rifle_holster2.ogg')
 
 /obj/item/gun/ballistic/automatic/remis/abyss/warfare/m545
@@ -79,7 +79,7 @@
 	inhand_icon_state = "inverno"
 	icon_state = "inverno"
 	base_icon_state = "inverno"
-	mag_type = /obj/item/ammo_box/magazine/a556winter
+	spawn_magazine_type = /obj/item/ammo_box/magazine/a556winter
 	fire_delay = 1.85
 	burst_size = 3
 	empty_icon_state = FALSE
@@ -129,7 +129,7 @@
 	inhand_icon_state = "nikonov"
 	icon_state = "nikonov"
 	base_icon_state = "nikonov"
-	mag_type = /obj/item/ammo_box/magazine/a545
+	spawn_magazine_type = /obj/item/ammo_box/magazine/a545
 	fire_sound = '_horizon/sound/weapons/guns/rifle/ak.wav'
 	suppressed_sound = '_horizon/sound/weapons/guns/rifle/ak_silenced.wav'
 	load_sound = '_horizon/sound/weapons/guns/rifle/akmagin.wav'
@@ -171,7 +171,7 @@
 //donator gun
 /obj/item/gun/ballistic/automatic/remis/abyss/donator
 	name = "\improper AN-95 5.4539mm Abyss Armaments Paypig Assault Rifle"
-	mag_type = /obj/item/ammo_box/magazine/a545/donator
+	spawn_magazine_type = /obj/item/ammo_box/magazine/a545/donator
 	worn_icon_state = "goldonov"
 	inhand_icon_state = "goldonov"
 	icon_state = "goldonov"
@@ -196,7 +196,7 @@
 	inhand_icon_state = "g11"
 	icon_state = "g11"
 	base_icon_state = "g11"
-	mag_type = /obj/item/ammo_box/magazine/a49234g11
+	spawn_magazine_type = /obj/item/ammo_box/magazine/a49234g11
 	fire_sound = '_horizon/sound/weapons/guns/rifle/g11.ogg'
 	load_sound = '_horizon/sound/weapons/guns/rifle/g11magin.wav'
 	load_empty_sound = '_horizon/sound/weapons/guns/rifle/g11magin.wav'
@@ -260,7 +260,7 @@
 	inhand_icon_state = "steyr"
 	icon_state = "steyr"
 	base_icon_state = "steyr"
-	mag_type = /obj/item/ammo_box/magazine/a556steyr
+	spawn_magazine_type = /obj/item/ammo_box/magazine/a556steyr
 	fire_sound = '_horizon/sound/weapons/guns/rifle/steyr.wav'
 	suppressed_sound = '_horizon/sound/weapons/guns/rifle/steyr_silenced.wav'
 	load_sound = '_horizon/sound/weapons/guns/rifle/mmagin.wav'
@@ -354,7 +354,7 @@
 	inhand_icon_state = "svd"
 	icon_state = "svd"
 	base_icon_state = "svd"
-	mag_type = /obj/item/ammo_box/magazine/a762svd
+	spawn_magazine_type = /obj/item/ammo_box/magazine/a762svd
 	actions_types = null
 	burst_size = 1
 	select = FALSE
@@ -435,7 +435,7 @@
 	drop_sound = '_horizon/sound/weapons/guns/drop_mediumgun.wav'
 	load_sound = list('_horizon/sound/weapons/guns/rifle/bolties/federson_load1.wav', '_horizon/sound/weapons/guns/rifle/bolties/federson_load2.wav', '_horizon/sound/weapons/guns/rifle/bolties/federson_load3.wav')
 	can_suppress = FALSE
-	mag_type = /obj/item/ammo_box/magazine/internal/federson
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/federson
 	rack_delay = 1
 
 //G36
@@ -449,7 +449,7 @@
 	inhand_icon_state = "g36"
 	icon_state = "g36"
 	base_icon_state = "g36"
-	mag_type = /obj/item/ammo_box/magazine/a556g36
+	spawn_magazine_type = /obj/item/ammo_box/magazine/a556g36
 	fire_sound = '_horizon/sound/weapons/guns/rifle/g36.ogg'
 	suppressed_sound = '_horizon/sound/weapons/guns/rifle/g36_suppressed.ogg'
 	load_sound = list('_horizon/sound/weapons/guns/rifle/g36_magin1.ogg', '_horizon/sound/weapons/guns/rifle/g36_magin2.ogg')

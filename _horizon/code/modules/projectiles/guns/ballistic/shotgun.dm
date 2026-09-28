@@ -90,7 +90,7 @@
 	bolt_drop_sound = '_horizon/sound/weapons/guns/shotgun/db_out.wav'
 	fire_sound = list('_horizon/sound/weapons/guns/shotgun/comgun1.wav', '_horizon/sound/weapons/guns/shotgun/comgun2.wav')
 	load_sound = '_horizon/sound/weapons/guns/shotgun/db_load.wav'
-	mag_type = /obj/item/ammo_box/magazine/internal/cylinder/bobox
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/bobox
 	slot_flags = ITEM_SLOT_BELT
 	//tetris_width = 64
 	//tetris_height =  = 32
@@ -102,7 +102,7 @@
 	icon_state = "ithaca"
 	base_icon_state = "ithaca"
 	empty_indicator = FALSE
-	mag_type = /obj/item/ammo_box/magazine/internal/shot/lethal
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/lethal
 
 
 /obj/item/gun/ballistic/shotgun/hunting
@@ -191,7 +191,7 @@
 		"recoil_angle_upper" = -15, \
 		"recoil_angle_lower" = -30, \
 	)
-	mag_type = /obj/item/ammo_box/magazine/internal/shot/lethal
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/lethal
 
 // BELADOR 2021 SILENCED SHOTGUN
 /obj/item/gun/ballistic/shotgun/automatic/b2021
@@ -220,7 +220,7 @@
 		"recoil_angle_upper" = -15, \
 		"recoil_angle_lower" = -30, \
 	)
-	mag_type = /obj/item/ammo_box/magazine/internal/shot/b2021
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/b2021
 
 /obj/item/gun/ballistic/shotgun/automatic/b2021/Initialize(mapload)
 	. = ..()
@@ -312,7 +312,7 @@
 		"recoil_angle_lower" = -30, \
 	)
 	pin = /obj/item/firing_pin
-	mag_type = /obj/item/ammo_box/magazine/abyss_shotgun_drum
+	spawn_magazine_type = /obj/item/ammo_box/magazine/abyss_shotgun_drum
 	suppressor_x_offset = 8
 
 // KS23 | TOZ-123 DESTROYER
@@ -324,7 +324,7 @@
 	icon_state = "bolas"
 	base_icon_state = "bolas"
 	inhand_icon_state = "bolas"
-	mag_type = /obj/item/ammo_box/magazine/internal/shot/bolas
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/bolas
 	fire_sound = list('_horizon/sound/weapons/guns/shotgun/bolas1.wav', '_horizon/sound/weapons/guns/shotgun/bolas2.wav')
 	suppressed_sound = list('_horizon/sound/weapons/guns/shotgun/bolas_silenced1.wav', '_horizon/sound/weapons/guns/shotgun/bolas_silenced2.wav')
 	load_sound = list(
@@ -362,7 +362,7 @@
 	var/semi = FALSE
 	var/spas_semi_click = '_horizon/sound/weapons/guns/shotgun/spas_click.ogg'
 	foldable = TRUE
-	mag_type = /obj/item/ammo_box/magazine/internal/shot/spas
+	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/spas
 
 /obj/item/gun/ballistic/shotgun/denominator/attack_self_tertiary(mob/user, modifiers)
 	. = ..()

@@ -21,7 +21,7 @@
 	inhand_icon_state = "nasr"
 	icon_state = "nasr"
 	base_icon_state = "nasr"
-	cell_type = /obj/item/stock_parts/cell
+	cell_type = /obj/item/stock_parts/power_store/cell
 	charge_delay = 15
 	ammo_type = list(/obj/item/ammo_casing/energy/nasr)
 	custom_materials = list(/datum/material/uranium=10000, \

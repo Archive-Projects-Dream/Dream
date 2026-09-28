@@ -16,7 +16,7 @@
 	safety_on_sound = '_horizon/sound/weapons/guns/energy/siren_safetyon.wav'
 	drop_sound = '_horizon/sound/weapons/guns/drop_heavygun.wav'
 	vary_fire_sound = FALSE
-	cell_type = /obj/item/stock_parts/cell/high
+	cell_type = /obj/item/stock_parts/power_store/cell/high
 	charge_delay = 5
 	fire_delay = 3 SECONDS
 	ammo_type = list(/obj/item/ammo_casing/energy/siren)

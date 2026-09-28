@@ -209,7 +209,7 @@
 	/// The sound it makes when you unfold a stock.
 	var/fold_close_sound = '_horizon/sound/weapons/guns/stock_close.wav'
 	/// Every time you fiddle with the stock
-	var/fiddle = 'modular_septic/sound/effects/fiddle.wav'
+	var/fiddle = '_horizon/sound/effects/fiddle.wav'
 
 /obj/item/gun/New()
 	. = ..()
@@ -479,11 +479,7 @@
 									span_hear("I hear a gunshot!"), COMBAT_MESSAGE_RANGE, target)
 
 	if(weapon_weight >= WEAPON_HEAVY)
-		if(!SEND_SIGNAL(src, COMSIG_TWOHANDED_WIELD_CHECK) && (GET_MOB_ATTRIBUTE_VALUE(user, STAT_STRENGTH) < 20))
-			user.dropItemToGround(src)
-			to_chat(user, span_userdanger(uppertext(fail_msg(TRUE))))
-	else if(weapon_weight >= WEAPON_MEDIUM)
-		if(!SEND_SIGNAL(src, COMSIG_TWOHANDED_WIELD_CHECK) && (GET_MOB_ATTRIBUTE_VALUE(user, STAT_STRENGTH) < 14))
+		if(!SEND_SIGNAL(src, COMSIG_TWOHANDED_WIELD_CHECK))
 			user.dropItemToGround(src)
 			to_chat(user, span_userdanger(uppertext(fail_msg(TRUE))))
 
@@ -681,5 +677,5 @@
 
 /datum/action/item_action/toggle_stock
 	name = "Toggle Stock"
-	icon_icon = 'modular_septic/icons/hud/quake/actions.dmi'
+	icon_icon = '_horizon/icons/hud/actions.dmi'
 	button_icon_state = "stock"
