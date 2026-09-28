@@ -14,7 +14,7 @@
 /// Legacy: called when an atom contained in this atom is deleted.
 /// Upstream removed this in favour of datum storage signals. No-op stub.
 /atom/proc/handle_atom_del(atom/deleting_atom)
-        return
+	return
 
 // =============================================================================
 // /obj/item/ammo_box helpers
@@ -25,7 +25,7 @@
 /// internally. We re-derive the count via ammo_count() and trigger an
 /// appearance refresh so call sites like _ammo_box.dm keep working.
 /obj/item/ammo_box/proc/update_ammo_count()
-        update_appearance()
+	update_appearance()
 
 // =============================================================================
 // /mob helpers
@@ -35,16 +35,16 @@
 /// KO'd, etc.). Upstream uses HAS_TRAIT(mob, TRAIT_INCAPACITATED) instead.
 /// This shim keeps horizon's _gun.dm / _ballistic.dm MouseDrop checks working.
 /mob/proc/incapacitated(ignore_restraints = FALSE, ignore_grab = FALSE, ignore_stasis = FALSE)
-        return HAS_TRAIT(src, TRAIT_INCAPACITATED)
+	return HAS_TRAIT(src, TRAIT_INCAPACITATED)
 
 /mob/living/incapacitated(ignore_restraints = FALSE, ignore_grab = FALSE, ignore_stasis = FALSE)
-        if(stat >= SOFT_CRIT)
-                return TRUE
-        if(HAS_TRAIT(src, TRAIT_INCAPACITATED))
-                return TRUE
-        if(!ignore_restraints && (HAS_TRAIT(src, TRAIT_HANDS_BLOCKED) || HAS_TRAIT(src, TRAIT_RESTRAINED)))
-                return TRUE
-        return FALSE
+	if(stat >= SOFT_CRIT)
+		return TRUE
+	if(HAS_TRAIT(src, TRAIT_INCAPACITATED))
+		return TRUE
+	if(!ignore_restraints && (HAS_TRAIT(src, TRAIT_HANDS_BLOCKED) || HAS_TRAIT(src, TRAIT_RESTRAINED)))
+		return TRUE
+	return FALSE
 
 // =============================================================================
 // /obj/item/gun helpers
@@ -55,13 +55,13 @@
 /// rifle.dm, and pistol.dm override /obj/item/gun/.../AltClick(mob/user)
 /// and call ..(), so we need this base to exist on /obj/item.
 /obj/item/proc/AltClick(mob/user)
-        return
+	return
 
 /// Legacy: fire selector position. 1 = semi, 2 = burst, 3 = full auto.
 /// Defined here (loaded before _automatic.dm) so `select = 3` in
 /// _automatic.dm doesn't trigger a "var_before_def" warning.
 /obj/item/gun/ballistic/automatic
-        var/select = 1
+	var/select = 1
 
 // =============================================================================
 // /obj/item/gun/ballistic/shotgun helpers
@@ -71,7 +71,7 @@
 /// attack_self_tertiary - it's a no-op stub so the override in shotgun.dm
 /// compiles. Returns the standard "continue chain" sentinel.
 /obj/item/proc/attack_self_tertiary(mob/user, modifiers)
-        return NONE
+	return NONE
 
 // =============================================================================
 // /obj/item/gun secondary attack helpers
@@ -82,13 +82,13 @@
 /// it with attack_secondary(). This no-op stub lets horizon's _gun.dm override
 /// compile. Override at the subtype level to add real behaviour.
 /obj/item/proc/afterattack_secondary(atom/target, mob/user, proximity_flag, click_parameters)
-        return NONE
+	return NONE
 
 /// Legacy: alt_click_secondary() was the right-click variant of AltClick.
 /// Upstream uses AltClickSecondaryOn(atom/target) on /mob instead. This
 /// no-op stub lets horizon's pistol.dm override compile.
 /obj/item/proc/alt_click_secondary(mob/user)
-        return NONE
+	return NONE
 
 // =============================================================================
 // /obj/item helpers
@@ -99,40 +99,40 @@
 /// simple file-path reference so the chaser / examine UI can resolve the
 /// asset via the standard asset cache.
 /proc/image2html(icon_or_image, mob/user, format = null, sourceonly = FALSE)
-        if(!icon_or_image)
-                return ""
-        // If we were handed a file path (the common case for horizon's desc_chaser),
-        // return the path string so the caller can embed it in an <img> tag.
-        if(isfile(icon_or_image) || istext(icon_or_image))
-                return "[icon_or_image]"
-        return "\[[icon_or_image]\]"
+	if(!icon_or_image)
+		return ""
+	// If we were handed a file path (the common case for horizon's desc_chaser),
+	// return the path string so the caller can embed it in an <img> tag.
+	if(isfile(icon_or_image) || istext(icon_or_image))
+		return "[icon_or_image]"
+	return "\[[icon_or_image]\]"
 
 
 /// Legacy: desc_chaser() returns a verbose description of an item for the
 /// chaser / examine UI. Upstream doesn't ship this - we return "" so the
 /// override in pistol.dm compiles.
 /obj/item/proc/desc_chaser(mob/user)
-        return ""
+	return ""
 
 // =============================================================================
 // /obj/item/knife helpers
 // =============================================================================
 
 /obj/item/knife
-        /// Legacy: if TRUE, this knife can be attached as a bayonet to a gun.
-        /// Upstream removed the bayonet attachment system from /obj/item/gun;
-        /// horizon's _gun.dm still reads `knife.bayonet`.
-        var/bayonet = FALSE
+	/// Legacy: if TRUE, this knife can be attached as a bayonet to a gun.
+	/// Upstream removed the bayonet attachment system from /obj/item/gun;
+	/// horizon's _gun.dm still reads `knife.bayonet`.
+	var/bayonet = FALSE
 
 // =============================================================================
 // /obj/item/flashlight/seclite helpers
 // =============================================================================
 
 /obj/item/flashlight/seclite
-        /// Legacy: if TRUE, the seclite is currently turned on. Upstream uses
-        /// `light_on` instead. This alias keeps horizon's _gun.dm overlay code
-        /// working.
-        var/on = FALSE
+	/// Legacy: if TRUE, the seclite is currently turned on. Upstream uses
+	/// `light_on` instead. This alias keeps horizon's _gun.dm overlay code
+	/// working.
+	var/on = FALSE
 
 // =============================================================================
 // Action button helpers
@@ -141,25 +141,25 @@
 /// Legacy: refreshes all action buttons on the user's HUD.
 /// Upstream uses /mob/proc/update_action_buttons(reload_screen).
 /obj/item/proc/update_action_buttons()
-        if(ismob(loc))
-                var/mob/M = loc
-                M.update_action_buttons()
+	if(ismob(loc))
+		var/mob/M = loc
+		M.update_action_buttons()
 
 // =============================================================================
 // /datum/action/item_action helpers
 // =============================================================================
 
 /datum/action/item_action
-        /// Legacy: icon file for the action button. Upstream uses `button_icon`
-        /// instead. We provide `icon_icon` as an alias so horizon's _gun.dm
-        /// toggle_stock action definition compiles.
-        var/icon_icon
+	/// Legacy: icon file for the action button. Upstream uses `button_icon`
+	/// instead. We provide `icon_icon` as an alias so horizon's _gun.dm
+	/// toggle_stock action definition compiles.
+	var/icon_icon
 
 /datum/action/item_action/New(Target)
-        . = ..()
-        // Mirror icon_icon into button_icon so upstream's rendering code works.
-        if(icon_icon && !button_icon)
-                button_icon = icon_icon
+	. = ..()
+	// Mirror icon_icon into button_icon so upstream's rendering code works.
+	if(icon_icon && !button_icon)
+		button_icon = icon_icon
 
 // =============================================================================
 // /obj/projectile helpers
@@ -174,4 +174,4 @@
 /// That override is the real implementation. This stub is only here so
 /// upstream's call sites that still use process_hit_loop() don't break.
 /obj/projectile/proc/process_hit(turf/T, atom/target, atom/bumped, hit_something = FALSE)
-        return process_hit_loop(target)
+	return process_hit_loop(target)

@@ -7,15 +7,15 @@
 
 /// Stores the attached seclite on the gun and grants the toggle action.
 /obj/item/gun/proc/set_gun_light(obj/item/flashlight/seclite/new_light)
-        gun_light = new_light
-        if(gun_light)
-                gun_light.set_light_flags(LIGHT_ATTACHED)
-                if(!alight)
-                        alight = new(src)
-                alight.target = gun_light
+	gun_light = new_light
+	if(gun_light)
+		gun_light.set_light_flags(LIGHT_ATTACHED)
+		if(!alight)
+			alight = new(src)
+		alight.target = gun_light
 
 /// Refreshes the gunlight action button state + the gun's icon overlays.
 /obj/item/gun/proc/update_gunlight()
-        if(alight)
-                alight.build_all_button_icons()
-        update_appearance()
+	if(alight)
+		alight.build_all_button_icons()
+	update_appearance()

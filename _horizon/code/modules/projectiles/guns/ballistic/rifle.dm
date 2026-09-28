@@ -113,9 +113,6 @@
 	var/obj/item/suppressor/S = new(src)
 	install_suppressor(S)
 
-/obj/item/gun/ballistic/automatic/remis/winter/pickup(mob/user)
-	. = ..()
-	user.client?.give_award(/datum/award/achievement/misc/nkiller, user)
 
 //Darkworld Gun
 /obj/item/gun/ballistic/automatic/remis/abyss

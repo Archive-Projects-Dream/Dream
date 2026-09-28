@@ -56,12 +56,6 @@
 	readout += span_notice("<b>Projectile Maximum Force:</b> [exam_proj.damage]")
 	if(exam_proj.wound_bonus)
 		readout += span_notice("<b>Projectile Wound Bonus:</b> [exam_proj.wound_bonus]")
-	if(exam_proj.bare_wound_bonus)
-		readout += span_notice("<b>Projectile Bare Wound Bonus:</b> [exam_proj.bare_wound_bonus]")
-	if(exam_proj.organ_bonus)
-		readout += span_notice("<b>Projectile Organ Bonus:</b> [exam_proj.organ_bonus]")
-	if(exam_proj.bare_organ_bonus)
-		readout += span_notice("<b>Projectile Bare Organ Bonus:</b> [exam_proj.bare_organ_bonus]")
 	readout += span_notice("<b>Projectile Sharpness:</b> [capitalize_like_old_man(translate_sharpness(exam_proj.get_sharpness()))]")
 	return readout.Join("\n")
 

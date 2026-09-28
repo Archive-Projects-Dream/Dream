@@ -8,10 +8,6 @@
 	shrapnel_type = null
 	range = 7
 
-/obj/projectile/bullet/l40mm/examine(mob/user)
-	. = ..()
-	user.client?.give_award(/datum/award/achievement/misc/meudeus, user)
-
 /obj/projectile/bullet/l40mm/on_hit(atom/target, blocked = FALSE)
 	. = ..()
 	explosion(target, devastation_range = -1, heavy_impact_range = 2, light_impact_range = 4, flame_range = 2, flash_range = 3, adminlog = FALSE, explosion_cause = src)
