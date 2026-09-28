@@ -9,12 +9,3 @@
 
 /atom/proc/sound_hint(duration = 5, use_icon = null, use_states = null)
 	return
-
-/mob/proc/sound_hint(duration = 5, use_icon = null, use_states = null)
-	return
-
-/obj/proc/sound_hint(duration = 5, use_icon = null, use_states = null)
-	return
-
-/turf/proc/sound_hint(duration = 5, use_icon = null, use_states = null)
-	return

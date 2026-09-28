@@ -35,10 +35,12 @@
 
 /// Returns the weight (in kilograms) this item contributes to a mob's encumbrance.
 /// Defaults to the item's own carry_weight value, plus any weight contributed by
-/// attached components (storage, magazine, etc.).
+/// attached storage datums.
+/// NOTE: Upstream /tg/station renamed /datum/component/storage to /datum/storage.
+/// We check for both at runtime to be safe.
 /obj/item/proc/get_carry_weight()
         . = carry_weight || 0
-        var/datum/component/storage/storage = GetComponent(/datum/component/storage)
+        var/datum/storage/storage = GetComponent(/datum/storage)
         if(storage)
                 . += storage.get_carry_weight()
 

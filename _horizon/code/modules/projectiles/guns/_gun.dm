@@ -72,8 +72,6 @@
         dry_fire_sound = '_horizon/sound/weapons/guns/empty.wav'
         /// Message when we dry fire (applies both to dry firing and failing to fire for other reasons)
         var/dry_fire_message = span_danger("*click*")
-        /// Volume of dry_fire_sound
-        var/dry_fire_sound_volume = 30
         /// Whether to vary dry_fire_sound or not
         var/dry_fire_sound_vary = FALSE
         /// Sound for aiming at someone
