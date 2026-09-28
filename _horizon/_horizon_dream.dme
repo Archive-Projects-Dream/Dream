@@ -29,6 +29,7 @@
 #include "code\datums\attributes.dm"
 #include "code\datums\elements\horizon_wield_check_bridge.dm"
 #include "code\datums\elements\world_icon.dm"
+#include "code\datums\keybinding\rack_gun.dm"
 #include "code\datums\legacy_stubs.dm"
 #include "code\datums\particles\leaves.dm"
 #include "code\elements\directional_attack.dm"
