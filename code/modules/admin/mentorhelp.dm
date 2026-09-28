@@ -365,8 +365,8 @@ GLOBAL_DATUM_INIT(mentorhelp_manager, /datum/mentorhelp_manager, new)
 		message_title = "MentorHelp"
 		var/display_text = get_display_name(recipient, sender)
 		message_sender_key = "<a href='byond://?src=[REF(src)];action=message'>[display_text]</a>"
-		message_sender_options = " (<a href='byond://?src=[REF(src)];action=mark'>Mark/Unmark</a>"
-		message_sender_options += " | <a href='byond://?src=[REF(src)];action=close'>Close</a> | <a href='byond://?src=[REF(src)];action=autorespond'>AutoResponse</a>)"
+		message_sender_options = " (<a class='button' href='byond://?src=[REF(src)];action=mark'>Mark/Unmark</a>"
+		message_sender_options += " | <a class='button' href='byond://?src=[REF(src)];action=close'>Close</a> | <a class='button' href='byond://?src=[REF(src)];action=autorespond'>AutoResponse</a>)"
 	else
 		var/display_text = get_display_name(recipient, sender)
 		message_sender_key = "<a href='byond://?src=[REF(src)];action=message'>[display_text]</a>"

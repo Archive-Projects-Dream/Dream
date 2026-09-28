@@ -84,7 +84,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	if(!l2b)
 		return
 	var/list/dat = list("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>[title]</title></head>")
-	dat += "<A href='byond://?_src_=holder;[HrefToken()];ahelp_tickets=[state]'>Refresh</A><br><br>"
+	dat += "<a class='button' href='byond://?_src_=holder;[HrefToken()];ahelp_tickets=[state]'>Refresh</a><br><br>"
 	for(var/I in l2b)
 		var/datum/admin_help/AH = I
 		dat += "[span_adminnotice("[span_adminhelp("Ticket #[AH.id]")]: <A href='byond://?_src_=holder;[HrefToken()];ahelp=[REF(AH)];ahelp_action=ticket'>[AH.initiator_key_name]: [AH.name]</A>")]<br>"
@@ -419,13 +419,13 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	. = "<br><b>Ticket Actions: </b>"
 	if(state == AHELP_ACTIVE)
 		if(initial_message)
-			. += " (<A href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];ahelp=[ref_src];ahelp_action=defer'>DEFER</A>)"
+			. += " <a class='button' href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];ahelp=[ref_src];ahelp_action=defer'>DEFER</a>"
 		if (CONFIG_GET(flag/popup_admin_pm))
-			. += " (<A href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];adminpopup=[REF(initiator)]'>POPUP</A>)"
+			. += " <a class='button' href='byond://?_src_=holder;[HrefToken(forceGlobal = TRUE)];adminpopup=[REF(initiator)]'>POPUP</a>"
 		. += ClosureLinks(ref_src)
 	. += "<br><b>Player Actions: </b>"
 	. += ADMIN_FULLMONTY_NONAME(initiator.mob)
-	. += " (<A href='byond://?_src_=holder;[HrefToken()];showmessageckey=[initiator.ckey]'>NOTES</A>)"
+	. += " <a class='button' href='byond://?_src_=holder;[HrefToken()];showmessageckey=[initiator.ckey]'>NOTES</a>"
 	. += "</b>"
 
 //private
@@ -524,7 +524,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	log_admin_private(msg)
 	SSblackbox.LogAhelp(id, "Reopened", "Reopened by [usr.key]", usr.ckey)
 	SSblackbox.record_feedback("tally", "ahelp_stats", 1, "reopened")
-	TicketPanel() //can only be done from here, so refresh it
+	OpenInTicketPanel() //can only be done from here, so refresh it
 
 //private
 /datum/admin_help/proc/RemoveActive()
@@ -745,7 +745,19 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 	if(response.closer)
 		Resolve(silent = TRUE)
 
-//Show the ticket panel
+// Opens this ticket in the TGUI admin/mentor ticket panel.
+// Use this instead of the legacy browse() TicketPanel() below.
+/datum/admin_help/proc/OpenInTicketPanel()
+	var/client/C = usr.client
+	if(!C?.holder)
+		return
+	if(!C.ticket_panel)
+		C.ticket_panel = new /datum/ticket_panel()
+	C.ticket_panel.selected_tab = ADMIN_TAB
+	C.ticket_panel.selected_ticket = id
+	C.holder.ticket_panel()
+
+//Show the ticket panel (LEGACY browse view)
 /datum/admin_help/proc/TicketPanel()
 	var/list/dat = list("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>Ticket #[id]</title></head>")
 	var/ref_src = "[REF(src)]"
@@ -768,7 +780,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 
 	// Helper for opening directly to player ticket history
 	dat += "<br><br><b>Player Ticket History:</b>"
-	dat += "[FOURSPACES]<A href='byond://?_src_=holder;[HrefToken()];player_ticket_history=[initiator_ckey]'>Open</A>"
+	dat += "[FOURSPACES]<a class='button' href='byond://?_src_=holder;[HrefToken()];player_ticket_history=[initiator_ckey]'>Open</a>"
 
 	// Append any tickets also opened by this user if relevant
 	var/list/related_tickets = GLOB.ahelp_tickets.TicketsByCKey(initiator_ckey)
@@ -814,7 +826,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		//not saying the original name cause it could be a long ass message
 		var/msg = "Ticket [TicketHref("#[id]")] titled [name] by [key_name_admin(usr)]"
 		message_admins(msg)
-	TicketPanel() //we have to be here to do this
+	OpenInTicketPanel() //we have to be here to do this
 
 //Forwarded action from admin/Topic
 /datum/admin_help/proc/Action(action)
@@ -833,7 +845,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 		webhook_sent = WEBHOOK_NONE
 	switch(action)
 		if("ticket")
-			TicketPanel()
+			OpenInTicketPanel()
 		if("retitle")
 			Retitle()
 		if("mark")
@@ -865,7 +877,7 @@ GLOBAL_DATUM_INIT(ahelp_tickets, /datum/admin_help_tickets, new)
 			dat += "CLOSED</b>"
 		else
 			dat += "UNKNOWN</b>"
-	dat += "\n[FOURSPACES]<A href='byond://?_src_=usr;player_ticket_panel=1'>Refresh</A>"
+	dat += "\n[FOURSPACES]<a class='button' href='byond://?_src_=usr;player_ticket_panel=1'>Refresh</a>"
 	dat += "<br><br>Opened at: [round_timestamp("hh:mm:ss", opened_at)] (Approx [DisplayTimeText(world.time - opened_at)] ago)"
 	if(closed_at)
 		dat += "<br>Closed at: [round_timestamp("hh:mm:ss", closed_at)] (Approx [DisplayTimeText(world.time - closed_at)] ago)"
