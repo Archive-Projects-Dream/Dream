@@ -350,8 +350,8 @@
                 playsound(src, eject_sound, eject_sound_volume, eject_sound_vary)
         else
                 playsound(src, eject_empty_sound, eject_sound_volume, eject_sound_vary)
-        magazine.forceMove(drop_location())
         var/obj/item/ammo_box/magazine/old_mag = magazine
+        magazine.forceMove(drop_location())
         if(tac_load)
                 if(insert_magazine(user, tac_load, FALSE))
                         to_chat(user, span_notice("I perform a tactical reload on [src]."))
@@ -361,10 +361,17 @@
         else
                 magazine = null
         if(old_mag)
-                if(!hand_index)
-                        user.put_in_hands(old_mag)
-                else
-                        user.put_in_hand(old_mag, hand_index)
+                if(user && iscarbon(user))
+                        var/mob/living/carbon/C = user
+                        // If the gun is wielded two-handed, unwield first to free
+                        // the offhand so the magazine can go into the player's hand.
+                        var/datum/component/two_handed/TH = GetComponent(/datum/component/two_handed)
+                        if(TH?.wielded)
+                                TH.unwield(C)
+                        if(!hand_index)
+                                C.put_in_hands(old_mag)
+                        else
+                                C.put_in_hand(old_mag, hand_index)
                 old_mag.update_appearance()
         if(display_message && !tac_load)
                 to_chat(user, span_notice("I pull the [magazine_wording] out of [src]."))

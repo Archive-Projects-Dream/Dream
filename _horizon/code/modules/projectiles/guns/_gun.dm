@@ -361,10 +361,12 @@
         return process_fire(target, user, TRUE, params, null, bonus_spread)
 
 /obj/item/gun/can_trigger_gun(mob/living/user)
-        . = ..()
-        // Safety checks are handled here so as not to break turrets
-        if(CHECK_MULTIPLE_BITFIELDS(safety_flags, GUN_SAFETY_HAS_SAFETY | GUN_SAFETY_ENABLED))
+        if(!handle_pins(user))
                 return FALSE
+        // Safety checks: if safety is ENABLED (ON), the gun cannot fire.
+        if(safety_flags & GUN_SAFETY_ENABLED)
+                return FALSE
+        return TRUE
 
 /obj/item/gun/check_botched(mob/living/user, params)
         if(clumsy_check)
