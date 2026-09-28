@@ -7,18 +7,19 @@
 // =============================================================================
 
 /// Legacy: preparePixelProjectile() set up a projectile's pixel-precise
-/// trajectory based on click params. Upstream moved this logic into fire().
-/// This shim is a no-op so horizon's _firing.dm throw_proj() compiles.
-/// Real trajectory setup happens in /obj/projectile/fire() upstream.
+/// trajectory based on click params. Upstream renamed it to
+/// aim_projectile() and gave it a (target, source, modifiers, deviation)
+/// signature. We forward so horizon's _firing.dm throw_proj() compiles
+/// AND actually sets the projectile's angle / pixel offsets.
 /obj/projectile/proc/preparePixelProjectile(atom/target, atom/source, modifiers, spread = 0)
-	return
+        aim_projectile(target, source, modifiers, spread)
 
 /// Legacy: Range() was called each time the projectile moved a tile.
 /// Upstream uses Bump() / process_hit_loop() instead. We provide a no-op
 /// stub so horizon's _projectile.dm override compiles; the override is
 /// where the real behaviour lives.
 /obj/projectile/proc/Range()
-	return
+        return
 
 // =============================================================================
 // /mob/living procs
@@ -28,13 +29,13 @@
 /// in the given zone, considering miss chances. Upstream uses
 /// get_bodypart(zone) directly. We delegate.
 /mob/living/proc/check_limb_hit(zone)
-	return get_bodypart(zone)
+        return get_bodypart(zone)
 
 /// Legacy: on_hit(projectile) was called when a projectile hit this mob.
 /// Upstream uses bullet_act() instead. We provide a no-op stub so
 /// horizon's _projectile.dm call to `living_target.on_hit(src)` compiles.
 /mob/living/proc/on_hit(obj/projectile/proj)
-	return
+        return
 
 // =============================================================================
 // /atom procs
@@ -45,13 +46,13 @@
 /// hardcoded hitsound handling in /obj/projectile/on_hit(). We return
 /// null by default; overridden on /turf subtypes below.
 /atom/proc/get_projectile_hitsound(obj/projectile/proj)
-	return null
+        return null
 
 /turf/closed/wall/get_projectile_hitsound(obj/projectile/proj)
-	return '_horizon/sound/bullet/ricochet1.wav'
+        return '_horizon/sound/bullet/ricochet1.wav'
 
 /turf/open/floor/get_projectile_hitsound(obj/projectile/proj)
-	return '_horizon/sound/bullet/ricochet1.wav'
+        return '_horizon/sound/bullet/ricochet1.wav'
 
 // =============================================================================
 // /obj/item/bodypart procs
@@ -67,10 +68,10 @@
 /// projectile (for forensic analysis). Upstream uses the reagent/blood
 /// system instead. We return an empty list so horizon's blood.dm compiles.
 /obj/projectile/proc/return_blood_DNA()
-	return list()
+        return list()
 
 /obj/effect/temp_visual/bloodsplatter/proc/return_blood_DNA()
-	return list()
+        return list()
 
 /obj/item/proc/return_blood_DNA()
-	return list()
+        return list()
