@@ -115,20 +115,6 @@
         /// If this gun has client recoil, this stores info such as amount and duration
         var/list/client_recoil_animation_information = null
 
-        /// Add this to the projectile diceroll modifiers of whatever we fire
-        var/diceroll_modifier = 0
-        /// Add this to the projectile diceroll modifiers of whatever we fire, but ONLY against a specified target
-        var/list/target_specific_diceroll = null
-
-        /// Aiming bonus that gets added in target_specific_diceroll, on stage 0
-        var/stage_zero_aim_bonus = 0
-        /// Aiming bonus that gets added in target_specific_diceroll, on stage 1
-        var/stage_one_aim_bonus = 0
-        /// Aiming bonus that gets added in target_specific_diceroll, on stage 2
-        var/stage_two_aim_bonus = 0
-        /// Aiming bonus that gets added in target_specific_diceroll, on stage 3
-        var/stage_three_aim_bonus = 0
-
         /// NO FULL AUTO IN BUILDINGS!
         var/full_auto = FALSE
 

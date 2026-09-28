@@ -7,15 +7,10 @@
         loaded_projectile.suppressed = quiet
         if(isitem(loaded_projectile.suppressed))
                 loaded_projectile.suppressed = SUPPRESSED_NONE
-        loaded_projectile.diceroll_modifier += diceroll_modifier
-        if(target_specific_diceroll)
-                LAZYOR(loaded_projectile.target_specific_diceroll, target_specific_diceroll)
         if(isgun(fired_from))
                 var/obj/item/gun/gun = fired_from
                 loaded_projectile.damage *= gun.projectile_damage_multiplier
                 loaded_projectile.stamina *= gun.projectile_damage_multiplier
-                loaded_projectile.diceroll_modifier += gun.diceroll_modifier
-                //loaded_projectile.skill_ranged = gun.skill_ranged
                 loaded_projectile.ranged_modifier = gun.ranged_modifier
                 loaded_projectile.ranged_zone_modifier = gun.ranged_zone_modifier
 
@@ -28,18 +23,6 @@
                 loaded_projectile.def_zone = zone_override
         else
                 loaded_projectile.def_zone = user.zone_selected
-                if(istype(user) && user.attributes && (target != user))
-                        var/zone_modifier = 0
-                        var/skill_modifier = 0
-                        //if(loaded_projectile.skill_ranged)
-                        //      skill_modifier += GET_MOB_SKILL_VALUE(user, loaded_projectile.skill_ranged)
-                        var/obj/item/bodypart/stock_bodypart = GLOB.bodyparts_by_zone[loaded_projectile.def_zone]
-                        if(stock_bodypart)
-                                zone_modifier += stock_bodypart.ranged_hit_zone_modifier
-                        var/diceroll = user.diceroll(skill_modifier+zone_modifier, context = DICE_CONTEXT_PHYSICAL)
-                        //Change zone on fails
-                        if(diceroll <= DICE_FAILURE)
-                                loaded_projectile.def_zone = ran_zone(user.zone_selected, 0)
         if(ishuman(user))
                 var/distance = get_dist(user, target)
                 loaded_projectile.decayedRange = min(loaded_projectile.range, distance)

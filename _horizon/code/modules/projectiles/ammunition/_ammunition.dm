@@ -7,10 +7,6 @@
         var/world_icon = '_horizon/icons/obj/items/ammo/casings_world.dmi'
         /// World icon state
         var/world_icon_state = "s-casing"
-        /// Add this to the projectile diceroll modifiers of whatever we fire
-        var/diceroll_modifier = 0
-        /// Add this to the projectile diceroll modifiers of whatever we fire, but ONLY against a specified target
-        var/list/target_specific_diceroll
         /// The funny sound we make when we bounce on floors
         var/bounce_sound = list('_horizon/sound/bullet/casing_bounce1.wav', '_horizon/sound/bullet/casing_bounce2.wav', '_horizon/sound/bullet/casing_bounce3.wav')
         /// The volume of the bouncing
