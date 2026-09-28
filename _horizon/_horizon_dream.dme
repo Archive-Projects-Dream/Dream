@@ -91,6 +91,7 @@
 #include "code\modules\projectiles\guns\ballistic\sawoff_compat.dm"
 #include "code\modules\projectiles\guns\ballistic\shotgun.dm"
 #include "code\modules\projectiles\guns\ballistic\smg.dm"
+#include "code\modules\projectiles\guns\ballistic\wield_attack_self.dm"
 #include "code\modules\projectiles\guns\energy\nasr.dm"
 #include "code\modules\projectiles\guns\energy\railgun.dm"
 #include "code\modules\projectiles\guns\energy\siren.dm"
