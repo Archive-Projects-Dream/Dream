@@ -11,14 +11,14 @@
 /// This shim is a no-op so horizon's _firing.dm throw_proj() compiles.
 /// Real trajectory setup happens in /obj/projectile/fire() upstream.
 /obj/projectile/proc/preparePixelProjectile(atom/target, atom/source, modifiers, spread = 0)
-	return
+        return
 
 /// Legacy: Range() was called each time the projectile moved a tile.
 /// Upstream uses Bump() / process_hit_loop() instead. We provide a no-op
 /// stub so horizon's _projectile.dm override compiles; the override is
 /// where the real behaviour lives.
 /obj/projectile/proc/Range()
-	return
+        return
 
 // =============================================================================
 // /mob/living procs
@@ -28,13 +28,13 @@
 /// in the given zone, considering miss chances. Upstream uses
 /// get_bodypart(zone) directly. We delegate.
 /mob/living/proc/check_limb_hit(zone)
-	return get_bodypart(zone)
+        return get_bodypart(zone)
 
 /// Legacy: on_hit(projectile) was called when a projectile hit this mob.
 /// Upstream uses bullet_act() instead. We provide a no-op stub so
 /// horizon's _projectile.dm call to `living_target.on_hit(src)` compiles.
 /mob/living/proc/on_hit(obj/projectile/proj)
-	return
+        return
 
 // =============================================================================
 // /turf procs
@@ -45,25 +45,24 @@
 /// hardcoded hitsound handling in /obj/projectile/on_hit(). We return
 /// null so horizon's _projectile.dm falls back to default behaviour.
 /turf/proc/get_projectile_hitsound(obj/projectile/proj)
-	return null
+        return null
 
 /turf/closed/wall/get_projectile_hitsound(obj/projectile/proj)
-	return 'sound/items/weapons/gun/general/ricochet.ogg'
+        return 'sound/items/weapons/gun/general/ricochet.ogg'
 
 /turf/open/floor/get_projectile_hitsound(obj/projectile/proj)
-	return 'sound/items/weapons/gun/general/ricochet.ogg'
+        return 'sound/items/weapons/gun/general/ricochet.ogg'
 
 /// Legacy: add_dent(dent_type, x, y) added a bullet dent decal to the turf.
-/// Upstream removed this. We provide a no-op stub so horizon's
-/// _projectile.dm compiles. Real dent rendering should be ported separately.
+/// Upstream removed this from the base /turf type (only /turf/closed/wall
+/// has it). We provide a no-op stub on /turf and /turf/open/floor so
+/// horizon's _projectile.dm compiles. /turf/closed/wall already has a
+/// real implementation upstream, so we don't override it here.
 /turf/proc/add_dent(dent_type, x, y)
-	return
-
-/turf/closed/wall/add_dent(dent_type, x, y)
-	return
+        return
 
 /turf/open/floor/add_dent(dent_type, x, y)
-	return
+        return
 
 // =============================================================================
 // /atom procs
@@ -72,7 +71,7 @@
 /// Legacy: get_projectile_hitsound(projectile) at the atom level.
 /// Returns null by default; overridden on /turf subtypes above.
 /atom/proc/get_projectile_hitsound(obj/projectile/proj)
-	return null
+        return null
 
 // =============================================================================
 // /obj/item/bodypart procs
@@ -88,10 +87,10 @@
 /// projectile (for forensic analysis). Upstream uses the reagent/blood
 /// system instead. We return an empty list so horizon's blood.dm compiles.
 /obj/projectile/proc/return_blood_DNA()
-	return list()
+        return list()
 
 /obj/effect/temp_visual/bloodsplatter/proc/return_blood_DNA()
-	return list()
+        return list()
 
 /obj/item/proc/return_blood_DNA()
-	return list()
+        return list()
