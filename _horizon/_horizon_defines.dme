@@ -19,6 +19,7 @@
 #include "code\__DEFINES\hud.dm"
 #include "code\__DEFINES\icons.dm"
 #include "code\__DEFINES\keybinding.dm"
+#include "code\__DEFINES\obj_flags_horizon.dm"
 #include "code\__DEFINES\particles.dm"
 #include "code\__DEFINES\physics.dm"
 #include "code\__DEFINES\projectiles.dm"
