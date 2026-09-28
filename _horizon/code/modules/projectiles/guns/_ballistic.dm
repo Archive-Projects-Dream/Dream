@@ -360,11 +360,11 @@
                         magazine = null
         else
                 magazine = null
-        if(!hand_index)
-                user.put_in_hands(old_mag)
-        else
-                user.put_in_hand(old_mag, hand_index)
         if(old_mag)
+                if(!hand_index)
+                        user.put_in_hands(old_mag)
+                else
+                        user.put_in_hand(old_mag, hand_index)
                 old_mag.update_appearance()
         if(display_message && !tac_load)
                 to_chat(user, span_notice("I pull the [magazine_wording] out of [src]."))
