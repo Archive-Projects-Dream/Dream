@@ -11,7 +11,9 @@
 // BEGIN_INCLUDE
 #include "code\__DEFINES\_helpers.dm"
 #include "code\__DEFINES\_signals.dm"
+#include "code\__DEFINES\_signals_horizon.dm"
 #include "code\__DEFINES\buildmode.dm"
+#include "code\__DEFINES\diceroll.dm"
 #include "code\__DEFINES\dir_slash.dm"
 #include "code\__DEFINES\guns.dm"
 #include "code\__DEFINES\hud.dm"
@@ -20,6 +22,7 @@
 #include "code\__DEFINES\particles.dm"
 #include "code\__DEFINES\physics.dm"
 #include "code\__DEFINES\projectiles.dm"
+#include "code\__DEFINES\sharpness.dm"
 #include "code\__DEFINES\signals_mob_living.dm"
 #include "code\__DEFINES\weight.dm"
 // END_INCLUDE
