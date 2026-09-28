@@ -1,5 +1,8 @@
 
-GLOBAL_LIST_EMPTY(proj_by_path_key) // A list of projectile objects, which are keyed by their path
+// NOTE: GLOB.proj_by_path_key is declared in
+// _horizon/code/_globalvars/horizon_globals.dm (loaded via _horizon_dream.dme)
+// because GLOBAL_LIST_EMPTY isn't available yet at this point in the load
+// order - _horizon_defines.dme is included before code/__DEFINES/__globals.dm.
 
 //generator types
 #define GEN_NUM "num"
