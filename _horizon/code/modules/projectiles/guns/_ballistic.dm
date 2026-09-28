@@ -272,6 +272,12 @@
                 else if(!internal_magazine && magazine)
                         var/atom/movable/screen/inventory/hand/hand_slot = over
                         eject_magazine(user, hand_index = hand_slot.held_index)
+        // Dragging the gun onto the player themselves when the gun is on
+        // the ground (not in hands) and has a magazine = eject the magazine
+        // into the player's hand.
+        else if(over == user && !user.is_holding(src) && isturf(loc))
+                if(!internal_magazine && magazine)
+                        eject_magazine(user)
 
 /obj/item/gun/ballistic/before_can_shoot_checks(mob/living/user, autofire_start = FALSE)
         . = ..()
