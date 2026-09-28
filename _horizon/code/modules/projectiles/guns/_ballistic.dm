@@ -169,19 +169,21 @@
                 if(LAZYACCESS(gunshot_animation_information, "add_pixel_x_sawn") && !isnull(LAZYACCESS(gunshot_animation_information, "pixel_x")))
                         gunshot_animation_information["pixel_x"] += gunshot_animation_information["add_pixel_x_sawn"]
 
-/obj/item/gun/ballistic/AltClick(mob/user)
+/// Alt-click on a ballistic gun with a suppressor attached starts unscrewing it.
+/// Uses upstream's click_alt() API instead of legacy AltClick().
+/obj/item/gun/ballistic/click_alt(mob/user)
         if(can_unsuppress && suppressed && user.is_holding(src))
                 var/obj/item/suppressor/suppressor = suppressed
                 playsound(user, '_horizon/sound/weapons/guns/silencer_start.ogg', 60, TRUE)
                 to_chat(user, span_notice("I start unscrewing."))
                 if(!do_after(user, 3 SECONDS, src))
-                        return
+                        return NONE
                 to_chat(user, span_notice("I unscrew [suppressor] from [src]."))
                 playsound(user, '_horizon/sound/weapons/guns/silencer_off.wav', 75, TRUE)
                 user.put_in_hands(suppressor)
                 clear_suppressor()
-        else
-                return ..()
+                return CLICK_ACTION_SUCCESS
+        return NONE
 
 /obj/item/gun/ballistic/attackby(obj/item/A, mob/user, params)
         . = ..()
@@ -261,7 +263,7 @@
 
 /obj/item/gun/ballistic/MouseDrop(atom/over, src_location, over_location, src_control, over_control, params)
         . = ..()
-        if(!isliving(usr) || !usr.Adjacent(src) || usr.incapacitated())
+        if(!isliving(usr) || !usr.Adjacent(src) || HAS_TRAIT(usr, TRAIT_INCAPACITATED))
                 return
         var/mob/living/user = usr
         if(istype(over, /atom/movable/screen/inventory/hand))

@@ -22,7 +22,7 @@
 
 /obj/projectile/blood/Destroy()
 	if(isturf(loc) && loc_gets_bloody)
-		loc.add_blood_DNA(return_blood_DNA())
+		loc.add_blood_DNA(GET_ATOM_BLOOD_DNA(src))
 	return ..()
 
 /obj/projectile/blood/on_hit(atom/target, blocked, pierce_hit, reduced, edge_protection)
@@ -37,7 +37,7 @@
 			var/direction = get_dir(src, target)
 			loc_gets_bloody = FALSE
 			var/obj/effect/decal/cleanable/blood/splatter/blood = new(loc)
-			blood.add_blood_DNA(return_blood_DNA())
+			blood.add_blood_DNA(GET_ATOM_BLOOD_DNA(src))
 			blood.layer = BELOW_MOB_LAYER
 			blood.plane = loc.plane
 			//Adjust pixel offset to make splatters appear on the wall
@@ -46,12 +46,12 @@
 		else if(istype(target, /obj/structure/window))
 			var/obj/structure/window/window = target
 			if(!window.fulltile)
-				window.add_blood_DNA(return_blood_DNA())
+				window.add_blood_DNA(GET_ATOM_BLOOD_DNA(src))
 				return
 			var/direction = get_dir(src, target)
 			loc_gets_bloody = FALSE
 			var/obj/effect/decal/cleanable/blood/splatter/blood = new(loc)
-			blood.add_blood_DNA(return_blood_DNA())
+			blood.add_blood_DNA(GET_ATOM_BLOOD_DNA(src))
 			blood.layer = BELOW_MOB_LAYER
 			blood.plane = GAME_PLANE_UPPER
 			//Adjust pixel offset to make splatters appear on the wall
@@ -65,14 +65,14 @@
 			if(final_hitsound)
 				playsound(floor, final_hitsound, hitsound_volume, TRUE, -1)
 		else
-			target.add_blood_DNA(return_blood_DNA())
+			target.add_blood_DNA(GET_ATOM_BLOOD_DNA(src))
 
 /obj/projectile/blood/proc/do_squirt(direction = SOUTH, range = 3, spread_min = -25, spread_max = 25)
 	if(!direction)
 		direction = pick(GLOB.alldirs)
 	src.range = range
 	var/target = get_ranged_target_turf(src, direction, range)
-	preparePixelProjectile(target, src, spread = rand(spread_min, spread_max))
+	aim_projectile(target, src, null, rand(spread_min, spread_max))
 	if(QDELETED(src))
 		return FALSE
 	fire()

@@ -19,7 +19,7 @@
         playsound(src, pick(bullet_spill), 60, TRUE)
         to_chat(user, span_notice("I remove a round from [src]!"))
         casing.update_appearance()
-        update_ammo_count()
+        update_appearance()
 
 /obj/item/ammo_box/attackby(obj/item/attacking_item, mob/user, params, silent = FALSE, replace_spent = FALSE)
         var/num_loaded = 0
@@ -35,7 +35,7 @@
                         if(!did_load || !multiload)
                                 break
                 if(num_loaded)
-                        ammo_box.update_ammo_count()
+                        ammo_box.update_appearance()
         else if(istype(attacking_item, /obj/item/ammo_casing))
                 if(!can_load(user))
                         return
@@ -50,7 +50,7 @@
                 if(!silent)
                         //to_chat(user, span_notice("I load [num_loaded] shell\s into \the [src]!"))
                         playsound(src, pick(bullet_load), 60, TRUE)
-                update_ammo_count()
+                update_appearance()
 
         return num_loaded
 

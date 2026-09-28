@@ -44,15 +44,13 @@
                 ammo.do_messy(duration = 2)
         check_for_del()
 
-/obj/item/ammo_box/magazine/ammo_stack/handle_atom_del(atom/A)
-        . = ..()
-        check_for_del()
-
 /obj/item/ammo_box/magazine/ammo_stack/empty_magazine()
         . = ..()
         check_for_del()
 
-/obj/item/ammo_box/magazine/ammo_stack/update_ammo_count()
+/// Override of upstream's /obj/item/ammo_box/update_appearance() to call
+/// check_for_del() so empty ammo stacks are auto-deleted.
+/obj/item/ammo_box/magazine/ammo_stack/update_appearance()
         . = ..()
         check_for_del()
 

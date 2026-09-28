@@ -184,24 +184,9 @@
                 var/image/folding_image = image(icon, src, "[base_icon_state]_[folded ? "folded" : "unfolded"]")
                 folding_image.layer = layer - 1
                 . += folding_image
-        if(gun_light)
-                var/image/flashlight_overlay
-                var/state = "[gunlight_state][gun_light.on? "_on":""]" //Generic state.
-                if(gun_light.icon_state in icon_states('icons/obj/weapons/guns/flashlights.dmi')) //Snowflake state?
-                        state = gun_light.icon_state
-                flashlight_overlay = image('icons/obj/weapons/guns/flashlights.dmi', state)
-                flashlight_overlay.pixel_x = flight_x_offset
-                flashlight_overlay.pixel_y = flight_y_offset
-                . += flashlight_overlay
-        if(bayonet)
-                var/image/knife_overlay
-                var/state = "bayonet" //Generic state.
-                if(bayonet.icon_state in icon_states('icons/obj/weapons/guns/bayonets.dmi')) //Snowflake state?
-                        state = bayonet.icon_state
-                knife_overlay = image('icons/obj/weapons/guns/bayonets.dmi', state)
-                knife_overlay.pixel_x = knife_x_offset
-                knife_overlay.pixel_y = knife_y_offset
-                . += knife_overlay
+        // Flashlight and bayonet overlays are now handled by upstream's
+        // /datum/component/seclite_attachable and /datum/component/bayonet_attachable
+        // respectively. We don't render them manually here.
         if(safety_flags & GUN_SAFETY_HAS_SAFETY)
                 var/image/safety_overlay
                 if((safety_flags & GUN_SAFETY_ENABLED) && (safety_flags & GUN_SAFETY_OVERLAY_ENABLED))
@@ -238,76 +223,31 @@
         . = ..()
         if(!foldable)
                 return
-        if(!isliving(usr) || !user.Adjacent(src) || user.incapacitated())
+        if(!isliving(usr) || !user.Adjacent(src) || HAS_TRAIT(user, TRAIT_INCAPACITATED))
                 return
         if(isopenturf(over))
                 toggle_stock(user)
 
 /obj/item/gun/attackby(obj/item/I, mob/living/user, params)
-        var/list/modifiers = params2list(params)
-        if(IS_HARM_INTENT(user, modifiers))
-                return ..()
-        else if(istype(I, /obj/item/flashlight/seclite))
-                if(!can_flashlight)
-                        return ..()
-                var/obj/item/flashlight/seclite/seclite = I
-                if(!gun_light)
-                        if(!user.transferItemToLoc(I, src))
-                                return
-                        to_chat(user, span_notice("I click [seclite] into place on [src]."))
-                        set_gun_light(seclite)
-                        update_gunlight()
-                        playsound(src, '_horizon/sound/weapons/guns/mod_use.wav', 75, TRUE, vary = FALSE)
-                        alight = new(src)
-                        if(loc == user)
-                                alight.Grant(user)
-        else if(istype(I, /obj/item/knife))
-                var/obj/item/knife/knife = I
-                if(!can_bayonet || !knife.bayonet || bayonet) //ensure the gun has an attachment point available, and that the knife is compatible with it.
-                        return ..()
-                if(!user.transferItemToLoc(I, src))
-                        return
-                to_chat(user, span_notice("I attach [knife] to [src]'s bayonet lug."))
-                bayonet = knife
-                playsound(src, '_horizon/sound/weapons/guns/mod_use.wav', 75, TRUE, vary = FALSE)
-                update_appearance()
-        else
-                return ..()
+        // Flashlight (seclite) and bayonet attachments are now handled by
+        // upstream's /datum/component/seclite_attachable and
+        // /datum/component/bayonet_attachable respectively. They register
+        // their own COMSIG_ATOM_ATTACKBY handlers, so we just fall through
+        // to ..() here.
+        return ..()
 
 /obj/item/gun/attack_self_secondary(mob/user, modifiers)
         . = ..()
         if(safety_flags & GUN_SAFETY_HAS_SAFETY)
                 toggle_safety(user)
 
-/obj/item/gun/attack_secondary(mob/living/victim, mob/living/user, params)
-        if(user == victim)
-                to_chat(user, span_warning("I can't hold myself up!"))
-                return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
-        var/datum/component/gunpoint/existing_gunpoint = user.GetComponent(/datum/component/gunpoint)
-        if(user.GetComponent(/datum/component/gunpoint))
-                existing_gunpoint.cancel()
-                return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
-
-        user.AddComponent(/datum/component/gunpoint, victim, src)
-        return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
+// Gunpoint (holding someone up at gunpoint) is now handled by upstream's
+// /obj/item/gun/interact_with_atom_secondary() which checks can_hold_up
+// and adds /datum/component/gunpoint. No need for a horizon override.
 
 /obj/item/gun/afterattack(atom/target, mob/living/user, flag, params)
         attack_fatigue_cost = 0
         return ..()
-
-/obj/item/gun/afterattack_secondary(atom/target, mob/user, proximity_flag, click_parameters)
-        var/datum/component/gunpoint/existing_gunpoint = user.GetComponent(/datum/component/gunpoint)
-        if(user.GetComponent(/datum/component/gunpoint))
-                existing_gunpoint.cancel()
-                return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
-        if(!isliving(target))
-                return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
-        if(user == target)
-                to_chat(user, span_warning("I can't hold myself up!"))
-                return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
-
-        user.AddComponent(/datum/component/gunpoint, target, src)
-        return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
 
 /obj/item/gun/fire_gun(atom/target, mob/living/user, flag, params)
         if(QDELETED(target))
@@ -618,5 +558,5 @@
 
 /datum/action/item_action/toggle_stock
         name = "Toggle Stock"
-        icon_icon = '_horizon/icons/hud/actions.dmi'
+        button_icon = '_horizon/icons/hud/actions.dmi'
         button_icon_state = "stock"
