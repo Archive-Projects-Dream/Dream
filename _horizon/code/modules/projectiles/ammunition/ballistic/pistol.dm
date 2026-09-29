@@ -16,11 +16,6 @@
 	bounce_volume = 35
 	stack_type = /obj/item/ammo_box/magazine/ammo_stack/c9mm
 
-/obj/item/ammo_casing/c9mm/evil
-	name = "evil 9mm bullet casing"
-	desc = "Ammunition imbued with chaotic energy."
-	projectile_type = /obj/projectile/bullet/c9mm/evil
-
 /obj/item/ammo_casing/c45
 	icon_state = "c45"
 	base_icon_state = "c45"

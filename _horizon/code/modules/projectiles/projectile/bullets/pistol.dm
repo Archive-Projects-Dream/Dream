@@ -7,14 +7,6 @@
 	damage = 30
 	wound_bonus = 0
 
-/obj/projectile/bullet/c9mm/evil
-	name = "evil 9mm bullet"
-	damage = 40
-
-/obj/projectile/bullet/c9mm/evil/Initialize(mapload)
-	. = ..()
-	name = "[pick("evil", "chaotic", "nightmarish", "disturbing", "cruel", "corrupted")] 9mm bullet"
-
 /obj/projectile/bullet/c45
 	damage = 35
 	wound_bonus = 0
