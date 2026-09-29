@@ -29,10 +29,8 @@
 	charge_sections = 5
 	display_empty = TRUE
 	selfcharge = TRUE
-	gunshot_animation_information = list("icon_state" = "boltshot", \
 										"pixel_x" = 28, \
 										"pixel_y" = 13)
-	recoil_animation_information = list("recoil_angle_upper" = -15, \
 										"recoil_angle_lower" = -25)
 	custom_price = 100000
 	force = 15

@@ -30,12 +30,10 @@
         load_sound = '_horizon/sound/weapons/guns/pistol/pistol_magin.wav'
         load_empty_sound = '_horizon/sound/weapons/guns/pistol/pistol_magin.wav'
         rack_sound = '_horizon/sound/weapons/guns/pistol/pistol_rack.wav'
-        gunshot_animation_information = list(
                 "pixel_x" = 15, \
                 "pixel_y" = 1, \
                 "inactive_wben_suppressed" = TRUE, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30, \
         )
@@ -64,12 +62,10 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "b93r"
         base_icon_state = "b93r"
-        gunshot_animation_information = list(
                 "pixel_x" = 15, \
                 "pixel_y" = 2, \
                 "inactive_wben_suppressed" = TRUE, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30, \
                 "recoil_burst_speed" = 0.5, \
@@ -89,12 +85,10 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "m1911"
         base_icon_state = "m1911"
-        gunshot_animation_information = list(
                 "pixel_x" = 16, \
                 "pixel_y" = 2, \
                 "inactive_wben_suppressed" = TRUE,
         )
-        recoil_animation_information = list()
         fire_sound = '_horizon/sound/weapons/guns/pistol/colt1.wav'
         rack_sound = '_horizon/sound/weapons/guns/pistol/pistol_rack.wav'
         force = 10
@@ -109,12 +103,10 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "USP"
         base_icon_state = "USP"
-        gunshot_animation_information = list(
                 "pixel_x" = 16, \
                 "pixel_y" = 2, \
                 "inactive_wben_suppressed" = TRUE,
         )
-        recoil_animation_information = list()
         fire_sound = list('_horizon/sound/weapons/guns/pistol/USP1.ogg', '_horizon/sound/weapons/guns/pistol/USP2.ogg')
         rack_sound = '_horizon/sound/weapons/guns/pistol/john_rack.wav'
         lock_back_sound = '_horizon/sound/weapons/guns/pistol/john_lockback.wav'
@@ -163,12 +155,10 @@
         base_icon_state = "combatmaster"
         fire_sound = list('_horizon/sound/weapons/guns/pistol/combatmaster1.wav', '_horizon/sound/weapons/guns/pistol/combatmaster2.wav')
         suppressed_sound = '_horizon/sound/weapons/guns/pistol/combatmaster_silenced.wav'
-        gunshot_animation_information = list(
                 "pixel_x" = 15, \
                 "pixel_y" = 1, \
                 "inactive_wben_suppressed" = TRUE, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30,
         )
@@ -190,11 +180,9 @@
                                         '_horizon/sound/weapons/guns/pistol/glock2.wav')
         suppressed_sound = list('_horizon/sound/weapons/guns/pistol/glock_suppressed1.wav', \
                                         '_horizon/sound/weapons/guns/pistol/glock_suppressed2.wav')
-        gunshot_animation_information = list(
                 "pixel_x" = 15, \
                 "pixel_y" = 5, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -20, \
                 "recoil_angle_lower" = -35, \
         )
@@ -220,16 +208,13 @@
         suppressed_sound = '_horizon/sound/weapons/guns/pistol/walter_silenced.wav'
         safety_on_sound = '_horizon/sound/weapons/guns/pistol/walter_safety.wav'
         safety_off_sound = '_horizon/sound/weapons/guns/pistol/walter_safety.wav'
-        gunshot_animation_information = list(
                 "pixel_x" = 11, \
                 "pixel_y" = 1, \
                 "inactive_wben_suppressed" = TRUE, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -10, \
                 "recoil_angle_lower" = -20, \
         )
-        client_recoil_animation_information = list(
                 "strength" = 0.35,
                 "duration" = 2,
         )
@@ -252,11 +237,9 @@
         inhand_icon_state = "one"
         icon_state = "aniquilador"
         base_icon_state = "aniquilador"
-        gunshot_animation_information = list(
                 "pixel_x" = 16, \
                 "pixel_y" = 2, \
         )
-        recoil_animation_information = list()
         fire_sound = '_horizon/sound/weapons/guns/pistol/one.ogg'
         rack_sound = '_horizon/sound/weapons/guns/pistol/one_rack.ogg'
         lock_back_sound = '_horizon/sound/weapons/guns/pistol/one_lockback.ogg'
@@ -308,11 +291,9 @@
         inhand_icon_state = "five7"
         icon_state = "glockl"
         base_icon_state = "glockl"
-        gunshot_animation_information = list(
                 "pixel_x" = 16, \
                 "pixel_y" = 2, \
         )
-        recoil_animation_information = list()
         fire_sound = list('_horizon/sound/weapons/guns/pistol/john1.wav', '_horizon/sound/weapons/guns/pistol/john2.wav')
         rack_sound = '_horizon/sound/weapons/guns/pistol/john_rack.wav'
         lock_back_sound = '_horizon/sound/weapons/guns/pistol/john_lockback.wav'
@@ -335,11 +316,9 @@
         inhand_icon_state = "pm9"
         icon_state = "pm9"
         base_icon_state = "pm9"
-        gunshot_animation_information = list(
                 "pixel_x" = 16, \
                 "pixel_y" = 2, \
         )
-        client_recoil_animation_information = list(
                 "strength" = 1,
                 "duration" = 2,
         )

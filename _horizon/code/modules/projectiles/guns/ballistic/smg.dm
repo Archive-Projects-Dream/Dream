@@ -69,18 +69,15 @@
         burst_size = 2
         can_suppress = TRUE
         suppressor_x_offset = 9
-        gunshot_animation_information = list(
                 "pixel_x" = 15, \
                 "pixel_y" = 2, \
                 "inactive_wben_suppressed" = TRUE, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -10, \
                 "recoil_angle_lower" = -20, \
                 "recoil_burst_speed" = 0.5, \
                 "return_burst_speed" = 0.5, \
         )
-        client_recoil_animation_information = list(
                 "strength" = 0.1,
                 "duration" = 1,
         )
@@ -116,18 +113,15 @@
         burst_size = 2
         can_suppress = TRUE
         suppressor_x_offset = 6
-        gunshot_animation_information = list(
                 "pixel_x" = 15, \
                 "pixel_y" = 2, \
                 "inactive_wben_suppressed" = TRUE, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -10, \
                 "recoil_angle_lower" = -20, \
                 "recoil_burst_speed" = 0.5, \
                 "return_burst_speed" = 0.5, \
         )
-        client_recoil_animation_information = list(
                 "strength" = 0.15, \
                 "duration" = 1, \
         )
@@ -163,7 +157,6 @@
         burst_size = 3
         can_suppress = TRUE
         suppressor_x_offset = 6
-        client_recoil_animation_information = list(
                 "strength" = 0.25, \
                 "duration" = 1, \
         )
@@ -196,7 +189,6 @@
         can_suppress = TRUE
         can_unsuppress = FALSE
         w_class = WEIGHT_CLASS_SMALL
-        client_recoil_animation_information = list(
                 "strength" = 0.15, \
                 "duration" = 1, \
         )
@@ -248,18 +240,15 @@
         burst_size = 2
         can_suppress = TRUE
         suppressor_x_offset = 2
-        gunshot_animation_information = list(
                 "pixel_x" = 21, \
                 "pixel_y" = 5, \
                 "inactive_wben_suppressed" = TRUE, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -10, \
                 "recoil_angle_lower" = -20, \
                 "recoil_burst_speed" = 0.5, \
                 "return_burst_speed" = 0.5, \
         )
-        client_recoil_animation_information = list(
                 "strength" = 0.2,
                 "duration" = 1,
         )

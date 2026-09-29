@@ -107,14 +107,6 @@
         /// Does the inhand state get modifier when sawn?
         var/sawn_inhand_state = FALSE
 
-        // ~ANIMATION VARIABLES
-        /// If this gun has a gunshot animation, this stores info such as icon, icon_state, pixel_x and pixel_y
-        var/list/gunshot_animation_information = null
-        /// If this gun has a recoil animation, this stores info such as angle and duration
-        var/list/recoil_animation_information = null
-        /// If this gun has client recoil, this stores info such as amount and duration
-        var/list/client_recoil_animation_information = null
-
         /// NO FULL AUTO IN BUILDINGS!
         var/full_auto = FALSE
 
@@ -305,51 +297,6 @@
                                 user.dropItemToGround(src, TRUE)
                                 return TRUE
 
-/obj/item/gun/shoot_live_shot(mob/living/user, pointblank = FALSE, atom/target, message = FALSE)
-        if(LAZYLEN(client_recoil_animation_information))
-                var/duration = client_recoil_animation_information["duration"]
-                var/strength = client_recoil_animation_information["strength"]
-                var/easing = client_recoil_animation_information["easing"] || CUBIC_EASING|EASE_OUT
-                var/angle_to_target = SIMPLIFY_DEGREES(get_angle(user, target) + 90)
-                var/recoil_angle = SIMPLIFY_DEGREES(angle_to_target + 180)
-                recoil_camera(user, duration, recoil_angle, strength, easing)
-
-        //sound_hint()
-
-        if(suppressed)
-                playsound(user, suppressed_sound, suppressed_volume, vary_fire_sound, ignore_walls = FALSE, extrarange = SILENCED_SOUND_EXTRARANGE, falloff_distance = 0)
-        else
-                playsound(user, fire_sound, fire_sound_volume, vary_fire_sound)
-                if(message)
-                        if(pointblank)
-                                if(ismob(target))
-                                        user.visible_message(span_danger("<b>[user]</b> fires [src] point blank at <b>[target]</b>!"), \
-                                                                        span_danger("I fire [src] point blank at <b>[target]</b>!"), \
-                                                                        span_hear("I hear a gunshot!"), COMBAT_MESSAGE_RANGE, target)
-                                        to_chat(target, span_userdanger("<b>[user]</b> fires [src] point blank at me!"))
-                                else
-                                        user.visible_message(span_danger("<b>[user]</b> fires [src] point blank at [target]!"), \
-                                                                        span_danger("I fire [src] point blank at [target]!"), \
-                                                                        span_hear("I hear a gunshot!"), COMBAT_MESSAGE_RANGE, target)
-                                if(pb_knockback > 0 && ismob(target))
-                                        var/mob/mob_target = target
-                                        var/atom/throw_target = get_edge_target_turf(mob_target, user.dir)
-                                        mob_target.throw_at(throw_target, pb_knockback, 2)
-                        else
-                                if(ismob(target))
-                                        user.visible_message(span_danger("<b>[user]</b> fires [src] at <b>[target]</b>!"), \
-                                                                        span_danger("I fire [src] at <b>[target]</b>!"), \
-                                                                        span_hear("I hear a gunshot!"), COMBAT_MESSAGE_RANGE, target)
-                                else
-                                        user.visible_message(span_danger("<b>[user]</b> fires [src] at [target]!"), \
-                                                                        span_danger("I fire [src] at [target]!"), \
-                                                                        span_hear("I hear a gunshot!"), COMBAT_MESSAGE_RANGE, target)
-
-        if(weapon_weight >= WEAPON_HEAVY)
-                if(!SEND_SIGNAL(src, COMSIG_TWOHANDED_WIELD_CHECK))
-                        user.dropItemToGround(src)
-                        to_chat(user, span_userdanger(uppertext(fail_msg(TRUE))))
-
 /obj/item/gun/on_autofire_start(mob/living/shooter)
         if(semicd || shooter.stat)
                 return NONE
@@ -442,79 +389,6 @@
         sound_hint()
         update_appearance()
         user.update_mouse_pointer()
-
-/obj/item/gun/proc/firing_animation(mob/user, burst_fire = FALSE)
-        if(gunshot_animation_information)
-                INVOKE_ASYNC(src, PROC_REF(gunshot_animation), user, burst_fire)
-        if(recoil_animation_information)
-                INVOKE_ASYNC(src, PROC_REF(recoil_animation), user, burst_fire)
-
-// wARNING: For some god forsaken reason, the recoil animation conflicts pretty badly with the gunshot, as the gunshot refuses to get angled
-/obj/item/gun/proc/gunshot_animation(mob/user, burst_fire = FALSE)
-        if(suppressed && LAZYACCESS(gunshot_animation_information, "inactive_wben_silenced"))
-                return
-        var/shot_icon = gunshot_animation_information["icon"] || '_horizon/icons/effects/gunshot.dmi'
-        var/shot_icon_state = gunshot_animation_information["icon_state"] || "gunshot"
-        var/shot_duration = gunshot_animation_information["duration"] || 2
-        var/shot_pixel_x = gunshot_animation_information["pixel_x"] || 0
-        var/shot_pixel_y = gunshot_animation_information["pixel_y"] || 0
-        var/image/shots_fired = image(shot_icon, shot_icon_state, src.layer-0.01)
-        shots_fired.pixel_x = shot_pixel_x
-        shots_fired.pixel_y = shot_pixel_y
-        add_overlay(shots_fired)
-        sleep(shot_duration)
-        cut_overlay(shots_fired)
-
-/obj/item/gun/proc/recoil_animation(mob/user, burst_fire = FALSE)
-        if(recoil_animation_information["doing_recoil_burst_animation"])
-                return
-        if(burst_fire)
-                return recoil_animation_burst(user, burst_fire)
-
-        var/recoil_angle_upper = recoil_animation_information["recoil_angle_upper"] || -20
-        var/recoil_angle_lower = recoil_animation_information["recoil_angle_lower"] || -40
-        var/recoil_speed = recoil_animation_information["recoil_speed"] || 2
-        var/return_speed = recoil_animation_information["return_speed"] || 2
-        var/recoil_easing = recoil_animation_information["recoil_easing"] || ELASTIC_EASING
-        var/return_easing = recoil_animation_information["return_easing"] || ELASTIC_EASING
-
-        var/matrix/return_matrix = matrix(transform)
-        var/matrix/recoil_matrix = matrix(transform)
-        recoil_matrix = recoil_matrix.Turn(rand(recoil_angle_lower, recoil_angle_upper))
-
-        animate(src, transform = recoil_matrix, time = recoil_speed, easing = recoil_easing)
-        sleep(recoil_speed)
-        animate(src, transform = return_matrix, time = return_speed, easing = return_easing)
-
-/obj/item/gun/proc/recoil_animation_burst(mob/user, burst_fire = FALSE)
-        var/recoil_burst_angle_upper = recoil_animation_information["recoil_burst_angle_upper"] || -5
-        var/recoil_burst_angle_lower = recoil_animation_information["recoil_burst_angle_upper"] || -10
-        var/recoil_burst_speed = recoil_animation_information["recoil_burst_speed"] || 0.5
-        var/return_burst_speed = recoil_animation_information["return_burst_speed"] || 0.5
-        var/recoil_burst_easing = recoil_animation_information["recoil_burst_easing"] || ELASTIC_EASING
-        var/return_burst_easing = recoil_animation_information["return_burst_easing"] || ELASTIC_EASING
-        var/recoil_burst_pixel_x = recoil_animation_information["recoil_burst_pixel_x"] || -5
-        var/recoil_burst_pixel_y = recoil_animation_information["recoil_burst_pixel_y"] || 0
-
-        var/old_pixel_x = pixel_x
-        var/new_pixel_x = pixel_x+recoil_burst_pixel_x
-        var/old_pixel_y = pixel_y
-        var/new_pixel_y = pixel_y+recoil_burst_pixel_y
-        var/matrix/return_matrix = matrix(transform)
-        var/matrix/recoil_matrix = matrix(transform)
-        recoil_matrix = recoil_matrix.Turn(rand(recoil_burst_angle_lower, recoil_burst_angle_upper))
-
-        recoil_animation_information["doing_recoil_burst_animation"] = TRUE
-        for(var/i in 1 to burst_size)
-                animate(src, transform = recoil_matrix, time = recoil_burst_speed, easing = recoil_burst_easing, flags = ANIMATION_PARALLEL)
-                animate(src, pixel_x = new_pixel_x, time = recoil_burst_speed, easing = recoil_burst_easing, flags = ANIMATION_PARALLEL)
-                animate(src, pixel_y = new_pixel_y, time = recoil_burst_speed, easing = recoil_burst_easing, flags = ANIMATION_PARALLEL)
-                sleep(recoil_burst_speed)
-                animate(src, transform = return_matrix, pixel_x = old_pixel_x, pixel_y = old_pixel_y, time = return_burst_speed, easing = return_burst_easing, flags = ANIMATION_PARALLEL)
-                animate(src, pixel_x = old_pixel_x, time = return_burst_speed, easing = recoil_burst_easing, flags = ANIMATION_PARALLEL)
-                animate(src, pixel_y = old_pixel_y, time = return_burst_speed, easing = recoil_burst_easing, flags = ANIMATION_PARALLEL)
-                sleep(return_burst_speed)
-        recoil_animation_information["doing_recoil_burst_animation"] = FALSE
 
 /obj/item/gun/ui_action_click(mob/user, actiontype) /// Allows users to spew facts
         if(istype(actiontype, /datum/action/item_action/toggle_stock))

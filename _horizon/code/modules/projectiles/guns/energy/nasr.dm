@@ -37,10 +37,8 @@
 	carry_weight = 5 KILOGRAMS
 	w_class = WEIGHT_CLASS_NORMAL
 	selfcharge = TRUE
-	gunshot_animation_information = list("icon_state" = "energyshot", \
 										"pixel_x" = 16, \
 										"pixel_y" = 2)
-	recoil_animation_information = list("recoil_angle_upper" = -15, \
 										"recoil_angle_lower" = -30)
 	custom_price = 100000
 	//skill_melee = SKILL_IMPACT_WEAPON_TWOHANDED

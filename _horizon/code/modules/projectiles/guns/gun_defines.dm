@@ -20,7 +20,6 @@
 
 // Legacy: recoil buildup when wielded. Read by horizon's rifle.dm.
 /obj/item/gun/ballistic
-	var/wielded_recoil_buildup = 0
 
 // Legacy: fire selector position. 1 = semi, 2 = burst, 3 = full auto.
 // Upstream removed `select` in favour of burst_fire_selection toggle.

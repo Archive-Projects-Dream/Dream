@@ -34,13 +34,11 @@
         load_sound_volume = 80
         safety_off_sound = '_horizon/sound/weapons/guns/shotgun/shotgun_safety2.wav'
         safety_on_sound = '_horizon/sound/weapons/guns/shotgun/shotgun_safety1.wav'
-        gunshot_animation_information = list(
                 "pixel_x" = 24, \
                 "pixel_y" = 1, \
                 "inactive_wben_suppressed" = TRUE, \
                 "add_pixel_x_sawn" = -5, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30, \
         )
@@ -124,13 +122,11 @@
         inhand_icon_state = "riot"
         empty_indicator = FALSE
         can_be_sawn_off = FALSE
-        gunshot_animation_information = list(
                 "pixel_x" = 25, \
                 "pixel_y" = 1, \
                 "inactive_wben_suppressed" = TRUE, \
                 "add_pixel_x_sawn" = -4, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30, \
         )
@@ -153,13 +149,11 @@
         fire_sound = '_horizon/sound/weapons/guns/shotgun/semigun.wav'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/semigun_silenced.wav'
         empty_indicator = FALSE
-        gunshot_animation_information = list(
                 "pixel_x" = 23, \
                 "pixel_y" = 1, \
                 "inactive_wben_suppressed" = TRUE, \
                 "add_pixel_x_sawn" = -4, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30, \
         )
@@ -186,13 +180,11 @@
         rack_sound = '_horizon/sound/weapons/guns/shotgun/semigun_cycle.wav'
         fire_sound = '_horizon/sound/weapons/guns/shotgun/semigun.wav'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/semigun_silenced.wav'
-        gunshot_animation_information = list(
                 "pixel_x" = 25, \
                 "pixel_y" = 1, \
                 "inactive_wben_suppressed" = TRUE, \
                 "add_pixel_x_sawn" = -5, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30, \
         )
@@ -215,13 +207,11 @@
         rack_sound = '_horizon/sound/weapons/guns/shotgun/semigun_cycle.wav'
         fire_sound = '_horizon/sound/weapons/guns/shotgun/rape_gun.wav'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/belador_silenced.wav'
-        gunshot_animation_information = list(
                 "pixel_x" = 25, \
                 "pixel_y" = 1, \
                 "inactive_wben_suppressed" = TRUE, \
                 "add_pixel_x_sawn" = -5, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30, \
         )
@@ -261,13 +251,11 @@
         eject_sound = '_horizon/sound/weapons/guns/shotgun/autogun_magout.ogg'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/belador_silenced.wav'
         load_sound_volume = 40
-        gunshot_animation_information = list(
                 "pixel_x" = 25, \
                 "pixel_y" = 1, \
                 "inactive_wben_suppressed" = TRUE, \
                 "add_pixel_x_sawn" = -5, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30, \
         )
@@ -306,13 +294,11 @@
         eject_sound = '_horizon/sound/weapons/guns/shotgun/autogun_magout.ogg'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/belador_silenced.wav'
         load_sound_volume = 40
-        gunshot_animation_information = list(
                 "pixel_x" = 31, \
                 "pixel_y" = 0, \
                 "inactive_wben_suppressed" = TRUE, \
                 "add_pixel_x_sawn" = -5, \
         )
-        recoil_animation_information = list(
                 "recoil_angle_upper" = -15, \
                 "recoil_angle_lower" = -30, \
         )
@@ -337,7 +323,6 @@
                 '_horizon/sound/weapons/guns/shotgun/bolas_load2.wav', \
                 '_horizon/sound/weapons/guns/shotgun/bolas_load3.wav', \
         )
-        client_recoil_animation_information = list(
                 "strength" = 1.5,
                 "duration" = 3.5,
         )
