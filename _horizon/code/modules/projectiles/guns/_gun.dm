@@ -34,10 +34,10 @@
                 debris_velocity = 15
         var/debris_amount = 8
         var/debris_scale = 0.7
-        var/x_component = sin(P.Angle) * debris_velocity
-        var/y_component = cos(P.Angle) * debris_velocity
-        var/x_component_smoke = sin(P.Angle) * -15
-        var/y_component_smoke = cos(P.Angle) * -15
+        var/x_component = sin(P.angle) * debris_velocity
+        var/y_component = cos(P.angle) * debris_velocity
+        var/x_component_smoke = sin(P.angle) * -15
+        var/y_component_smoke = cos(P.angle) * -15
         var/obj/effect/abstract/particle_holder/debris_visuals
         var/obj/effect/abstract/particle_holder/smoke_visuals
         var/position_offset = rand(-6,6)

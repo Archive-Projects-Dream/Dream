@@ -145,14 +145,8 @@
         if(isitem(suppressed))
                 var/obj/item/suppressor = suppressed
                 w_class -= suppressor.w_class
-                if(findtext(variable, "old_", 1, 5))
-                else
         suppressed = null
         update_appearance()
-
-/obj/item/gun/ballistic/sawoff(mob/user, obj/item/saw)
-        . = ..()
-        if(.)
 
 /// Alt-click on a ballistic gun with a suppressor attached starts unscrewing it.
 /// Uses upstream's click_alt() API instead of legacy AltClick().
