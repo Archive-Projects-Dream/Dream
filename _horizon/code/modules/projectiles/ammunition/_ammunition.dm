@@ -27,19 +27,6 @@
         . = ..()
         icon_state = "[base_icon_state][loaded_projectile ? "-live" : ""]"
 
-/obj/item/ammo_casing/bounce_away(bounce_angle, spread_multiplier = 1, pixel_mess = TRUE, still_warm = FALSE, sound_delay = 3)
-        if(!heavy_metal)
-                return
-        update_appearance()
-        undo_messy()
-        do_messy()
-        SpinAnimation(10, 1)
-        var/turf/bouncer = drop_location()
-        if(still_warm && bouncer?.bullet_sizzle)
-                addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(playsound), src, 'sound/items/tools/welder.ogg', 20, 1), sound_delay) //If the turf is made of water and the shell casing is still hot, make a sizzling sound when it's ejected.
-        else
-                addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(playsound), src, pick(bounce_sound), bounce_volume, bounce_vary), sound_delay) //Soft / non-solid turfs that shouldn't make a sound when a shell casing is ejected over them.
-
 /obj/item/ammo_casing/add_notes_ammo()
         var/list/readout = list()
         readout += span_notice("<b>Caliber:</b> [caliber]")

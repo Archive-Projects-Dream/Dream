@@ -169,18 +169,15 @@
 	return TRUE
 
 /obj/item/ammo_casing/throw_impact(atom/hit_atom, datum/thrownthing/throwingdatum)
-	bounce_away(bounce_angle = rand(0, 360), spread_multiplier = 0.75, still_warm = FALSE, sound_delay = 0)	// [HORIZON-ADD] PHYSICS
+	bounce_away(bounce_angle = rand(0, 360), spread_multiplier = 0.75, still_warm = FALSE, sound_delay = 0) // [HORIZON-ADD] PHYSICS
 	return ..()
 
 // [HORIZON-EDIT] PHYSICS
-/obj/item/ammo_casing/proc/bounce_away(bounce_angle, spread_multiplier = 1, pixel_mess = TRUE, still_warm = FALSE, sound_delay = 3)
+/obj/item/ammo_casing/proc/bounce_away(bounce_angle, spread_multiplier = 1, still_warm = FALSE, sound_delay = 3)
 	update_appearance()
 	var/turf/our_turf = get_turf(src)
 	if(!our_turf)
 		return
-	if(pixel_mess)
-		pixel_x = base_pixel_x + rand(-world.icon_size/4, world.icon_size/4)
-		pixel_y = base_pixel_y + rand(-world.icon_size/4, world.icon_size/4)
 	if(!isnull(bounce_angle))
 		//cool awesome physics this is so sick tbh
 		AddComponent(/datum/component/movable_physics, \
@@ -192,6 +189,11 @@
 			vertical_friction = 10 * spread_multiplier * 0.05, \
 			z_floor = 0, \
 		)
+		pixel_x = base_pixel_x + rand(-world.icon_size/4, world.icon_size/4)
+		pixel_y = base_pixel_y + rand(-world.icon_size/4, world.icon_size/4)
+	else
+		undo_messy()
+		do_messy()
 	if(still_warm && our_turf.bullet_sizzle)
 		addtimer(CALLBACK(GLOBAL_PROC, GLOBAL_PROC_REF(playsound), src, 'sound/items/tools/welder.ogg', 20, 1), sound_delay) //If the turf is made of water and the shell casing is still hot, make a sizzling sound when it's ejected.
 	else if(our_turf.bullet_bounce_sound)

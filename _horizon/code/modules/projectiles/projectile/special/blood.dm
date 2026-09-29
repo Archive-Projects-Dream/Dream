@@ -10,7 +10,7 @@
 	hitsound = null
 	nodamage = TRUE
 	range = 3
-	no_effect = TRUE //No sparks for blood.
+	//no_effect = TRUE //No sparks for blood.
 	var/loc_gets_bloody = TRUE
 
 /obj/projectile/blood/Initialize(mapload, list/blood_dna, loc_gets_bloody = TRUE)
