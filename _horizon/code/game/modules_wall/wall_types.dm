@@ -54,6 +54,10 @@
 				var/turf/closed/wall/neighbour_wall = T
 				neighbour_wall.update_connections()
 				neighbour_wall.update_icon()
+				//Our disappearance changes their junction in the new smoothing
+				//system too (their own shadows are re-smoothed by Destroy()).
+				if(LAZYLEN(neighbour_wall.tiles_with))
+					neighbour_wall.relativewall()
 
 // MARK: Types Wall
 /*

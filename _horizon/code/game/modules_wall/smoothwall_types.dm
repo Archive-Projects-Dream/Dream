@@ -29,6 +29,9 @@
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	tiles_with = BASED_TILES
+	///Shadow masks have to stay connected across missing corner tiles,
+	///so they also smooth diagonally (see relativewall_diagonals()).
+	smooth_diagonals = TRUE
 
 /atom/movable/atom_shadow/Initialize(mapload)
 	. = ..()
@@ -37,6 +40,14 @@
 
 /atom/movable/atom_shadow/handle_icon_junction(junction)
 	icon_state = "wall-[junction]"
+
+/atom/movable/atom_shadow/Destroy()
+	//Our disappearance changes the junction of everything around us,
+	//including diagonal neighbours that link to us across an open corner.
+	var/list/smoothing_neighbours = get_adjacent_smoothers()
+	. = ..()
+	for(var/atom/smoothing_neighbour in smoothing_neighbours)
+		smoothing_neighbour.relativewall()
 
 /atom/movable/atom_shadow/door
 	icon = '_horizon/icons/obj/airlock_mask.dmi'
