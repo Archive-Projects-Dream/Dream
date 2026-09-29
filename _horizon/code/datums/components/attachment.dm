@@ -227,55 +227,55 @@
 		return on_fire_gun.Invoke(parent_gun, user, target, flag, params)
 
 /datum/component/attachment/proc/relay_pre_attack(obj/item/parent, obj/item/gun, atom/target_atom, mob/user, params)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(on_preattack)
 		return on_preattack.Invoke(gun, target_atom, user, params)
 
 /datum/component/attachment/proc/relay_attacked(obj/item/parent, obj/item/gun, obj/item, mob/user, params)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(on_attacked)
 		return on_attacked.Invoke(gun, user, item)
 
 /datum/component/attachment/proc/try_wield(obj/item/parent, obj/item/gun, mob/user, params)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(on_wield)
 		return on_wield.Invoke(gun, user, params)
 
 /datum/component/attachment/proc/try_unwield(obj/item/parent, obj/item/gun, mob/user, params)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(on_unwield)
 		return on_unwield.Invoke(gun, user, params)
 
 /datum/component/attachment/proc/relay_secondary_action(obj/item/parent, obj/item/gun, mob/user, params)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(on_secondary_action)
 		return on_secondary_action.Invoke(gun, user, params)
 
 /datum/component/attachment/proc/relay_ctrl_click(obj/item/parent, obj/item/gun, mob/user, params)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(on_ctrl_click)
 		return on_ctrl_click.Invoke(gun, user, params)
 
 /datum/component/attachment/proc/relay_alt_click(obj/item/parent, obj/item/gun, mob/user, params)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(on_alt_click)
 		return on_alt_click.Invoke(gun, user, params)
 
 /datum/component/attachment/proc/relay_attack_hand(obj/item/parent, obj/item/gun, mob/user, params)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(on_attack_hand)
 		return on_attack_hand.Invoke(gun, user, params)
 
 /datum/component/attachment/proc/relay_safety(obj/item/parent, obj/item/gun, mob/user, params)
-	SIGNAL_HANDLER_DOES_SLEEP
+	SIGNAL_HANDLER
 
 	if(on_safety)
 		return on_safety.Invoke(gun, user, params)
@@ -299,16 +299,16 @@
 /datum/action/attachment/New(Target)
 	..()
 	name = name
-	button_icon = target.icon
-	button_icon_state = target.icon_state
+	button_icon = target:icon
+	button_icon_state = target:icon_state
 
 /datum/action/attachment/Destroy()
 	. = ..()
 	gun = null
 
 /datum/action/attachment/build_all_button_icons()
-	button_icon = target.icon
-	button_icon_state = target.icon_state
+	button_icon = target:icon
+	button_icon_state = target:icon_state
 	..()
 
 /datum/action/attachment/toggle
@@ -316,15 +316,15 @@
 
 /datum/action/attachment/toggle/New(Target)
 	. = ..()
-	name = "Toggle [target.name]"
+	name = "Toggle [target:name]"
 
 /datum/action/attachment/toggle/Trigger()
 	..()
 	SEND_SIGNAL(target, COMSIG_ATTACHMENT_TOGGLE, gun, owner)
 
 /datum/action/attachment/toggle/build_all_button_icons()
-	button_icon = target.icon
-	button_icon_state = target.icon_state
+	button_icon = target:icon
+	button_icon_state = target:icon_state
 	..()
 
 /datum/action/attachment/ammo
