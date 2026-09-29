@@ -1,4 +1,9 @@
 /obj/item/gun/energy/nasr
+	gunshot_animation_information = list("icon_state" = "energyshot", \
+							"pixel_x" = 16, \
+							"pixel_y" = 2)
+	recoil_animation_information = list("recoil_angle_upper" = -15, \
+							"recoil_angle_lower" = -30)
 	name = "Nasr"
 	desc = "A handheld, industrial device meant to melt glue at low-voltages. It has been powered wirelessly by the hatred and blatent racism of a certain egyption indevidual with terroristic intentions."
 	icon = '_horizon/icons/obj/items/guns/energy.dmi'

@@ -1,4 +1,16 @@
 /obj/item/gun/ballistic/revolver
+	gunshot_animation_information = list(
+		"pixel_x" = 12, \
+		"pixel_y" = 5, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.5,
+		"duration" = 2.5,
+	)
 	icon = '_horizon/icons/obj/items/guns/revolver.dmi'
 	icon_state = "revolver"
 	base_icon_state = "revolver"

@@ -32,6 +32,21 @@
 
 // hksmg
 /obj/item/gun/ballistic/automatic/remis/smg/solitario
+	gunshot_animation_information = list(
+		"pixel_x" = 15, \
+		"pixel_y" = 2, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+		"recoil_burst_speed" = 0.5, \
+		"return_burst_speed" = 0.5, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.1,
+		"duration" = 1,
+	)
         name = "\improper Solitario Inseguro R5 submachine gun"
         desc = "A reliable submachine gun with a high-magazine capacity maufactured by popular civilian arms dealer S&I"
         icon = '_horizon/icons/obj/items/guns/smg.dmi'

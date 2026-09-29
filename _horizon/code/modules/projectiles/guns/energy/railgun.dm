@@ -1,4 +1,9 @@
 /obj/item/gun/energy/railgun
+	gunshot_animation_information = list("icon_state" = "boltshot", \
+							"pixel_x" = 28, \
+							"pixel_y" = 13)
+	recoil_animation_information = list("recoil_angle_upper" = -15, \
+							"recoil_angle_lower" = -25)
 	name = "\improper \"Siren\" Heavy Plasma Rifle"
 	desc = "An unwieldly and burdenly heavy firearm capable of firing without physical bullets, but instead utilizing chargable plasma batteries."
 	icon = '_horizon/icons/obj/items/guns/48x32.dmi'

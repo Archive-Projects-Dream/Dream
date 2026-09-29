@@ -1,5 +1,15 @@
 // Remove this dumb knockback shit pls
 /obj/item/gun/ballistic/shotgun
+	gunshot_animation_information = list(
+		"pixel_x" = 24, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+		"add_pixel_x_sawn" = -5, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
         icon = '_horizon/icons/obj/items/guns/40x32.dmi'
         icon_state = "ithaca"
         base_icon_state = "ithaca"

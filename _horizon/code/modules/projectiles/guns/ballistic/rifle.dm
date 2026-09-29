@@ -102,6 +102,19 @@
 
 //Darkworld Gun
 /obj/item/gun/ballistic/automatic/remis/abyss
+	gunshot_animation_information = list(
+		"pixel_x" = 32, \
+		"pixel_y" = 3, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.2,
+		"duration" = 1,
+	)
         name = "\improper Abyss Armaments Due Diligence"
         desc = "The double D as it's sometimes caused. Produced before the great war, but very resiliant. \
                 The muzzle brake seems to be compatable with noise suppressors! So good."

@@ -1,4 +1,8 @@
 /obj/item/gun/ballistic
+	client_recoil_animation_information = list(
+		"strength" = 0.35,
+		"duration" = 2,
+	)
         /// Why is this not already a variable?
         var/bolt_drop_sound_vary = FALSE
         /// Wording for the cylinder, for break action guns
