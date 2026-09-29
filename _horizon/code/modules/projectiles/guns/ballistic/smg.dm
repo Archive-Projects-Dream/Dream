@@ -1,27 +1,19 @@
 // c20r
 /obj/item/gun/ballistic/automatic/c20r
         pin = /obj/item/firing_pin
-        //skill_melee = SKILL_IMPACT_WEAPON
-        //skill_ranged = SKILL_SMG
 
 // m90
 /obj/item/gun/ballistic/automatic/m90
         pin = /obj/item/firing_pin
-        //skill_melee = SKILL_IMPACT_WEAPON
-        //skill_ranged = SKILL_SMG
 
 /obj/item/gun/ballistic/automatic/remis/smg
         worn_icon = '_horizon/icons/obj/items/guns/worn/back.dmi'
         equip_sound = '_horizon/sound/weapons/guns/weap_away.ogg'
         drop_sound = '_horizon/sound/weapons/guns/drop_lightgun.wav'
-        //skill_melee = SKILL_IMPACT_WEAPON
         slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE
-        //skill_ranged = SKILL_SMG
         suppressed = SUPPRESSED_NONE
         full_auto = TRUE
         w_class = WEIGHT_CLASS_BULKY
-        //tetris_width = 96
-        //tetris_height =  = 96
 
 // ppsh
 /obj/item/gun/ballistic/automatic/remis/smg/ppsh

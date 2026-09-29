@@ -39,7 +39,3 @@
 	weapon_weight = WEAPON_HEAVY
 	burst_size = 3
 	carry_weight = 5 KILOGRAMS
-	//skill_melee = SKILL_IMPACT_WEAPON_TWOHANDED
-	//skill_ranged = SKILL_LAW
-	//tetris_width = 160
-	//tetris_height =  = 128

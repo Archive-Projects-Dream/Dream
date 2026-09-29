@@ -1,20 +1,4 @@
-// horizon-dev-sync[bot] port
-// Override /obj/item/gun/ballistic/attack_self to defer to the two_handed
-// component's wield/unwield when the gun is wieldable (wielded_inhand_state).
-//
-// Upstream's /obj/item/gun/ballistic/attack_self does NOT call ..(), so
-// /obj/item/proc/attack_self never runs, and COMSIG_ITEM_ATTACK_SELF never
-// fires. This means the /datum/component/two_handed (which listens for that
-// signal to wield/unwield) never gets a chance to run.
-//
-// Keybindings:
-// - Z (attack_self): wield/unwield heavy guns; eject/rack on non-wieldable
-// - R (rack_gun keybinding): rack the bolt on any ballistic gun
-// - Right-click (attack_self_secondary): toggle safety
-
 /obj/item/gun/ballistic/attack_self(mob/living/user, modifiers)
-        // Heavy two-handed guns: Z toggles wield/unwield instead of racking.
-        // Racking is done via the R key (see _horizon/code/datums/keybinding/rack_gun.dm).
         if(wielded_inhand_state && user?.is_holding(src) && istype(user, /mob/living/carbon))
                 var/datum/component/two_handed/two_handed_component = GetComponent(/datum/component/two_handed)
                 if(two_handed_component)
@@ -39,9 +23,6 @@
         recent_rack = world.time + rack_delay
         rack(user)
 
-/// RIGHT-CLICK on a held gun = toggle safety.
-/// This is the legacy modular_septic behaviour: attack_self_secondary on
-/// a gun toggles the safety on/off.
 /obj/item/gun/ballistic/attack_self_secondary(mob/living/user, modifiers)
         if(safety_flags & GUN_SAFETY_HAS_SAFETY)
                 toggle_safety(user)

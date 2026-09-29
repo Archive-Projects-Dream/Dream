@@ -1,9 +1,3 @@
-// horizon-dev-sync[bot] port
-// Restored from legacy code/modules/projectiles/guns/ballistic.dm. Upstream
-// /tg/station does not ship the guncleaning() proc but horizon's
-// ballistic.dm calls it from attackby() to let players clean a misfiring
-// gun with a sheet of cloth.
-
 /obj/item/gun/ballistic/proc/guncleaning(mob/user, obj/item/A)
 	if(misfire_probability == 0)
 		to_chat(user, span_notice("[src] seems to be already clean of fouling."))

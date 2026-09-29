@@ -206,14 +206,6 @@
         if(isopenturf(over))
                 toggle_stock(user)
 
-/obj/item/gun/attackby(obj/item/I, mob/living/user, params)
-        // Flashlight (seclite) and bayonet attachments are now handled by
-        // upstream's /datum/component/seclite_attachable and
-        // /datum/component/bayonet_attachable respectively. They register
-        // their own COMSIG_ATOM_ATTACKBY handlers, so we just fall through
-        // to ..() here.
-        return ..()
-
 /obj/item/gun/attack_self_secondary(mob/user, modifiers)
         . = ..()
         if(safety_flags & GUN_SAFETY_HAS_SAFETY)
@@ -222,10 +214,6 @@
 // Gunpoint (holding someone up at gunpoint) is now handled by upstream's
 // /obj/item/gun/interact_with_atom_secondary() which checks can_hold_up
 // and adds /datum/component/gunpoint. No need for a horizon override.
-
-/obj/item/gun/afterattack(atom/target, mob/living/user, flag, params)
-        attack_fatigue_cost = 0
-        return ..()
 
 /obj/item/gun/fire_gun(atom/target, mob/living/user, flag, params)
         if(QDELETED(target))

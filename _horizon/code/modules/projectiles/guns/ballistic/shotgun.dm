@@ -47,11 +47,7 @@
         can_suppress = TRUE
         suppressor_x_offset = 13
         bolt_type = BOLT_TYPE_LOCKING
-        //skill_melee = SKILL_IMPACT_WEAPON_TWOHANDED
-        //skill_ranged = SKILL_SHOTGUN
         slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE
-        //tetris_width = 128
-        //tetris_height =  = 32
 
 // DOUBLE BARRELED SHOTGUN
 /obj/item/gun/ballistic/shotgun/doublebarrel
@@ -90,8 +86,6 @@
         load_sound = '_horizon/sound/weapons/guns/shotgun/db_load.wav'
         spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/bobox
         slot_flags = ITEM_SLOT_BELT
-        //tetris_width = 64
-        //tetris_height =  = 32
 
 // ITHACA SHOTGUN
 /obj/item/gun/ballistic/shotgun/ithaca

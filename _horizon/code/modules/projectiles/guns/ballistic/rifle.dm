@@ -15,12 +15,7 @@
         weapon_weight = WEAPON_HEAVY
         inhand_x_dimension = 32
         inhand_y_dimension = 32
-        //skill_melee = SKILL_IMPACT_WEAPON_TWOHANDED
-        //skill_ranged = SKILL_RIFLE
         w_class = WEIGHT_CLASS_BULKY
-        //tetris_width = 128
-        //tetris_height =  = 64
-
 
 /obj/item/gun/ballistic/automatic/remis/abyss/warfare
         icon = '_horizon/icons/obj/items/guns/alter/48x32.dmi'
@@ -394,13 +389,9 @@
         w_class = WEIGHT_CLASS_BULKY
         inhand_x_dimension = 32
         inhand_y_dimension = 32
-        //skill_melee = SKILL_IMPACT_WEAPON_TWOHANDED
-        //skill_ranged = SKILL_RIFLE
         can_be_sawn_off = FALSE
         can_jam = FALSE
         safety_flags = NONE
-        //tetris_width = 32
-        //tetris_height =  = 128
 
 /obj/item/gun/ballistic/rifle/boltaction/remis/federson
         name = "\improper Dreaderson \"Brass Rain\" bolt-action rifle"

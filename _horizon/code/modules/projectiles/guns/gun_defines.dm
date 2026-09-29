@@ -18,11 +18,5 @@
 	/// /obj/projectile) because _gun.dm checks it on the gun itself.
 	var/semicd = FALSE
 
-// Legacy: recoil buildup when wielded. Read by horizon's rifle.dm.
-/obj/item/gun/ballistic
-
-// Legacy: fire selector position. 1 = semi, 2 = burst, 3 = full auto.
-// Upstream removed `select` in favour of burst_fire_selection toggle.
-// Horizon's _automatic.dm and rifle.dm read/write `select` directly.
 /obj/item/gun/ballistic/automatic
 	var/select = 1

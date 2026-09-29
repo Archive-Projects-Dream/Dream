@@ -1,8 +1,6 @@
 // grenade launcher
 /obj/item/gun/ballistic/revolver/grenadelauncher
 	pin = /obj/item/firing_pin
-	//skill_melee = SKILL_IMPACT_WEAPON_TWOHANDED
-	//skill_ranged = SKILL_GRENADE_LAUNCHER
 
 /obj/item/gun/ballistic/shotgun/grenadelauncher/batata
 	name = "40mm Batata Frita explosive fragmentation launcher"
@@ -28,7 +26,5 @@
 	can_suppress = FALSE
 	fire_delay = 3 SECONDS
 	w_class = WEIGHT_CLASS_HUGE
-	//skill_melee = SKILL_IMPACT_WEAPON_TWOHANDED
-	//skill_ranged = SKILL_GRENADE_LAUNCHER
 	bolt_type = BOLT_TYPE_LOCKING
 	empty_icon_state = FALSE

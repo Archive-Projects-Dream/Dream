@@ -5,13 +5,9 @@
         carry_weight = 0.8
         safety_off_sound = '_horizon/sound/weapons/guns/pistol/pistol_safety.wav'
         safety_on_sound = '_horizon/sound/weapons/guns/pistol/pistol_safety.wav'
-        //skill_melee = SKILL_IMPACT_WEAPON
-        //skill_ranged = SKILL_PISTOL
         suppressed = SUPPRESSED_NONE
         equip_sound = '_horizon/sound/weapons/guns/pistol/pistol_holster.wav'
         drop_sound = '_horizon/sound/weapons/guns/drop_lightgun.wav'
-        //tetris_width = 64
-        //tetris_height =  = 32
 
 // RUGER MKIV
 /obj/item/gun/ballistic/automatic/pistol
@@ -343,12 +339,6 @@
 /obj/item/gun/ballistic/automatic/pistol/pm9/Initialize(mapload)
         . = ..()
         AddComponent(/datum/component/trumadness, /obj/item/ammo_casing/c9mm/evil)
-
-/// examine_more shows the PM9's chaser gif. Uses upstream's examine_more()
-/// API instead of legacy desc_chaser()/image2html().
-/obj/item/gun/ballistic/automatic/pistol/pm9/examine_more(mob/user)
-        . = ..()
-        . += "<img src='_horizon/images/pm9.gif' width=128 height=96>"
 
 /obj/item/gun/ballistic/automatic/pistol/pm9/attackby(obj/item/A, mob/user, params)
         if(istype(A, /obj/item/suppressor))
