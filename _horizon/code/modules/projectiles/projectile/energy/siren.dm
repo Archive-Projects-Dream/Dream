@@ -1,6 +1,6 @@
 /obj/projectile/beam/laser/siren
 	name = "plasma ball"
-	icon = '_horizon/icons/obj/items/guns/projectiles/energy.dmi'
+	icon = '_horizon/icons/obj/items/guns/projectiles/projectiles.dmi'
 	icon_state = "plasma"
 	damage = 30
 	light_color = LIGHT_COLOR_LIGHT_CYAN

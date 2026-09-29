@@ -1,6 +1,6 @@
 /obj/projectile/beam/laser/nasr
 	name = "laser"
-	icon = '_horizon/icons/obj/items/guns/projectiles/energy.dmi'
+	icon = '_horizon/icons/obj/items/guns/projectiles/projectiles.dmi'
 	icon_state = "laser"
 	damage = 70
 	light_color = LIGHT_COLOR_BLOOD_MAGIC
