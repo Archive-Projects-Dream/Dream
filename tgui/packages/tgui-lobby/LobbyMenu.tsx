@@ -1,31 +1,22 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { Tooltip } from 'tgui-core/components';
+import { useEffect, useState } from 'react';
+import { classes } from 'tgui-core/react';
 import { storage } from 'common/storage';
 import {
-  type LobbyLanguage,
-  makeT,
-  playerCountLabel,
-} from './i18n';
-import { assetMap } from './assets';
+  Box,
+  Button,
+  Modal,
+  Section,
+  Stack,
+} from 'tgui-core/components';
+import { type LobbyLanguage, makeT, playerCountLabel } from './i18n';
 import {
-  areSoundsEnabled,
   loadSoundsEnabled,
-  playCollapseSound,
-  playExpandSound,
+  playLoadSound,
   playSelectSound,
   setSoundsEnabled,
 } from './audio';
 
-type StationTrait = {
-  ref: string;
-  name: string;
-  description: string;
-  iconState: string;
-  overlays: string[];
-};
-
 export type ServerState = {
-  titleImageUrl: string;
   gamePhase: 'startup' | 'pregame' | 'setting_up' | 'playing' | 'postgame';
   isReady: boolean;
   canReady: boolean;
@@ -41,11 +32,8 @@ export type ServerState = {
   shiftTime: string;
   isAdmin: boolean;
   isLocalhost: boolean;
-  stationTraits: StationTrait[];
   hasNewPoll: boolean;
   canPoll: boolean;
-  overflowJob: string | null;
-  traitFeedback: string | null;
   transparent: boolean;
   // html-lobby-v2 additions
   language: LobbyLanguage;
@@ -53,308 +41,388 @@ export type ServerState = {
   preferenceIssues: string[];
   previewUrls: Record<string, string> | null;
   videoUrl: string | null;
+  backgroundUrl: string | null;
   serverName: string | null;
 };
-
-type LobbyState = {
-  isCollapsed: boolean;
-  serverState: ServerState | null;
-};
-
-type LobbyAction =
-  | { type: 'serverInit'; payload: ServerState }
-  | { type: 'serverUpdate'; payload: Partial<ServerState> }
-  | { type: 'setCollapsed'; collapsed: boolean };
-
-const DEFAULT_STATE: LobbyState = {
-  isCollapsed: false,
-  serverState: null,
-};
-
-const CRT_STORAGE_KEY = 'lobby-crt-enabled';
-
-function lobbyReducer(state: LobbyState, action: LobbyAction): LobbyState {
-  switch (action.type) {
-    case 'serverInit':
-      return { ...state, serverState: action.payload };
-    case 'serverUpdate':
-      if (!state.serverState) return state;
-      return {
-        ...state,
-        serverState: { ...state.serverState, ...action.payload },
-      };
-    case 'setCollapsed':
-      return { ...state, isCollapsed: action.collapsed };
-    default:
-      return state;
-  }
-}
 
 function sendAction(action: string, payload?: Record<string, unknown>) {
   Byond.sendMessage('action', { action, ...payload });
 }
 
-async function getApngDuration(url: string): Promise<number> {
-  try {
-    const res = await fetch(url);
-    const data = await res.arrayBuffer();
-    const decoder = new ImageDecoder({ type: 'image/apng', data });
-    await decoder.tracks.ready;
-    let total = 0;
-    for (let i = 0; i < decoder.tracks.selectedTrack!.frameCount; i++) {
-      const result = await decoder.decode({ frameIndex: i });
-      total += result.image.duration! / 1000;
-      result.image.close();
-    }
-    decoder.close();
-    return total;
-  } catch {
-    return FALLBACK_APNG_DURATION_MS;
+/** Client-side setting persistence keys (kept from the original lobby) */
+const FILTER_STORAGE_KEY = 'lobby-filter-disabled';
+const THEME_STORAGE_KEY = 'lobby-theme-disabled';
+const VIDEO_STORAGE_KEY = 'lobby-video-enabled';
+
+/** After this long, entry animations stop replaying on re-renders */
+const ANIMATION_DISABLE_MS = 10000;
+
+/** Delay before the lobby load jingle, mirrors the original lobby */
+const LOAD_SOUND_DELAY_MS = 250;
+
+const GAME_PHASE_STATUS = {
+  startup: 'statusStartup',
+  pregame: 'statusPregame',
+  setting_up: 'statusSettingUp',
+  playing: 'statusPlaying',
+  postgame: 'statusPostgame',
+} as const;
+
+const PREVIEW_DIRS = ['south', 'east', 'north', 'west'] as const;
+
+function countdownLabel(countdown: string, t: ReturnType<typeof makeT>) {
+  if (countdown === 'DELAYED') {
+    return t('delayed');
   }
-}
-
-const durationCache = new Map<string, Promise<number>>();
-const blobCache = new Map<string, string>();
-
-function getCachedDuration(url: string): Promise<number> {
-  let p = durationCache.get(url);
-  if (!p) {
-    p = getApngDuration(url);
-    durationCache.set(url, p);
+  if (countdown === 'SOON') {
+    return t('soon');
   }
-  return p;
+  return countdown;
 }
 
-function preloadApng(assetKey: string) {
-  const url = assetMap[assetKey];
-  if (!url || blobCache.has(assetKey)) return;
-  blobCache.set(assetKey, url);
-  fetch(url)
-    .then((r) => r.blob())
-    .then((blob) => {
-      const blobUrl = URL.createObjectURL(blob);
-      blobCache.set(assetKey, blobUrl);
-      getCachedDuration(blobUrl);
-    })
-    .catch(() => {});
-}
-
-function getPreloadedUrl(assetKey: string): string | null {
-  return blobCache.get(assetKey) ?? assetMap[assetKey] ?? null;
-}
-
-function useFlick(assetKey: string): [() => void, React.ReactNode] {
-  const [count, setCount] = useState(0);
-  const [activeUrl, setActiveUrl] = useState<string | null>(null);
+export function LobbyMenu() {
+  const [ss, setSs] = useState<ServerState | null>(null);
+  const [fadingOut, setFadingOut] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [animationsDisabled, setAnimationsDisabled] = useState(false);
+  const [filterDisabled, setFilterDisabled] = useState<boolean | undefined>();
+  const [themeDisabled, setThemeDisabled] = useState<boolean | undefined>();
+  const [videoEnabled, setVideoEnabled] = useState(true);
+  const [soundsOn, setSoundsOn] = useState(true);
 
   useEffect(() => {
-    preloadApng(assetKey);
-  }, [assetKey]);
-
-  const trigger = useCallback(() => {
-    const url = getPreloadedUrl(assetKey);
-    if (!url) return;
-    setActiveUrl(url);
-    setCount((c) => c + 1);
-    getCachedDuration(url).then((ms) => {
-      setTimeout(() => setActiveUrl(null), ms);
+    Byond.subscribeTo('init', (payload: ServerState) => {
+      setSs(payload);
     });
-  }, [assetKey]);
 
-  const element = activeUrl ? (
-    <img key={count} className="sprite-btn__pressed" src={activeUrl} alt="" />
-  ) : null;
+    Byond.subscribeTo('state', (payload: Partial<ServerState>) => {
+      setSs((prev) =>
+        prev ? { ...prev, ...payload } : (payload as ServerState),
+      );
+    });
 
-  return [trigger, element];
-}
-
-/** Helper to get an icon URL from the asset map */
-function icon(name: string): string | undefined {
-  return assetMap[`${name}.png`];
-}
-
-function SpriteButton({
-  iconState,
-  enabled = true,
-  onClick,
-  children,
-  pressedKey,
-}: {
-  iconState: string;
-  enabled?: boolean;
-  onClick?: React.MouseEventHandler;
-  children?: React.ReactNode;
-  pressedKey?: string;
-}) {
-  const displayState = enabled ? iconState : `${iconState}_disabled`;
-  const key = pressedKey ?? iconState;
-  const [triggerFlick, flickElement] = useFlick(`${key}_pressed.png`);
-  const [triggerEnabled, enabledElement] = useFlick(`${iconState}_enabled.png`);
-  const prevEnabled = useRef(enabled);
+    // The server hides the browser shortly after this message
+    Byond.subscribeTo('fadeOut', () => setFadingOut(true));
+  }, []);
 
   useEffect(() => {
-    if (enabled && !prevEnabled.current) {
-      triggerEnabled();
-    }
-    prevEnabled.current = enabled;
-  }, [enabled, triggerEnabled]);
+    storage
+      .get(FILTER_STORAGE_KEY)
+      .then((val) => setFilterDisabled(!!val));
 
-  return (
-    <button
-      className={`sprite-btn ${!enabled ? 'sprite-btn--disabled' : ''}`}
-      onClick={(e) => {
-        if (!enabled) return;
-        playSelectSound();
-        triggerFlick();
-        onClick?.(e);
-      }}
-      disabled={!enabled}
-    >
-      <img className="sprite-btn__normal" src={icon(displayState)} alt="" />
-      <img
-        className="sprite-btn__hover"
-        src={icon(`${iconState}_highlighted`)}
-        alt=""
-      />
-      {flickElement}
-      {enabledElement}
-      {children}
-    </button>
-  );
-}
+    storage.get(THEME_STORAGE_KEY).then((val) => setThemeDisabled(!!val));
 
-const scaleCss = (px: number) => `calc(${px}px * var(--lobby-scale, 1))`;
+    storage.get(VIDEO_STORAGE_KEY).then((val) => {
+      setVideoEnabled(val === undefined || val === null ? true : !!val);
+    });
 
-/** Wrapper for absolutely-positioned lobby elements that collapse with the menu. */
-function LobbyElement({
-  top,
-  left,
-  zIndex,
-  collapsed,
-  slide,
-  children,
-  elRef,
-  style,
-  noCollapse,
-}: {
-  top: number;
-  left: number;
-  zIndex?: number;
-  collapsed: boolean;
-  slide?: boolean;
-  children: React.ReactNode;
-  elRef?: React.Ref<HTMLDivElement>;
-  style?: React.CSSProperties;
-  /** Don't apply collapse animation (e.g. shutter is JS-animated) */
-  noCollapse?: boolean;
-}) {
-  const collapseClass =
-    !noCollapse && collapsed
-      ? slide
-        ? 'lobby__el--collapse-slide'
-        : 'lobby__el--collapse-up'
-      : '';
-  return (
-    <div
-      ref={elRef}
-      className={`lobby__el ${collapseClass}`}
-      style={{
-        top: scaleCss(top),
-        left: scaleCss(left),
-        zIndex,
-        ...style,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function TraitFeedback({ text }: { text: string }) {
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    setVisible(true);
-    const timer = setTimeout(() => setVisible(false), TRAIT_FEEDBACK_MS);
-    return () => clearTimeout(timer);
-  }, [text]);
-
-  if (!visible) return null;
-
-  return (
-    <div className="lobby__el lobby__trait-feedback" key={text}>
-      {text}
-    </div>
-  );
-}
-
-/** Typewriter welcome line with the character's name */
-function WelcomeLine({
-  name,
-  language,
-  collapsed,
-}: {
-  name: string | null;
-  language: LobbyLanguage;
-  collapsed: boolean;
-}) {
-  const t = useMemo(() => makeT(language), [language]);
-  const full = `${t('welcome')} ${name || t('guest')}`;
-  const [shownLen, setShownLen] = useState(full.length);
-
-  useEffect(() => {
-    setShownLen(0);
-    let interval: ReturnType<typeof setInterval> | undefined;
-    const timer = setTimeout(() => {
-      let i = 0;
-      interval = setInterval(() => {
-        i += 1;
-        setShownLen(i);
-        if (i >= full.length) {
-          clearInterval(interval);
-        }
-      }, 45);
-    }, 600);
-    return () => {
-      clearTimeout(timer);
-      if (interval) {
-        clearInterval(interval);
+    loadSoundsEnabled().then((enabled) => {
+      setSoundsOn(enabled);
+      if (enabled) {
+        setTimeout(() => playLoadSound(), LOAD_SOUND_DELAY_MS);
       }
-    };
-  }, [full]);
+    });
 
-  return (
-    <div
-      className={`lobby__welcome ${collapsed ? 'lobby__welcome--collapsed' : ''}`}
-    >
-      {full.slice(0, shownLen)}
-      {shownLen < full.length && (
-        <span className="lobby__welcome-cursor">_</span>
-      )}
-    </div>
-  );
-}
+    const timer = setTimeout(
+      () => setAnimationsDisabled(true),
+      ANIMATION_DISABLE_MS,
+    );
+    return () => clearTimeout(timer);
+  }, []);
 
-/** CM13-style warnings about the player's current preferences */
-function PreferenceIssues({
-  issues,
-  collapsed,
-}: {
-  issues: string[];
-  collapsed: boolean;
-}) {
-  if (issues.length === 0) {
+  useEffect(() => {
+    const bg = ss?.transparent ? 'transparent' : '#000';
+    document.documentElement.style.setProperty('--lobby-bg', bg);
+    document.documentElement.style.backgroundColor = bg;
+    document.body.style.backgroundColor = bg;
+  }, [ss?.transparent]);
+
+  if (!ss || themeDisabled === undefined || filterDisabled === undefined) {
     return null;
   }
+
+  const language = ss.language || 'english';
+  const t = makeT(language);
+  const crtTheme = !themeDisabled;
+  const crtFilter = crtTheme && !filterDisabled;
+  const pregame = ss.gamePhase === 'pregame' || ss.gamePhase === 'startup';
+  const typingDelay = (index: number) =>
+    animationsDisabled ? '0s' : `${1.5 + index * 0.2}s`;
+
   return (
     <div
-      className={`lobby__issues ${collapsed ? 'lobby__issues--collapsed' : ''}`}
+      className={classes([
+        'LobbyScreen',
+        crtTheme ? 'LobbyScreen--crt' : 'LobbyScreen--plain',
+        crtTheme && 'crtTheme',
+        crtFilter && 'filterEnabled',
+        animationsDisabled && 'noAnimation',
+        fadingOut && 'lobbyFadeOut',
+        ss.transparent && 'LobbyScreen--transparent',
+      ])}
     >
-      {issues.map((issue, index) => (
-        <div key={index} className="lobby__issues-item">
-          {issue}
-        </div>
-      ))}
+      {!ss.transparent && ss.backgroundUrl && (
+        <div
+          className="bgBackground bgLoad"
+          style={{ backgroundImage: `url(${ss.backgroundUrl})` }}
+        />
+      )}
+
+      {!ss.transparent && videoEnabled && ss.videoUrl && (
+        <video
+          className="bgVideo"
+          src={ss.videoUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      )}
+
+      {crtFilter && !ss.transparent && <div className="crt" />}
+
+      {hidden && (
+        <Box position="absolute" top="10px" left="10px" className="floating">
+          <Button icon="check" onClick={() => setHidden(false)} />
+        </Box>
+      )}
+
+      <Stack vertical height="100%" justify="space-around" align="center">
+        <Stack.Item>
+          <Section
+            p={3}
+            className="sectionLoad"
+            style={{ opacity: hidden ? '0' : '1' }}
+          >
+            <Stack vertical>
+              <Stack.Item>
+                <Stack vertical align="center" className="welcomeHolder">
+                  <Stack.Item>
+                    <Box className="typeEffect styledText">
+                      {t('welcome')}
+                    </Box>
+                  </Stack.Item>
+                  <Stack.Item>
+                    <Box
+                      className="typeEffect styledText"
+                      style={{ animationDelay: '1.4s' }}
+                    >
+                      {ss.characterName || t('guest')}
+                    </Box>
+                  </Stack.Item>
+                </Stack>
+              </Stack.Item>
+
+              <Stack.Item>
+                <div className="dividerEffect" />
+              </Stack.Item>
+
+              <LobbyButton
+                delay={typingDelay(1)}
+                icon="file-lines"
+                disabled={!ss.assetsReady}
+                onClick={() => sendAction('character_setup')}
+              >
+                {t('setupCharacter')}
+              </LobbyButton>
+
+              <LobbyButton
+                delay={typingDelay(2)}
+                icon="gear"
+                disabled={!ss.assetsReady}
+                onClick={() => sendAction('settings')}
+              >
+                {t('gamePreferences')}
+              </LobbyButton>
+
+              <LobbyButton
+                delay={typingDelay(3)}
+                icon="check-to-slot"
+                onClick={() => sendAction('crew_manifest')}
+              >
+                {t('crewManifest')}
+              </LobbyButton>
+
+              <LobbyButton
+                delay={typingDelay(4)}
+                icon="list-ul"
+                onClick={() => sendAction('changelog')}
+              >
+                {t('changelog')}
+              </LobbyButton>
+
+              <Stack.Item>
+                <div className="dividerEffect" />
+              </Stack.Item>
+
+              <LobbyButton
+                delay={typingDelay(5)}
+                icon="eye"
+                disabled={!ss.canObserve}
+                onClick={() => sendAction('observe')}
+              >
+                {t('observe')}
+              </LobbyButton>
+
+              {ss.canReady && (
+                <LobbyButton
+                  delay={typingDelay(6)}
+                  icon={ss.isReady ? 'check' : 'xmark'}
+                  selected={ss.isReady}
+                  onClick={() => sendAction('ready_toggle')}
+                >
+                  {ss.isReady ? t('unready') : t('ready')}
+                </LobbyButton>
+              )}
+
+              {!ss.canReady && ss.canJoin && (
+                <LobbyButton
+                  delay={typingDelay(6)}
+                  icon="users"
+                  onClick={() => sendAction('join')}
+                >
+                  {t('joinGame')}
+                </LobbyButton>
+              )}
+
+              {!!ss.canPoll && (
+                <LobbyButton
+                  delay={typingDelay(7)}
+                  icon="clipboard-list"
+                  badge={ss.hasNewPoll ? t('newPoll') : null}
+                  onClick={() => sendAction('poll')}
+                >
+                  {t('polls')}
+                </LobbyButton>
+              )}
+
+              {!!ss.isLocalhost && (
+                <LobbyButton
+                  delay={typingDelay(8)}
+                  icon="forward"
+                  onClick={() => sendAction('start_now')}
+                >
+                  {t('startNow')}
+                </LobbyButton>
+              )}
+
+              <Stack.Item>
+                <Button
+                  fluid
+                  className="hideButton"
+                  icon="eye-slash"
+                  onClick={() => setHidden(true)}
+                >
+                  <span className="styledText">{t('hideMenu')}</span>
+                </Button>
+              </Stack.Item>
+            </Stack>
+          </Section>
+        </Stack.Item>
+      </Stack>
+
+      <CharacterPreview ss={ss} t={t} />
+
+      <StatsPanel ss={ss} t={t} language={language} pregame={pregame} />
+
+      <PreferenceIssues issues={ss.preferenceIssues} />
+
+      <LobbySettings
+        ss={ss}
+        t={t}
+        language={language}
+        filterDisabled={filterDisabled}
+        setFilterDisabled={setFilterDisabled}
+        themeDisabled={themeDisabled}
+        setThemeDisabled={setThemeDisabled}
+        videoEnabled={videoEnabled}
+        setVideoEnabled={setVideoEnabled}
+        soundsOn={soundsOn}
+        setSoundsOn={setSoundsOn}
+      />
+    </div>
+  );
+}
+
+type TFunc = ReturnType<typeof makeT>;
+
+function LobbyButton(props: {
+  delay: string;
+  icon?: string;
+  selected?: boolean;
+  disabled?: boolean;
+  badge?: string | null;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  children: React.ReactNode;
+}) {
+  const { delay, icon, selected, disabled, badge, onClick, children } = props;
+  return (
+    <Stack.Item className="buttonEffect" style={{ animationDelay: delay }}>
+      <Button
+        fluid
+        className="distinctButton"
+        icon={icon}
+        selected={selected}
+        disabled={disabled}
+        onClick={(e) => {
+          if (disabled) return;
+          playSelectSound();
+          onClick?.(e);
+        }}
+      >
+        <span className="styledText">{children}</span>
+        {!!badge && <span className="badgeNotification">{badge}</span>}
+      </Button>
+    </Stack.Item>
+  );
+}
+
+/** Character preview with client-side direction cycling */
+function CharacterPreview({ ss, t }: { ss: ServerState; t: TFunc }) {
+  const [dirIndex, setDirIndex] = useState(0);
+
+  const urls = ss.previewUrls;
+  if (!urls) {
+    return null;
+  }
+
+  const dir = PREVIEW_DIRS[dirIndex];
+  const url = urls[dir] ?? Object.values(urls)[0];
+
+  return (
+    <div className="lobby__preview">
+      <div className="lobby__panel-title">{t('previewTitle')}</div>
+      <div className="lobby__preview-body">
+        {url && <img className="lobby__preview-img" src={url} alt="" />}
+      </div>
+      <Stack className="lobby__preview-buttons">
+        <Stack.Item grow>
+          <Button
+            fluid
+            compact
+            icon="rotate"
+            onClick={() => {
+              playSelectSound();
+              setDirIndex((dirIndex + 1) % PREVIEW_DIRS.length);
+            }}
+          >
+            {t('rotate')}
+          </Button>
+        </Stack.Item>
+        <Stack.Item grow>
+          <Button
+            fluid
+            compact
+            icon="arrows-rotate"
+            onClick={() => {
+              playSelectSound();
+              sendAction('refresh_preview');
+            }}
+          >
+            {t('refresh')}
+          </Button>
+        </Stack.Item>
+      </Stack>
     </div>
   );
 }
@@ -368,38 +436,36 @@ function StatsRow({ label, value }: { label: string; value: string | null }) {
   );
 }
 
-const GAME_PHASE_STATUS = {
-  startup: 'statusStartup',
-  pregame: 'statusPregame',
-  setting_up: 'statusSettingUp',
-  playing: 'statusPlaying',
-  postgame: 'statusPostgame',
-} as const;
-
-/** Extended round/server statistics panel under the info TV */
+/** Round/server statistics panel on the right edge */
 function StatsPanel({
   ss,
+  t,
   language,
-  collapsed,
+  pregame,
 }: {
   ss: ServerState;
+  t: TFunc;
   language: LobbyLanguage;
-  collapsed: boolean;
+  pregame: boolean;
 }) {
-  const t = useMemo(() => makeT(language), [language]);
   const statusKey = GAME_PHASE_STATUS[ss.gamePhase];
   return (
-    <div
-      className={`lobby__stats ${collapsed ? 'lobby__stats--collapsed' : ''}`}
-    >
-      <div className="lobby__stats-title">{t('statsTitle')}</div>
+    <div className="lobby__stats">
+      <div className="lobby__panel-title">{t('statsTitle')}</div>
       <StatsRow label={t('statsServer')} value={ss.serverName} />
       <StatsRow label={t('statsMap')} value={ss.mapName} />
       <StatsRow label={t('statsStatus')} value={t(statusKey)} />
-      <StatsRow label={t('statsShiftTime')} value={ss.shiftTime} />
+      {pregame ? (
+        <StatsRow
+          label={t('statsTimeLeft')}
+          value={countdownLabel(ss.countdown, t)}
+        />
+      ) : (
+        <StatsRow label={t('statsShiftTime')} value={ss.shiftTime} />
+      )}
       <StatsRow
         label={t('statsPlayers')}
-        value={String(ss.playerCount)}
+        value={playerCountLabel(language, ss.playerCount)}
       />
       <StatsRow label={t('statsReady')} value={String(ss.readyCount)} />
       <StatsRow
@@ -410,639 +476,203 @@ function StatsPanel({
   );
 }
 
-const PREVIEW_DIRS = ['south', 'east', 'north', 'west'] as const;
+/** CM13-style warnings about the player's current preferences */
+function PreferenceIssues({ issues }: { issues: string[] }) {
+  if (!issues || issues.length === 0) {
+    return null;
+  }
+  return (
+    <div className="messageHolder">
+      <Stack vertical justify="flex-end" fill>
+        {issues.map((issue, index) => (
+          <Section key={index} className="sectionLoad issueSection">
+            <Box className="issueText">{issue}</Box>
+          </Section>
+        ))}
+      </Stack>
+    </div>
+  );
+}
 
-/** Character preview with client-side direction cycling */
-function CharacterPreview({
+/** Settings button (bottom right) and its popup */
+function LobbySettings({
   ss,
+  t,
   language,
-  collapsed,
+  filterDisabled,
+  setFilterDisabled,
+  themeDisabled,
+  setThemeDisabled,
+  videoEnabled,
+  setVideoEnabled,
+  soundsOn,
+  setSoundsOn,
 }: {
   ss: ServerState;
+  t: TFunc;
   language: LobbyLanguage;
-  collapsed: boolean;
+  filterDisabled: boolean;
+  setFilterDisabled: (value: boolean) => void;
+  themeDisabled: boolean;
+  setThemeDisabled: (value: boolean) => void;
+  videoEnabled: boolean;
+  setVideoEnabled: (value: boolean) => void;
+  soundsOn: boolean;
+  setSoundsOn: (value: boolean) => void;
 }) {
-  const t = useMemo(() => makeT(language), [language]);
-  const [dirIndex, setDirIndex] = useState(0);
-
-  const urls = ss.previewUrls;
-  if (!urls) {
-    return null;
-  }
-
-  const dir = PREVIEW_DIRS[dirIndex];
-  const url = urls[dir] ?? Object.values(urls)[0];
-
-  return (
-    <div
-      className={`lobby__preview ${collapsed ? 'lobby__preview--collapsed' : ''}`}
-    >
-      <div className="lobby__preview-title">{t('previewTitle')}</div>
-      <div className="lobby__preview-body">
-        {url && <img className="lobby__preview-img" src={url} alt="" />}
-      </div>
-      <div className="lobby__preview-buttons">
-        <button
-          className="lobby__text-btn"
-          onClick={() => {
-            playSelectSound();
-            setDirIndex((dirIndex + 1) % PREVIEW_DIRS.length);
-          }}
-        >
-          {t('rotate')}
-        </button>
-        <button
-          className="lobby__text-btn"
-          onClick={() => {
-            playSelectSound();
-            sendAction('refresh_preview');
-          }}
-        >
-          {t('refresh')}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/** Lobby settings popup: language, CRT filter, interface sounds */
-function LobbySettings({
-  language,
-  crtEnabled,
-  setCrtEnabled,
-}: {
-  language: LobbyLanguage;
-  crtEnabled: boolean;
-  setCrtEnabled: (value: boolean) => void;
-}) {
-  const t = useMemo(() => makeT(language), [language]);
   const [open, setOpen] = useState(false);
-  const [soundsOn, setSoundsOn] = useState(true);
-
-  useEffect(() => {
-    loadSoundsEnabled().then((enabled) => setSoundsOn(enabled));
-  }, []);
-
-  if (!open) {
-    return (
-      <button
-        className="lobby__settings-btn"
-        onClick={() => {
-          playSelectSound();
-          setOpen(true);
-        }}
-      >
-        {language === 'russian' ? 'RU' : 'EN'}
-      </button>
-    );
-  }
 
   return (
-    <div className="lobby__modal-backdrop" onClick={() => setOpen(false)}>
-      <div
-        className="lobby__modal"
-        onClick={(e) => e.stopPropagation()}
+    <>
+      <Box
+        position="absolute"
+        bottom="10px"
+        right="10px"
+        className="settingsHolder"
       >
-        <div className="lobby__modal-title">{t('settingsTitle')}</div>
-        <div className="lobby__modal-row">
-          <span className="lobby__stats-label">{t('languageLabel')}</span>
-          <div className="lobby__modal-actions">
-            <button
-              className={`lobby__text-btn ${language === 'english' ? 'lobby__text-btn--active' : ''}`}
-              onClick={() => {
-                playSelectSound();
-                sendAction('set_language', { language: 'english' });
-              }}
-            >
-              English
-            </button>
-            <button
-              className={`lobby__text-btn ${language === 'russian' ? 'lobby__text-btn--active' : ''}`}
-              onClick={() => {
-                playSelectSound();
-                sendAction('set_language', { language: 'russian' });
-              }}
-            >
-              Русский
-            </button>
-          </div>
-        </div>
-        <div className="lobby__modal-row">
-          <span className="lobby__stats-label">{t('crtLabel')}</span>
-          <div className="lobby__modal-actions">
-            <button
-              className={`lobby__text-btn ${crtEnabled ? 'lobby__text-btn--active' : ''}`}
-              onClick={() => {
-                playSelectSound();
-                const next = !crtEnabled;
-                setCrtEnabled(next);
-                storage.set(CRT_STORAGE_KEY, next);
-              }}
-            >
-              {crtEnabled ? t('on') : t('off')}
-            </button>
-          </div>
-        </div>
-        <div className="lobby__modal-row">
-          <span className="lobby__stats-label">{t('soundsLabel')}</span>
-          <div className="lobby__modal-actions">
-            <button
-              className={`lobby__text-btn ${soundsOn ? 'lobby__text-btn--active' : ''}`}
-              onClick={() => {
-                const next = !areSoundsEnabled();
-                setSoundsEnabled(next);
-                setSoundsOn(next);
-                if (next) {
+        <Button
+          icon="cog"
+          onClick={() => {
+            playSelectSound();
+            setOpen(true);
+          }}
+        >
+          {language === 'russian' ? 'RU' : 'EN'}
+        </Button>
+      </Box>
+
+      {open && (
+        <Modal>
+          <Section
+            p={3}
+            className="settingsModal"
+            title={t('settingsTitle')}
+            buttons={
+              <Button
+                icon="xmark"
+                onClick={() => {
                   playSelectSound();
-                }
-              }}
-            >
-              {soundsOn ? t('on') : t('off')}
-            </button>
-          </div>
-        </div>
-        <div className="lobby__modal-row lobby__modal-row--right">
-          <button className="lobby__text-btn" onClick={() => setOpen(false)}>
-            {t('closeLabel')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const SHUTTER_TRAVEL_PX = 143;
-const SHUTTER_MOVE_MS = 400;
-const SHUTTER_WAIT_MS = 200;
-const COLLAPSE_SLIDE_PX = 134;
-const LOCALHOST_HANDLE_SHIFT_PX = 50;
-const LOCALHOST_HANDLE_SHIFT_MS = 200;
-const TRAIT_FEEDBACK_MS = 1500;
-const MAX_TRAITS_PER_COLUMN = 3;
-const FALLBACK_APNG_DURATION_MS = 300;
-const EASE_OUT = 'cubic-bezier(0.33, 1, 0.68, 1)';
-const EASE_IN = 'cubic-bezier(0.32, 0, 0.67, 0)';
-
-function getLobbyScale(): number {
-  return parseFloat(
-    document.documentElement.style.getPropertyValue('--lobby-scale') || '1',
-  );
-}
-
-export function LobbyMenu() {
-  const [state, dispatch] = useReducer(lobbyReducer, DEFAULT_STATE);
-  const [animating, setAnimating] = useState(false);
-  const [tvActive, setTvActive] = useState(true);
-  const [fadingOut, setFadingOut] = useState(false);
-  const [crtEnabled, setCrtEnabled] = useState(false);
-  const shutterRef = useRef<HTMLDivElement>(null);
-  const collapseRef = useRef<HTMLDivElement>(null);
-
-  const ss = state.serverState;
-
-  useEffect(() => {
-    Byond.subscribeTo('init', (payload: ServerState) => {
-      dispatch({ type: 'serverInit', payload });
-    });
-
-    Byond.subscribeTo('state', (payload: Partial<ServerState>) => {
-      dispatch({ type: 'serverUpdate', payload });
-    });
-
-    // The server hides the browser shortly after this message
-    Byond.subscribeTo('fadeOut', () => setFadingOut(true));
-  }, []);
-
-  useEffect(() => {
-    storage.get(CRT_STORAGE_KEY).then((val) => {
-      setCrtEnabled(val === undefined ? false : !!val);
-    });
-  }, []);
-
-  useEffect(() => {
-    const bg = ss?.transparent ? 'transparent' : '#000';
-    document.documentElement.style.setProperty('--lobby-bg', bg);
-    document.documentElement.style.backgroundColor = bg;
-    document.body.style.backgroundColor = bg;
-  }, [ss?.transparent]);
-
-  if (!ss) {
-    return null;
-  }
-
-  const language = ss.language || 'english';
-  const t = makeT(language);
-
-  const backgroundStyle = ss.transparent
-    ? undefined
-    : ss.titleImageUrl
-      ? {
-          backgroundImage: `url(${ss.titleImageUrl})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }
-      : undefined;
-
-  const collapsed = state.isCollapsed;
-  const blipEnabled = ss.gamePhase === 'pregame' || ss.gamePhase === 'startup';
-  const collapseIcon = collapsed ? 'expand' : 'collapse';
-
-  let blipState = 'ready_blip_disabled';
-  if (blipEnabled) {
-    blipState = ss.isReady ? 'ready_blip_ready' : 'ready_blip_not_ready';
-  }
-
-  async function handleToggleCollapse() {
-    if (animating) return;
-    setAnimating(true);
-
-    const shutter = shutterRef.current;
-
-    if (!collapsed) {
-      playCollapseSound();
-      setTvActive(false);
-
-      if (shutter) {
-        const dist = SHUTTER_TRAVEL_PX * getLobbyScale();
-
-        await shutter.animate(
-          [
-            { transform: 'translateY(0)' },
-            { transform: `translateY(${dist}px)` },
-          ],
-          { duration: SHUTTER_MOVE_MS, easing: EASE_OUT, fill: 'forwards' },
-        ).finished;
-
-        await new Promise((r) => setTimeout(r, SHUTTER_WAIT_MS));
-
-        for (const a of shutter.getAnimations()) a.cancel();
-        shutter.animate(
-          [
-            { transform: `translateY(${dist}px)` },
-            { transform: 'translateY(0)' },
-          ],
-          { duration: SHUTTER_MOVE_MS, easing: EASE_IN, fill: 'forwards' },
-        );
-      }
-
-      dispatch({ type: 'setCollapsed', collapsed: true });
-
-      await new Promise((r) => setTimeout(r, SHUTTER_MOVE_MS));
-      if (shutter) {
-        for (const a of shutter.getAnimations()) a.cancel();
-      }
-
-      if (ss?.isLocalhost && collapseRef.current) {
-        const shift = LOCALHOST_HANDLE_SHIFT_PX * getLobbyScale();
-        collapseRef.current.animate(
-          [
-            {
-              transform: `translateY(${-COLLAPSE_SLIDE_PX * getLobbyScale()}px)`,
-            },
-            {
-              transform: `translateY(${-COLLAPSE_SLIDE_PX * getLobbyScale()}px) translateX(${-shift}px)`,
-            },
-          ],
-          {
-            duration: LOCALHOST_HANDLE_SHIFT_MS,
-            easing: EASE_OUT,
-            fill: 'forwards',
-          },
-        );
-      }
-    } else {
-      playExpandSound();
-
-      if (ss?.isLocalhost && collapseRef.current) {
-        const scale = getLobbyScale();
-        const shift = 50 * scale;
-        const yOff = -COLLAPSE_SLIDE_PX * scale;
-        for (const a of collapseRef.current.getAnimations()) a.cancel();
-        await collapseRef.current.animate(
-          [
-            { transform: `translateY(${yOff}px) translateX(${-shift}px)` },
-            { transform: `translateY(${yOff}px)` },
-          ],
-          {
-            duration: LOCALHOST_HANDLE_SHIFT_MS,
-            easing: EASE_IN,
-            fill: 'forwards',
-          },
-        ).finished;
-        for (const a of collapseRef.current.getAnimations()) a.cancel();
-      }
-
-      if (shutter) {
-        const dist = SHUTTER_TRAVEL_PX * getLobbyScale();
-
-        shutter.animate(
-          [
-            { transform: 'translateY(0)' },
-            { transform: `translateY(${dist}px)` },
-          ],
-          { duration: SHUTTER_MOVE_MS, easing: EASE_OUT, fill: 'forwards' },
-        );
-      }
-
-      dispatch({ type: 'setCollapsed', collapsed: false });
-
-      await new Promise((r) => setTimeout(r, SHUTTER_MOVE_MS));
-
-      if (shutter) {
-        const dist = SHUTTER_TRAVEL_PX * getLobbyScale();
-
-        await new Promise((r) => setTimeout(r, SHUTTER_WAIT_MS));
-
-        for (const a of shutter.getAnimations()) a.cancel();
-        await shutter.animate(
-          [
-            { transform: `translateY(${dist}px)` },
-            { transform: 'translateY(0)' },
-          ],
-          { duration: SHUTTER_MOVE_MS, easing: EASE_IN, fill: 'forwards' },
-        ).finished;
-
-        for (const a of shutter.getAnimations()) a.cancel();
-      }
-
-      setTvActive(true);
-    }
-
-    setAnimating(false);
-  }
-
-  const roundStarted = ss.gamePhase === 'playing';
-  const postgame = ss.gamePhase === 'postgame';
-  let tvLines: string[];
-  if (postgame) {
-    tvLines = [t('gameEnded'), t('restartSoon')];
-  } else if (roundStarted) {
-    tvLines = [
-      ss.mapName,
-      playerCountLabel(language, ss.playerCount),
-      `${ss.shiftTime} ${t('shiftIn')}`,
-    ];
-  } else if (ss.isAdmin) {
-    tvLines = [
-      `${t('startingIn')} ${countdownLabel(ss.countdown, t)}`,
-      playerCountLabel(language, ss.playerCount),
-      `${ss.readyCount} ${t('playersReady')}`,
-      `${ss.adminReadyCount} / ${ss.adminCount} ${t('adminsReady')}`,
-    ];
-  } else {
-    tvLines = [
-      countdownLabel(ss.countdown, t),
-      playerCountLabel(language, ss.playerCount),
-    ];
-  }
-
-  return (
-    <div
-      className={`lobby ${ss.transparent ? 'lobby--transparent' : ''} ${
-        fadingOut ? 'lobby--fading' : ''
-      }`}
-      style={backgroundStyle}
-    >
-      {!ss.transparent && ss.videoUrl && (
-        <video
-          className="lobby__video"
-          src={ss.videoUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
-        />
-      )}
-
-      {!ss.transparent && crtEnabled && <div className="lobby__crt" />}
-
-      <div className="lobby__anchor">
-        <LobbyElement top={0} left={-61} zIndex={1} collapsed={collapsed}>
-          <img className="lobby__sprite" src={icon('background')} alt="" />
-        </LobbyElement>
-
-        {!!ss.canReady && (
-          <LobbyElement top={8} left={-65} zIndex={3} collapsed={collapsed}>
-            <Tooltip content={ss.isReady ? t('ttNotReady') : t('ttReady')} position="bottom">
-              <SpriteButton
-                iconState={ss.isReady ? 'ready' : 'not_ready'}
-                onClick={() => sendAction('ready_toggle')}
+                  setOpen(false);
+                }}
               />
-            </Tooltip>
-          </LobbyElement>
-        )}
-
-        {!!ss.canJoin && (
-          <LobbyElement top={13} left={-58} zIndex={3} collapsed={collapsed}>
-            <Tooltip content={t('ttJoin')} position="bottom">
-              <SpriteButton
-                iconState="join_game"
-                onClick={(e) => sendAction('join', { ctrlClick: e.ctrlKey })}
-              />
-            </Tooltip>
-          </LobbyElement>
-        )}
-
-        <LobbyElement top={40} left={-54} zIndex={3} collapsed={collapsed}>
-          <Tooltip content={t('ttObserve')} position="bottom">
-            <SpriteButton
-              iconState="observe"
-              enabled={!!ss.canObserve}
-              onClick={() => sendAction('observe')}
-            />
-          </Tooltip>
-        </LobbyElement>
-
-        <LobbyElement top={70} left={-54} zIndex={3} collapsed={collapsed}>
-          <Tooltip content={t('ttCharacterSetup')} position="bottom">
-            <SpriteButton
-              iconState="character_setup"
-              enabled={!!ss.assetsReady}
-              onClick={() => sendAction('character_setup')}
-            />
-          </Tooltip>
-        </LobbyElement>
-
-        <LobbyElement
-          top={-143}
-          left={-73}
-          zIndex={5}
-          collapsed={collapsed}
-          noCollapse
-          elRef={shutterRef}
-        >
-          <img className="lobby__sprite" src={icon('shutter')} alt="" />
-        </LobbyElement>
-
-        <LobbyElement
-          top={82}
-          left={-54}
-          collapsed={collapsed}
-          slide
-          elRef={collapseRef}
-        >
-          <Tooltip content={collapsed ? t('ttExpand') : t('ttCollapse')} position="bottom">
-            <button
-              className="sprite-btn sprite-btn--no-press"
-              onClick={handleToggleCollapse}
-              disabled={animating}
-            >
-              <img
-                className="sprite-btn__normal"
-                src={icon(collapseIcon)}
-                alt=""
-              />
-              <img
-                className="sprite-btn__hover"
-                src={icon(`${collapseIcon}_highlighted`)}
-                alt=""
-              />
-              <img className="lobby__blip" src={icon(blipState)} alt="" />
-            </button>
-          </Tooltip>
-        </LobbyElement>
-
-        {[
-          {
-            id: 'poll',
-            left: -26,
-            enabled: !!ss.canPoll,
-            badge: ss.hasNewPoll,
-            tooltip: t('ttPoll'),
-          },
-          { id: 'crew_manifest', left: 2, tooltip: t('ttManifest') },
-          { id: 'settings', left: 29, enabled: !!ss.assetsReady, tooltip: t('ttSettings') },
-          { id: 'changelog', left: 57, tooltip: t('ttChangelog') },
-        ].map(({ id, left, enabled, badge, tooltip }) => (
-          <LobbyElement
-            key={id}
-            top={122}
-            left={left}
-            zIndex={6}
-            collapsed={collapsed}
+            }
           >
-            <Tooltip content={tooltip} position="bottom">
-              <SpriteButton
-                iconState={id}
-                enabled={enabled}
-                onClick={() => sendAction(id)}
-              >
-                {!!badge && (
-                  <img className="lobby__badge" src={icon('new_poll')} alt="" />
-                )}
-              </SpriteButton>
-            </Tooltip>
-          </LobbyElement>
-        ))}
-
-        {!!ss.isLocalhost && (
-          <LobbyElement top={146} left={-54} zIndex={3} collapsed={collapsed}>
-            <Tooltip content={t('ttStartNow')} position="bottom">
-              <SpriteButton
-                iconState="start_now"
-                onClick={() => sendAction('start_now')}
-              />
-            </Tooltip>
-          </LobbyElement>
-        )}
-
-        {ss.stationTraits.map((trait, i) => (
-          <LobbyElement
-            key={trait.ref}
-            top={40 + (i % MAX_TRAITS_PER_COLUMN) * 27}
-            left={-85 - Math.floor(i / MAX_TRAITS_PER_COLUMN) * 27}
-            zIndex={3}
-            collapsed={collapsed}
-          >
-            <Tooltip content={trait.description} position="left">
-              <div className="lobby__trait-wrapper">
-                <SpriteButton
-                  iconState={trait.iconState}
-                  onClick={() => sendAction('sign_up', { ref: trait.ref })}
+            <Stack vertical>
+              <SettingsRow label={t('languageLabel')}>
+                <Button
+                  selected={language === 'english'}
+                  onClick={() => {
+                    playSelectSound();
+                    sendAction('set_language', { language: 'english' });
+                  }}
                 >
-                  {trait.overlays.map((overlay) => (
-                    <img
-                      key={overlay}
-                      className="lobby__trait-overlay"
-                      src={icon(overlay)}
-                      alt=""
-                    />
-                  ))}
-                </SpriteButton>
-              </div>
-            </Tooltip>
-          </LobbyElement>
-        ))}
+                  English
+                </Button>
+                <Button
+                  selected={language === 'russian'}
+                  onClick={() => {
+                    playSelectSound();
+                    sendAction('set_language', { language: 'russian' });
+                  }}
+                >
+                  Русский
+                </Button>
+              </SettingsRow>
 
-        {!!ss.traitFeedback && <TraitFeedback text={ss.traitFeedback} />}
-      </div>
+              <SettingsRow label={t('crtLabel')}>
+                <Button
+                  selected={!filterDisabled}
+                  onClick={() => {
+                    playSelectSound();
+                    const next = !filterDisabled;
+                    setFilterDisabled(next);
+                    storage.set(FILTER_STORAGE_KEY, next);
+                  }}
+                >
+                  {filterDisabled ? t('off') : t('on')}
+                </Button>
+              </SettingsRow>
 
-      <div className={`lobby__tv ${collapsed ? 'lobby__tv--collapsed' : ''}`}>
-        <div className="info-tv">
-          <img className="info-tv__layer" src={icon('newplayer')} alt="" />
-          <img
-            className="info-tv__layer info-tv__overlay"
-            src={icon('newplayer_overlay')}
-            alt=""
-          />
-          {tvActive && (
-            <div className="info-tv__text">
-              {tvLines.map((line, i) => (
-                <div key={i}>{line}</div>
-              ))}
-            </div>
-          )}
-          {tvActive && !collapsed && (
-            <>
-              {assetMap['static_base.png'] && (
-                <img
-                  className="info-tv__static"
-                  src={assetMap['static_base.png']}
-                  alt=""
-                />
+              <SettingsRow label={t('themeLabel')}>
+                <Button
+                  selected={!themeDisabled}
+                  onClick={() => {
+                    playSelectSound();
+                    const next = !themeDisabled;
+                    setThemeDisabled(next);
+                    storage.set(THEME_STORAGE_KEY, next);
+                  }}
+                >
+                  {themeDisabled ? t('off') : t('on')}
+                </Button>
+              </SettingsRow>
+
+              <SettingsRow label={t('soundsLabel')}>
+                <Button
+                  selected={soundsOn}
+                  onClick={() => {
+                    const next = !soundsOn;
+                    setSoundsEnabled(next);
+                    setSoundsOn(next);
+                    if (next) {
+                      playSelectSound();
+                    }
+                  }}
+                >
+                  {soundsOn ? t('on') : t('off')}
+                </Button>
+              </SettingsRow>
+
+              {!!ss.videoUrl && (
+                <SettingsRow label={t('videoLabel')}>
+                  <Button
+                    selected={videoEnabled}
+                    onClick={() => {
+                      playSelectSound();
+                      const next = !videoEnabled;
+                      setVideoEnabled(next);
+                      storage.set(VIDEO_STORAGE_KEY, next);
+                    }}
+                  >
+                    {videoEnabled ? t('on') : t('off')}
+                  </Button>
+                </SettingsRow>
               )}
-              {assetMap['scanline.png'] && (
-                <img
-                  className="info-tv__scanlines"
-                  src={assetMap['scanline.png']}
-                  alt=""
-                />
-              )}
-            </>
-          )}
-        </div>
-      </div>
 
-      <StatsPanel ss={ss} language={language} collapsed={collapsed} />
-
-      <CharacterPreview ss={ss} language={language} collapsed={collapsed} />
-
-      <WelcomeLine
-        name={ss.characterName}
-        language={language}
-        collapsed={collapsed}
-      />
-
-      <PreferenceIssues
-        issues={ss.preferenceIssues || []}
-        collapsed={collapsed}
-      />
-
-      <LobbySettings
-        language={language}
-        crtEnabled={crtEnabled}
-        setCrtEnabled={setCrtEnabled}
-      />
-    </div>
+              <Stack.Item>
+                <Button
+                  fluid
+                  onClick={() => {
+                    playSelectSound();
+                    setOpen(false);
+                  }}
+                >
+                  {t('closeLabel')}
+                </Button>
+              </Stack.Item>
+            </Stack>
+          </Section>
+        </Modal>
+      )}
+    </>
   );
 }
 
-function countdownLabel(countdown: string, t: ReturnType<typeof makeT>): string {
-  if (countdown === 'DELAYED') {
-    return t('delayed');
-  }
-  if (countdown === 'SOON') {
-    return t('soon');
-  }
-  return countdown;
+function SettingsRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Stack.Item>
+      <Stack justify="space-between" align="center">
+        <Stack.Item className="settingsLabel">{label}</Stack.Item>
+        <Stack.Item>
+          <Stack>{children}</Stack>
+        </Stack.Item>
+      </Stack>
+    </Stack.Item>
+  );
 }

@@ -22,18 +22,14 @@ export function loadSoundsEnabled(): Promise<boolean> {
   });
 }
 
-function getAssetUrl(name: string): string | null {
-  return assetMap[name] ?? null;
-}
-
-function playOneShot(name: string) {
+function playOneShot(name: string, volume = 0.6) {
   if (!soundsEnabled) {
     return;
   }
-  const url = getAssetUrl(name);
+  const url = assetMap[name];
   if (!url) return;
   const audio = new Audio(url);
-  audio.volume = 0.6;
+  audio.volume = volume;
   audio.play().catch(() => {});
 }
 
@@ -41,10 +37,7 @@ export function playSelectSound() {
   playOneShot('ui_select1.ogg');
 }
 
-export function playCollapseSound() {
-  playOneShot('menu_rollup1.ogg');
-}
-
-export function playExpandSound() {
-  playOneShot('menu_rolldown1.ogg');
+/// The ambient lobby load jingle, played once when the lobby opens
+export function playLoadSound() {
+  playOneShot('load.mp3', 0.5);
 }
