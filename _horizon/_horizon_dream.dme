@@ -48,6 +48,7 @@
 #include "code\modules\hud\ammo_counter_hud.dm"
 #include "code\modules\hud\screen_objects.dm"
 #include "code\modules\mob\living\living.dm"
+#include "code\modules\mob\living\living_pointer.dm"
 #include "code\modules\physics\atom_movables.dm"
 #include "code\modules\physics\physics_component.dm"
 #include "code\modules\physics\physics_SS.dm"

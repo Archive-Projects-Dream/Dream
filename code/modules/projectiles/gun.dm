@@ -22,7 +22,7 @@
         item_flags = NEEDS_PERMIT
         attack_verb_continuous = list("strikes", "hits", "bashes")
         attack_verb_simple = list("strike", "hit", "bash")
-        action_slots = ALL
+        action_slots = ITEM_SLOT_HANDS // [HORIZON-EDIT] only show action buttons when held in hands
 
         // Muzzle Flash
         light_on = FALSE
