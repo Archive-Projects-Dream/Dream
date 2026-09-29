@@ -515,6 +515,7 @@
                 firing_burst = FALSE
                 return FALSE
         shoot_live_shot(user, get_dist(user, target) <= 1, target, message)
+        firing_animation(user, TRUE) // [HORIZON-ADD] gunshot + recoil
         if (iteration >= burst_size)
                 firing_burst = FALSE
 
@@ -605,6 +606,7 @@
                         return user.combat_mode ? ITEM_INTERACT_SKIP_TO_ATTACK : NONE
 
                 shoot_live_shot(user, get_dist(user, target) <= 1, target, message)
+                firing_animation(user, FALSE) // [HORIZON-ADD] gunshot + recoil
                 // If gun gets destroyed as a result of firing
                 if (!QDELETED(src))
                         process_chamber(user) // [HORIZON-EDIT] PHYSICS
