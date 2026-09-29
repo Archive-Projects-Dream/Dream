@@ -277,10 +277,6 @@
         carry_weight = 2
         custom_price = 5500
 
-/obj/item/gun/ballistic/automatic/pistol/pm9/Initialize(mapload)
-        . = ..()
-        AddComponent(/datum/component/trumadness, /obj/item/ammo_casing/c9mm/evil)
-
 /obj/item/gun/ballistic/automatic/pistol/pm9/attackby(obj/item/A, mob/user, params)
         if(istype(A, /obj/item/suppressor))
                 return
