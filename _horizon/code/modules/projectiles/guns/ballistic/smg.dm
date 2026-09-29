@@ -1,12 +1,12 @@
 // c20r
-/obj/item/gun/ballistic/automatic/c20r
+/obj/item/gun/ballistic/automatic/hd_gun/c20r
 	pin = /obj/item/firing_pin
 
 // m90
-/obj/item/gun/ballistic/automatic/m90
+/obj/item/gun/ballistic/automatic/hd_gun/m90
 	pin = /obj/item/firing_pin
 
-/obj/item/gun/ballistic/automatic/remis/smg
+/obj/item/gun/ballistic/automatic/hd_gun/remis/smg
 	worn_icon = '_horizon/icons/obj/items/guns/worn/back.dmi'
 	equip_sound = '_horizon/sound/weapons/guns/weap_away.ogg'
 	drop_sound = '_horizon/sound/weapons/guns/drop_lightgun.wav'
@@ -31,22 +31,7 @@
 	custom_price = 4000
 
 // hksmg
-/obj/item/gun/ballistic/automatic/remis/smg/solitario
-	gunshot_animation_information = list(
-		"pixel_x" = 15, \
-		"pixel_y" = 2, \
-		"inactive_wben_suppressed" = TRUE, \
-	)
-	recoil_animation_information = list(
-		"recoil_angle_upper" = -10, \
-		"recoil_angle_lower" = -20, \
-		"recoil_burst_speed" = 0.5, \
-		"return_burst_speed" = 0.5, \
-	)
-	client_recoil_animation_information = list(
-		"strength" = 0.1,
-		"duration" = 1,
-	)
+/obj/item/gun/ballistic/automatic/hd_gun/remis/smg/solitario
 	name = "\improper Solitario Inseguro R5 submachine gun"
 	desc = "A reliable submachine gun with a high-magazine capacity maufactured by popular civilian arms dealer S&I"
 	icon = '_horizon/icons/obj/items/guns/smg.dmi'
@@ -66,7 +51,7 @@
 	safety_on_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
 	fire_sound = '_horizon/sound/weapons/guns/smg/hksmg.wav'
 	suppressed_sound = '_horizon/sound/weapons/guns/smg/hksmg_silenced.ogg'
-	spawn_magazine_type =   /obj/item/ammo_box/magazine/hksmg22lr
+	spawn_magazine_type = /obj/item/ammo_box/magazine/hksmg22lr
 	weapon_weight = WEAPON_LIGHT
 	bolt_type = BOLT_TYPE_LOCKING
 	slot_flags = ITEM_SLOT_BELT
@@ -76,9 +61,24 @@
 	burst_size = 2
 	can_suppress = TRUE
 	suppressor_x_offset = 9
+	gunshot_animation_information = list(
+		"pixel_x" = 15, \
+		"pixel_y" = 2, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+		"recoil_burst_speed" = 0.5, \
+		"return_burst_speed" = 0.5, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.1,
+		"duration" = 1,
+	)
 	custom_price = 10000
 
-/obj/item/gun/ballistic/automatic/remis/smg/bastardo
+/obj/item/gun/ballistic/automatic/hd_gun/remis/smg/bastardo
 	name = "\improper Feio Bastardo R1 submachine gun"
 	desc = "A fully-automatic submachine gun issued to ZoomTech officers and military force with an accelerated fire delay, comes with a folding stock, and a threaded barrel for suppression."
 	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
@@ -100,7 +100,7 @@
 	fireselector_auto = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
 	fireselector_burst = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
 	fireselector_semi = '_horizon/sound/weapons/guns/rifle/aksafety1.wav'
-	spawn_magazine_type =   /obj/item/ammo_box/magazine/bastardo9mm
+	spawn_magazine_type =	/obj/item/ammo_box/magazine/bastardo9mm
 	weapon_weight = WEAPON_MEDIUM
 	force = 10
 	recoil = 0.2
@@ -108,9 +108,24 @@
 	burst_size = 2
 	can_suppress = TRUE
 	suppressor_x_offset = 6
+	gunshot_animation_information = list(
+		"pixel_x" = 15, \
+		"pixel_y" = 2, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+		"recoil_burst_speed" = 0.5, \
+		"return_burst_speed" = 0.5, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.15, \
+		"duration" = 1, \
+	)
 	custom_price = 20000
 
-/obj/item/gun/ballistic/automatic/remis/smg/thump
+/obj/item/gun/ballistic/automatic/hd_gun/remis/smg/thump
 	name = "\improper Cesno Thump R2 submachine gun"
 	desc = "A fully-automatic submachine gun that fires in optional three-round bursts, comes with a threaded barrel, and was engineered as a direct upgrade to the Solitario to .45 ACP."
 	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
@@ -131,7 +146,7 @@
 	safety_on_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
 	fire_sound = '_horizon/sound/weapons/guns/smg/thump.wav'
 	suppressed_sound = '_horizon/sound/weapons/guns/smg/thump_silenced.wav'
-	spawn_magazine_type =   /obj/item/ammo_box/magazine/thump45
+	spawn_magazine_type = /obj/item/ammo_box/magazine/thump45
 	weapon_weight = WEAPON_MEDIUM
 	bolt_type = BOLT_TYPE_LOCKING
 	force = 10
@@ -140,9 +155,13 @@
 	burst_size = 3
 	can_suppress = TRUE
 	suppressor_x_offset = 6
+	client_recoil_animation_information = list(
+		"strength" = 0.25, \
+		"duration" = 1, \
+	)
 
 /// Adds a seclite (flashlight) attachment point to this SMG.
-/obj/item/gun/ballistic/automatic/remis/smg/thump/add_seclight_point()
+/obj/item/gun/ballistic/automatic/hd_gun/remis/smg/thump/add_seclight_point()
 	AddComponent(/datum/component/seclite_attachable, \
 		light_overlay_icon = 'icons/obj/weapons/guns/flashlights.dmi', \
 		light_overlay = "flight", \
@@ -150,7 +169,7 @@
 		overlay_y = 14)
 
 // SUPPRESSED HK SMG
-/obj/item/gun/ballistic/automatic/remis/smg/solitario/suppressed
+/obj/item/gun/ballistic/automatic/hd_gun/remis/smg/solitario/suppressed
 	name = "Solitario-SD Inseguro R7 \"Saber\" submachine gun"
 	desc = "An integrally suppressed version of the Solitario, changed post-factory to be chambered in .380, however. This has made the drum mags incompatible."
 	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
@@ -169,17 +188,21 @@
 	can_suppress = TRUE
 	can_unsuppress = FALSE
 	w_class = WEIGHT_CLASS_SMALL
+	client_recoil_animation_information = list(
+		"strength" = 0.15, \
+		"duration" = 1, \
+	)
 
 /obj/item/gun/ballistic/automatic/remis/smg/solitario/suppressed/Initialize(mapload)
 	. = ..()
 	var/obj/item/suppressor/S = new(src)
 	install_suppressor(S)
 
-/obj/item/gun/ballistic/automatic/remis/smg/solitario/suppressed/no_mag
+/obj/item/gun/ballistic/automatic/hd_gun/remis/smg/solitario/suppressed/no_mag
 	spawnwithmagazine = FALSE
 
 // KAKAKAKAKAKAKAKAKAKKAKAKAKAKAKAKA REALLYGOODCOMICS GUN I LOVE REALLYGOODCOMICS YES SIR I AM AN AIR MARSHAL
-/obj/item/gun/ballistic/automatic/remis/smg/bolsa
+/obj/item/gun/ballistic/automatic/hd_gun/remis/smg/bolsa
 	name = "\improper Bolsa R6 submachine gun"
 	desc = "An antique, compact submachine gun that is prohibited to civillians in many stations. Discontinued, but it still has It's strengths, that being the extendable stock and the size."
 	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
@@ -203,7 +226,7 @@
 	fireselector_semi = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
 	safety_off_sound = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
 	safety_on_sound = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
-	spawn_magazine_type =   /obj/item/ammo_box/magazine/uzi9mm
+	spawn_magazine_type = /obj/item/ammo_box/magazine/uzi9mm
 	foldable = TRUE
 	folded = TRUE
 	w_class = WEIGHT_CLASS_NORMAL
@@ -217,4 +240,19 @@
 	burst_size = 2
 	can_suppress = TRUE
 	suppressor_x_offset = 2
+	gunshot_animation_information = list(
+		"pixel_x" = 21, \
+		"pixel_y" = 5, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+		"recoil_burst_speed" = 0.5, \
+		"return_burst_speed" = 0.5, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.2,
+		"duration" = 1,
+	)
 	custom_price = 20000

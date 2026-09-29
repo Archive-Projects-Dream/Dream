@@ -1,4 +1,4 @@
-/obj/item/gun/energy/railgun
+/obj/item/gun/energy/hd_gun/railgun
 	gunshot_animation_information = list("icon_state" = "boltshot", \
 							"pixel_x" = 28, \
 							"pixel_y" = 13)

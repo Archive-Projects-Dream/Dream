@@ -1,14 +1,5 @@
 // all pistols
-/obj/item/gun/ballistic/automatic/pistol
-	gunshot_animation_information = list(
-		"pixel_x" = 15, \
-		"pixel_y" = 1, \
-		"inactive_wben_suppressed" = TRUE, \
-	)
-	recoil_animation_information = list(
-		"recoil_angle_upper" = -15, \
-		"recoil_angle_lower" = -30, \
-	)
+/obj/item/gun/ballistic/automatic/pistol/hd_gun
 	fire_delay = 1
 	carry_weight = 1
 	carry_weight = 0.8
@@ -19,7 +10,7 @@
 	drop_sound = '_horizon/sound/weapons/guns/drop_lightgun.wav'
 
 // RUGER MKIV
-/obj/item/gun/ballistic/automatic/pistol
+/obj/item/gun/ballistic/automatic/pistol/hd_gun
 	name = "\improper Plinker pistol"
 	desc = "A small, easily concealable 9mm handgun. Has a threaded barrel for suppressors."
 	icon = '_horizon/icons/obj/items/guns/pistol.dmi'
@@ -35,13 +26,22 @@
 	load_sound = '_horizon/sound/weapons/guns/pistol/pistol_magin.wav'
 	load_empty_sound = '_horizon/sound/weapons/guns/pistol/pistol_magin.wav'
 	rack_sound = '_horizon/sound/weapons/guns/pistol/pistol_rack.wav'
+	gunshot_animation_information = list(
+		"pixel_x" = 15, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
 	suppressor_x_offset = 10
 	w_class = WEIGHT_CLASS_NORMAL
 	carry_weight = 1 KILOGRAMS
 	custom_price = 3000
 
 // BERETTA 69R
-/obj/item/gun/ballistic/automatic/pistol/aps
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/aps
 	name = "\improper 69R machine pistol"
 	desc = "A machine pistol made by some crazy italians, capable of shooting in 3-round bursts. \
 		Uses 9mm ammo. Has a threaded barrel for suppressors."
@@ -60,6 +60,17 @@
 	icon = '_horizon/icons/obj/items/guns/pistol.dmi'
 	icon_state = "b93r"
 	base_icon_state = "b93r"
+	gunshot_animation_information = list(
+		"pixel_x" = 15, \
+		"pixel_y" = 2, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+		"recoil_burst_speed" = 0.5, \
+		"return_burst_speed" = 0.5, \
+	)
 	burst_size = 3
 	suppressor_x_offset = 11
 	w_class = WEIGHT_CLASS_NORMAL
@@ -68,12 +79,18 @@
 	full_auto = TRUE
 
 // M1911
-/obj/item/gun/ballistic/automatic/pistol/m1911
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/m1911
 	name = "\improper Cold 1911"
 	desc = "A classical copy of a antique design, even centuries later is efficient for close-quarter combat and self-defence at the cost of magazine capacity."
 	icon = '_horizon/icons/obj/items/guns/pistol.dmi'
 	icon_state = "m1911"
 	base_icon_state = "m1911"
+	gunshot_animation_information = list(
+		"pixel_x" = 16, \
+		"pixel_y" = 2, \
+		"inactive_wben_suppressed" = TRUE,
+	)
+	recoil_animation_information = list()
 	fire_sound = '_horizon/sound/weapons/guns/pistol/colt1.wav'
 	rack_sound = '_horizon/sound/weapons/guns/pistol/pistol_rack.wav'
 	force = 10
@@ -82,12 +99,18 @@
 	custom_price = 3500
 
 // USP
-/obj/item/gun/ballistic/automatic/pistol/cortes //corruptable gun
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/cortes //corruptable gun
 	name = "\improper Cortes .45"
 	desc = "A lavish pistol for a lavish life."
 	icon = '_horizon/icons/obj/items/guns/pistol.dmi'
 	icon_state = "USP"
 	base_icon_state = "USP"
+	gunshot_animation_information = list(
+		"pixel_x" = 16, \
+		"pixel_y" = 2, \
+		"inactive_wben_suppressed" = TRUE,
+	)
+	recoil_animation_information = list()
 	fire_sound = list('_horizon/sound/weapons/guns/pistol/USP1.ogg', '_horizon/sound/weapons/guns/pistol/USP2.ogg')
 	rack_sound = '_horizon/sound/weapons/guns/pistol/john_rack.wav'
 	lock_back_sound = '_horizon/sound/weapons/guns/pistol/john_lockback.wav'
@@ -103,7 +126,7 @@
 	COOLDOWN_DECLARE(corruption_cooldown)
 	custom_price = 3500
 
-/obj/item/gun/ballistic/automatic/pistol/cortes/proc/corrupt(chance = 0, mob/inborn)
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/cortes/proc/corrupt(chance = 0, mob/inborn)
 	if(corrupted)
 		return
 	if(prob(chance))
@@ -121,13 +144,13 @@
 	else
 		say(pick("No...", "It can't be...", "Stop..."))
 
-/obj/item/gun/ballistic/automatic/pistol/cortes/shoot_live_shot(mob/living/user, pointblank = FALSE, atom/target, message = TRUE)
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/cortes/shoot_live_shot(mob/living/user, pointblank = FALSE, atom/target, message = TRUE)
 	. = ..()
 	if(corrupted)
 		playsound(user, corrupted_shot_sound, 70, FALSE)
 
 // STI 2011 COMBAT MASTER
-/obj/item/gun/ballistic/automatic/pistol/combatmaster
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/combatmaster
 	name = "\improper Frag Master 2511"
 	desc = "An expensive, reliable handgun with a large magazine capacity. \
 			Very similar to the Cold 1911, but chambered in 9mm and made with modern materials such as a polymer handle and titanium frame."
@@ -136,6 +159,15 @@
 	base_icon_state = "combatmaster"
 	fire_sound = list('_horizon/sound/weapons/guns/pistol/combatmaster1.wav', '_horizon/sound/weapons/guns/pistol/combatmaster2.wav')
 	suppressed_sound = '_horizon/sound/weapons/guns/pistol/combatmaster_silenced.wav'
+	gunshot_animation_information = list(
+		"pixel_x" = 15, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30,
+	)
 	force = 10
 	suppressor_x_offset = 12
 	spawn_magazine_type = /obj/item/ammo_box/magazine/combatmaster9mm
@@ -144,7 +176,7 @@
 	custom_price = 4500
 
 // GLOCK-17
-/obj/item/gun/ballistic/automatic/pistol/glock17
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/glock17
 	name = "\improper Gosma-17 9mm pistol"
 	desc = "A chunky pistol often accompanied with the screams of thugs."
 	icon = '_horizon/icons/obj/items/guns/pistol.dmi'
@@ -154,6 +186,14 @@
 					'_horizon/sound/weapons/guns/pistol/glock2.wav')
 	suppressed_sound = list('_horizon/sound/weapons/guns/pistol/glock_suppressed1.wav', \
 					'_horizon/sound/weapons/guns/pistol/glock_suppressed2.wav')
+	gunshot_animation_information = list(
+		"pixel_x" = 15, \
+		"pixel_y" = 5, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -20, \
+		"recoil_angle_lower" = -35, \
+	)
 	force = 10
 	spawn_magazine_type = /obj/item/ammo_box/magazine/glock9mm
 	mag_display = TRUE
@@ -164,7 +204,7 @@
 	suppressor_x_offset = 10
 
 // WALTHER PPK
-/obj/item/gun/ballistic/automatic/pistol/ppk
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/ppk
 	name = "\improper Bombeiro 22lr pistol"
 	desc = "The Walter Bomberio pistol is a reliable, easily concealable 22lr pistol. \
 			Doesn't pack too much of a punch, but was famously used by a british secret agent."
@@ -176,6 +216,19 @@
 	suppressed_sound = '_horizon/sound/weapons/guns/pistol/walter_silenced.wav'
 	safety_on_sound = '_horizon/sound/weapons/guns/pistol/walter_safety.wav'
 	safety_off_sound = '_horizon/sound/weapons/guns/pistol/walter_safety.wav'
+	gunshot_animation_information = list(
+		"pixel_x" = 11, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.35,
+		"duration" = 2,
+	)
 	spawn_magazine_type = /obj/item/ammo_box/magazine/ppk22lr
 	mag_display = TRUE
 	can_suppress = TRUE
@@ -185,7 +238,7 @@
 	custom_price = 900
 
 // "DEAGLE"
-/obj/item/gun/ballistic/automatic/pistol/aniquilador
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/aniquilador
 	name = "\improper Aniquilador .50 LE Anti-Personnel Firearm"
 	desc = "A very rare firearm that can be found within experimental military bases, comes loaded with .50 LE, Living Exterminator rounds. \
 		Feeling the gun in your hand, he never stops nervously shaking and vibrating until you aim down the sights at a living being."
@@ -195,6 +248,11 @@
 	inhand_icon_state = "one"
 	icon_state = "aniquilador"
 	base_icon_state = "aniquilador"
+	gunshot_animation_information = list(
+		"pixel_x" = 16, \
+		"pixel_y" = 2, \
+	)
+	recoil_animation_information = list()
 	fire_sound = '_horizon/sound/weapons/guns/pistol/one.ogg'
 	rack_sound = '_horizon/sound/weapons/guns/pistol/one_rack.ogg'
 	lock_back_sound = '_horizon/sound/weapons/guns/pistol/one_lockback.ogg'
@@ -211,15 +269,15 @@
 	carry_weight = 2 KILOGRAMS
 	custom_price = 5500
 
-/obj/item/gun/ballistic/automatic/pistol/aniquilador/Initialize(mapload)
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/aniquilador/Initialize(mapload)
 	. = ..()
 	RegisterSignal(src, COMSIG_GUNPOINT_GUN_AIM_STRESS_SOUNDED, PROC_REF(aimed_sounding))
 
-/obj/item/gun/ballistic/automatic/pistol/aniquilador/Destroy()
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/aniquilador/Destroy()
 	UnregisterSignal(src, COMSIG_GUNPOINT_GUN_AIM_STRESS_SOUNDED)
 	return ..()
 
-/obj/item/gun/ballistic/automatic/pistol/aniquilador/proc/aimed_sounding(datum/component/gunpoint/gunpoint, sounding)
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/aniquilador/proc/aimed_sounding(datum/component/gunpoint/gunpoint, sounding)
 	var/voice_line = "FUCK!"
 	switch(sounding)
 		if('_horizon/sound/weapons/guns/pistol/voice_anaquilador/anaquilador_getout.wav')
@@ -230,14 +288,14 @@
 		say(voice_line)
 	INVOKE_ASYNC(src, PROC_REF(we_do_a_little_shaking))
 
-/obj/item/gun/ballistic/automatic/pistol/aniquilador/proc/we_do_a_little_shaking(intensity = 4, time_in = 2, time_out = 2, loops = 3)
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/aniquilador/proc/we_do_a_little_shaking(intensity = 4, time_in = 2, time_out = 2, loops = 3)
 	for(var/i in 1 to loops)
 		animate(src, pixel_x = pixel_x + intensity, time = time_in)
 		sleep(time_in)
 		animate(src, pixel_x = pixel_x - intensity, time = time_out)
 		sleep(time_out)
 
-/obj/item/gun/ballistic/automatic/pistol/john
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/john
 	name = "\improper John .50 AE Pistol"
 	desc = "Who's that? Oh It's just John, don't worry. It's a plinking pistol."
 	icon = '_horizon/icons/obj/items/guns/pistol.dmi'
@@ -246,6 +304,11 @@
 	inhand_icon_state = "five7"
 	icon_state = "glockl"
 	base_icon_state = "glockl"
+	gunshot_animation_information = list(
+		"pixel_x" = 16, \
+		"pixel_y" = 2, \
+	)
+	recoil_animation_information = list()
 	fire_sound = list('_horizon/sound/weapons/guns/pistol/john1.wav', '_horizon/sound/weapons/guns/pistol/john2.wav')
 	rack_sound = '_horizon/sound/weapons/guns/pistol/john_rack.wav'
 	lock_back_sound = '_horizon/sound/weapons/guns/pistol/john_lockback.wav'
@@ -258,7 +321,7 @@
 	carry_weight = 2 KILOGRAMS
 	custom_price = 5500
 
-/obj/item/gun/ballistic/automatic/pistol/pm9
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/pm9
 	name = "\improper PM9 Evil Gun"
 	desc = "This is a strown together pack of metal that has just enough things touching eachother in the certain way to not burst in your hands when you fire. \
 	A unholy abomination, a devious, godforsaken handgun. Use it with care."
@@ -268,6 +331,14 @@
 	inhand_icon_state = "pm9"
 	icon_state = "pm9"
 	base_icon_state = "pm9"
+	gunshot_animation_information = list(
+		"pixel_x" = 16, \
+		"pixel_y" = 2, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 1,
+		"duration" = 2,
+	)
 	fire_sound = '_horizon/sound/weapons/guns/pistol/pm9.wav'
 	suppressed_sound = '_horizon/sound/weapons/guns/pistol/pm9_suppressed.wav'
 	rack_sound = '_horizon/sound/weapons/guns/pistol/pm9_rack.wav'
@@ -286,7 +357,7 @@
 	carry_weight = 2
 	custom_price = 5500
 
-/obj/item/gun/ballistic/automatic/pistol/pm9/attackby(obj/item/A, mob/user, params)
+/obj/item/gun/ballistic/automatic/pistol/hd_gun/pm9/attackby(obj/item/A, mob/user, params)
 	if(istype(A, /obj/item/suppressor))
 		return
 	. = ..()

@@ -1,4 +1,4 @@
-/obj/item/gun/energy/nasr
+/obj/item/gun/energy/hd_gun/nasr
 	gunshot_animation_information = list("icon_state" = "energyshot", \
 							"pixel_x" = 16, \
 							"pixel_y" = 2)

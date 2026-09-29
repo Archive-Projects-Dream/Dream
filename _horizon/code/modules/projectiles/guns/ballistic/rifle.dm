@@ -1,4 +1,4 @@
-/obj/item/gun/ballistic/automatic/remis
+/obj/item/gun/ballistic/automatic/hd_gun/remis
 	worn_icon = '_horizon/icons/obj/items/guns/worn/back.dmi'
 	equip_sound = '_horizon/sound/weapons/guns/weap_away.ogg'
 	drop_sound = '_horizon/sound/weapons/guns/drop_mediumgun.wav'
@@ -17,14 +17,14 @@
 	inhand_y_dimension = 32
 	w_class = WEIGHT_CLASS_BULKY
 
-/obj/item/gun/ballistic/automatic/remis/abyss/warfare
+/obj/item/gun/ballistic/automatic/hd_gun/remis/abyss/warfare
 	icon = '_horizon/icons/obj/items/guns/alter/48x32.dmi'
 	worn_icon = '_horizon/icons/obj/items/guns/alter/worn/back.dmi'
 	lefthand_file = '_horizon/icons/obj/items/guns/alter/inhands/rifle_lefthand.dmi'
 	righthand_file = '_horizon/icons/obj/items/guns/alter/inhands/rifle_righthand.dmi'
 	equip_sound = list('_horizon/sound/weapons/guns/rifle_holster1.ogg', '_horizon/sound/weapons/guns/rifle_holster2.ogg')
 
-/obj/item/gun/ballistic/automatic/remis/abyss/warfare/m545
+/obj/item/gun/ballistic/automatic/hd_gun/remis/abyss/warfare/m545
 	name = "\improper Peacekeeper 545"
 	desc = "Named nicknamed for the type of PMC armies that are generally found carrying them."
 	worn_icon_state = "inverno"
@@ -43,8 +43,7 @@
 	fireselector_burst = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
 	fireselector_semi = '_horizon/sound/weapons/guns/rifle/aksafety1.wav'
 
-
-/obj/item/gun/ballistic/automatic/remis/abyss/warfare/m545/ak
+/obj/item/gun/ballistic/automatic/hd_gun/remis/abyss/warfare/m545/ak
 	name = "\improper Eclipse 545"
 	desc = "Often found on... less than scrupulous PMC groups."
 	inhand_icon_state = "ak"
@@ -63,7 +62,7 @@
 	fireselector_burst = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
 	fireselector_semi = '_horizon/sound/weapons/guns/rifle/aksafety1.wav'
 
-/obj/item/gun/ballistic/automatic/remis/winter
+/obj/item/gun/ballistic/automatic/hd_gun/remis/winter
 	name = "\improper Inverno Genocídio NK-49 Assault Rifle"
 	desc = "Inverno Genocídio, 'Winter Genocide' Assault Rifle firing in 5.56. Used by Ordin- Ordinat... ORDINATORS KILL THIS BASTARD!"
 	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
@@ -93,28 +92,22 @@
 	custom_price = 45000
 	carry_weight = 3 KILOGRAMS
 	can_unsuppress = FALSE
-
-/obj/item/gun/ballistic/automatic/remis/winter/Initialize(mapload)
-	. = ..()
-	var/obj/item/suppressor/S = new(src)
-	install_suppressor(S)
-
-
-//Darkworld Gun
-/obj/item/gun/ballistic/automatic/remis/abyss
-	gunshot_animation_information = list(
-		"pixel_x" = 32, \
-		"pixel_y" = 3, \
-		"inactive_wben_suppressed" = TRUE, \
-	)
 	recoil_animation_information = list(
-		"recoil_angle_upper" = -10, \
-		"recoil_angle_lower" = -20, \
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -25, \
 	)
 	client_recoil_animation_information = list(
 		"strength" = 0.2,
 		"duration" = 1,
 	)
+
+/obj/item/gun/ballistic/automatic/hd_gun/remis/winter/Initialize(mapload)
+	. = ..()
+	var/obj/item/suppressor/S = new(src)
+	install_suppressor(S)
+
+//Darkworld Gun
+/obj/item/gun/ballistic/automatic/hd_gun/remis/abyss
 	name = "\improper Abyss Armaments Due Diligence"
 	desc = "The double D as it's sometimes caused. Produced before the great war, but very resiliant. \
 		The muzzle brake seems to be compatable with noise suppressors! So good."
@@ -145,6 +138,19 @@
 	burst_size = 2
 	can_suppress = TRUE
 	suppressor_x_offset = 10
+	gunshot_animation_information = list(
+		"pixel_x" = 32, \
+		"pixel_y" = 3, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.2,
+		"duration" = 1,
+	)
 	custom_price = 30000
 	w_class = WEIGHT_CLASS_BULKY
 	full_auto = TRUE
@@ -152,7 +158,7 @@
 	folded = FALSE
 
 //donator gun
-/obj/item/gun/ballistic/automatic/remis/abyss/donator
+/obj/item/gun/ballistic/automatic/hd_gun/remis/abyss/donator
 	name = "\improper AN-95 5.4539mm Abyss Armaments Paypig Assault Rifle"
 	spawn_magazine_type = /obj/item/ammo_box/magazine/a545/donator
 	worn_icon_state = "goldonov"
@@ -164,12 +170,12 @@
 	can_unsuppress = FALSE
 	suppressor_x_offset = 2
 
-/obj/item/gun/ballistic/automatic/remis/abyss/donator/Initialize(mapload)
+/obj/item/gun/ballistic/automatic/hd_gun/remis/abyss/donator/Initialize(mapload)
 	. = ..()
 	var/obj/item/suppressor/S = new(src)
 	install_suppressor(S)
 
-/obj/item/gun/ballistic/automatic/remis/g11
+/obj/item/gun/ballistic/automatic/hd_gun/remis/g11
 	name = "\improper Kh11 4.92x34mm Assault Rifle"
 	desc = "An almost sci-fi designed rifle with a complex mechanism on the inside. \
 	It was rumored in the past that the HRE was making a rifle that could be shot without casings being left behind, this chunky firearm is their sucess story."
@@ -196,9 +202,24 @@
 	burst_size = 3
 	can_suppress = FALSE
 	custom_price = 20000
+	gunshot_animation_information = list(
+		"pixel_x" = 21, \
+		"pixel_y" = -1, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+		"recoil_burst_speed" = 0.5, \
+		"return_burst_speed" = 0.5, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.3,
+		"duration" = 2,
+	)
 
 //copypasted just to ensure that we can nuke the casing
-/obj/item/gun/ballistic/automatic/remis/g11/handle_chamber(empty_chamber, from_firing, chamber_next_round)
+/obj/item/gun/ballistic/automatic/hd_gun/remis/g11/handle_chamber(empty_chamber, from_firing, chamber_next_round)
 	if((!semi_auto && from_firing) || (bolt_type == BOLT_TYPE_BREAK_ACTION))
 		return
 	var/obj/item/ammo_casing/casing = chambered //Find chambered round
@@ -216,7 +237,7 @@
 	if(chamber_next_round && (magazine?.max_ammo > 1))
 		chamber_round()
 
-/obj/item/gun/ballistic/automatic/remis/steyr
+/obj/item/gun/ballistic/automatic/hd_gun/remis/steyr
 	name = "\improper Selo-Selo ACR Prototype Flechette-Firing Assault Rifle"
 	desc = "A unique firearm that practically consists of one large piece with a barrel ran through the whole gun. Fires in steel-SCF Flechettes. \
 		If you look hard enough, the entire gun seems to vibrate, and shake. It's almost like It's alive."
@@ -248,18 +269,33 @@
 	suppressor_x_offset = 8
 	can_suppress = TRUE
 	verb_say = "passionately whispers"
+	gunshot_animation_information = list(
+		"pixel_x" = 29, \
+		"pixel_y" = 0, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+		"recoil_burst_speed" = 0.5, \
+		"return_burst_speed" = 0.5, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.1,
+		"duration" = 1,
+	)
 	custom_price = 80000
 
-/obj/item/gun/ballistic/automatic/remis/steyr/Initialize(mapload)
+/obj/item/gun/ballistic/automatic/hd_gun/remis/steyr/Initialize(mapload)
 	. = ..()
 	RegisterSignal(src, COMSIG_GUNPOINT_GUN_AIM_STRESS_SOUNDED, PROC_REF(aimed_sounding))
 
-/obj/item/gun/ballistic/automatic/remis/steyr/Destroy()
+/obj/item/gun/ballistic/automatic/hd_gun/remis/steyr/Destroy()
 	UnregisterSignal(src, COMSIG_GUNPOINT_GUN_AIM_STRESS_SOUNDED)
 	return ..()
 
 /// Alt-click plays a voice line + screen shake. Uses upstream's click_alt API.
-/obj/item/gun/ballistic/automatic/remis/steyr/click_alt(mob/user, sounding)
+/obj/item/gun/ballistic/automatic/hd_gun/remis/steyr/click_alt(mob/user, sounding)
 	var/monologue = "FIX ME!"
 	switch(sounding)
 		if('_horizon/sound/weapons/guns/rifle/voice_steyr/cyberpunk.wav')
@@ -273,8 +309,7 @@
 	INVOKE_ASYNC(src, PROC_REF(we_do_a_little_shaking))
 	return CLICK_ACTION_SUCCESS
 
-
-/obj/item/gun/ballistic/automatic/remis/steyr/proc/aimed_sounding(datum/component/gunpoint/gunpoint, sounding)
+/obj/item/gun/ballistic/automatic/hd_gun/remis/steyr/proc/aimed_sounding(datum/component/gunpoint/gunpoint, sounding)
 	var/voice_line = "FUCK!"
 	switch(sounding)
 		if('_horizon/sound/weapons/guns/rifle/voice_steyr/canthide.wav')
@@ -289,7 +324,7 @@
 		say(voice_line)
 	INVOKE_ASYNC(src, PROC_REF(we_do_a_little_shaking))
 
-/obj/item/gun/ballistic/automatic/remis/steyr/proc/we_do_a_little_shaking(intensity = 4, time_in = 2, time_out = 2, loops = 3)
+/obj/item/gun/ballistic/automatic/hd_gun/remis/steyr/proc/we_do_a_little_shaking(intensity = 4, time_in = 2, time_out = 2, loops = 3)
 	for(var/i in 1 to loops)
 		animate(src, pixel_x = pixel_x + intensity, time = time_in)
 		sleep(time_in)
@@ -297,7 +332,7 @@
 		sleep(time_out)
 
 // 7.62x54R Lampiao sniper-rifle
-/obj/item/gun/ballistic/automatic/remis/svd
+/obj/item/gun/ballistic/automatic/hd_gun/remis/svd
 	name = "\proper Judgement semi-automatic designated marksman rifle"
 	desc = "A Judgement sniper-rifle firing in 7.62x54R, the design allows for comfortable medium and long range combat, and unconventional, but effective CQC against armored targets. \
 	 Has a dovetail mount for a PSO-1M2-1 4x24 scope and a threaded barrel for a sound-suppressor. "
@@ -331,8 +366,21 @@
 	can_suppress = TRUE
 	suppressor_x_offset = 6
 	suppressor_y_offset = 1
+	gunshot_animation_information = list(
+		"pixel_x" = 43, \
+		"pixel_y" = 2, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -18, \
+		"recoil_angle_lower" = -25, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.5,
+		"duration" = 2,
+	)
 
-/obj/item/gun/ballistic/rifle/boltaction/remis
+/obj/item/gun/ballistic/rifle/boltaction/hd_gun/remis
 	worn_icon = '_horizon/icons/obj/items/guns/worn/back.dmi'
 	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
 	lefthand_file = '_horizon/icons/obj/items/guns/inhands/rifle_lefthand.dmi'
@@ -356,7 +404,7 @@
 	can_jam = FALSE
 	safety_flags = NONE
 
-/obj/item/gun/ballistic/rifle/boltaction/remis/federson
+/obj/item/gun/ballistic/rifle/boltaction/hd_gun/remis/federson
 	name = "\improper Dreaderson \"Brass Rain\" bolt-action rifle"
 	desc = "A bolt-action rifle capable of piercing through armor, and making accurate shots even at a range. It's cursed by having It's own cartridge unfortunately, .276 Dreaderson."
 	icon_state = "pedersen"
@@ -375,7 +423,7 @@
 	rack_delay = 1
 
 //G36
-/obj/item/gun/ballistic/automatic/remis/g36
+/obj/item/gun/ballistic/automatic/hd_gun/remis/g36
 	name = "\improper Perdedor 5.56 Void International Assault Rifle"
 	desc = "A sort-of melty, sort-of chocolately 5.56 assault rifle that has the appearance of something that would be easily churned and poured over toast or seafood."
 	icon = '_horizon/icons/obj/items/guns/64x32.dmi'
@@ -404,6 +452,19 @@
 	fire_delay = 1.5
 	burst_size = 3
 	can_suppress = TRUE
+	gunshot_animation_information = list(
+		"pixel_x" = 36, \
+		"pixel_y" = 3, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -20, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.18,
+		"duration" = 1,
+	)
 	custom_price = 30000
 	w_class = WEIGHT_CLASS_BULKY
 	mag_display_ammo = TRUE

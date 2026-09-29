@@ -1,16 +1,4 @@
-/obj/item/gun/ballistic/revolver
-	gunshot_animation_information = list(
-		"pixel_x" = 12, \
-		"pixel_y" = 5, \
-	)
-	recoil_animation_information = list(
-		"recoil_angle_upper" = -15, \
-		"recoil_angle_lower" = -30, \
-	)
-	client_recoil_animation_information = list(
-		"strength" = 0.5,
-		"duration" = 2.5,
-	)
+/obj/item/gun/ballistic/revolver/hd_gun
 	icon = '_horizon/icons/obj/items/guns/revolver.dmi'
 	icon_state = "revolver"
 	base_icon_state = "revolver"
@@ -42,21 +30,33 @@
 	equip_sound = '_horizon/sound/weapons/guns/pistol/pistol_holster.wav'
 	pickup_sound = '_horizon/sound/weapons/guns/pistol/pistol_draw.wav'
 	dry_fire_sound = '_horizon/sound/weapons/guns/revolver/empty_revolver.wav'
+	gunshot_animation_information = list(
+		"pixel_x" = 12, \
+		"pixel_y" = 5, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.5,
+		"duration" = 2.5,
+	)
 	w_class = WEIGHT_CLASS_NORMAL
 	carry_weight = 1.5 KILOGRAMS
 
-/obj/item/gun/ballistic/revolver/chamber_examine(mob/user)
+/obj/item/gun/ballistic/revolver/hd_gun/chamber_examine(mob/user)
 	. = ..()
 	. += "The [cylinder_wording] can be spun with <b>alt+click</b>"
 
-/obj/item/gun/ballistic/revolver/get_ammo(countchambered = FALSE, countempties = TRUE)
+/obj/item/gun/ballistic/revolver/hd_gun/get_ammo(countchambered = FALSE, countempties = TRUE)
 	var/boolets = 0 //mature var names for mature people //What If I'm a child?
 	if(magazine)
 		boolets += magazine.ammo_count(countempties)
 	return boolets
 
 // CATTLE REVOLVER
-/obj/item/gun/ballistic/revolver/gado
+/obj/item/gun/ballistic/revolver/hd_gun/gado
 	name = "\improper Revolver de Gado"
 	desc = "An efficient revolver with multiple new systems in-place, if the hammer wasn't enough, there's now a safety exclusively for people who put the gun in their holster way too fast and shoot their own damn leg. \
 			It has a unique system for the hammer and cylinder. It's used for slaughtering cattle."
@@ -71,12 +71,24 @@
 	bolt_drop_sound = '_horizon/sound/weapons/guns/revolver/gado_out.wav'
 	// hammer sound
 	rack_sound = '_horizon/sound/weapons/guns/revolver/gado_hammer.wav'
+	gunshot_animation_information = list(
+		"pixel_x" = 13, \
+		"pixel_y" = 3, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15,
+		"recoil_angle_lower" = -30, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.5,
+		"duration" = 2.5,
+	)
 	safety_flags = GUN_SAFETY_HAS_SAFETY | GUN_SAFETY_ENABLED | GUN_SAFETY_OVERLAY_ENABLED | GUN_SAFETY_OVERLAY_DISABLED
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/gado
 	carry_weight = 2 KILOGRAMS
 
 // NAMBU REVOLVER
-/obj/item/gun/ballistic/revolver/nova
+/obj/item/gun/ballistic/revolver/hd_gun/nova
 	name = "\improper Nova Seguranca M62 revolver"
 	desc = "A stained, antique revolver with an unknown insignia on the side."
 	icon_state = "newnambu"
@@ -85,6 +97,14 @@
 	lefthand_file = '_horizon/icons/obj/items/guns/inhands/pistol_lefthand.dmi'
 	righthand_file = '_horizon/icons/obj/items/guns/inhands/pistol_righthand.dmi'
 	inhand_icon_state = "newnambu"
+	gunshot_animation_information = list(
+		"pixel_x" = 13, \
+		"pixel_y" = 3, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -10, \
+		"recoil_angle_lower" = -25, \
+	)
 	fire_sound = '_horizon/sound/weapons/guns/revolver/nova.wav'
 	alternative_fire_sound = '_horizon/sound/weapons/guns/revolver/nova_alt.wav'
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/nova
@@ -92,11 +112,11 @@
 	initial_caliber = CALIBER_38
 	carry_weight = 1.5 KILOGRAMS
 
-/obj/item/gun/ballistic/revolver/nova/pluspee
+/obj/item/gun/ballistic/revolver/hd_gun/nova/pluspee
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/nova/pluspee
 
 // Poppy
-/obj/item/gun/ballistic/revolver/poppy
+/obj/item/gun/ballistic/revolver/hd_gun/poppy
 	name = "\improper .500 Poppy Revolver"
 	desc = "A revolver used in a notorius game of random deathmatch."
 	icon_state = "500"
@@ -110,12 +130,24 @@
 	lock_back_sound = '_horizon/sound/weapons/guns/revolver/bigboy_in.wav'
 	bolt_drop_sound = '_horizon/sound/weapons/guns/revolver/bigboy_out.wav'
 	rack_sound = '_horizon/sound/weapons/guns/revolver/bigboy_hammer.wav'
+	gunshot_animation_information = list(
+		"pixel_x" = 13, \
+		"pixel_y" = 3, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -25, \
+		"recoil_angle_lower" = -30, \
+	)
+	client_recoil_animation_information = list(
+		"strength" = 0.8,
+		"duration" = 3,
+	)
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/poppy
 	carry_weight = 3 KILOGRAMS
 
 
 // CHIAPPA RHINO
-/obj/item/gun/ballistic/revolver/rhino
+/obj/item/gun/ballistic/revolver/hd_gun/rhino
 	name = "\improper Chappa Rhyno"
 	desc = "A large, powerful .357 revolver with a very blocky design."
 	icon_state = "rhino"
@@ -125,5 +157,9 @@
 	bolt_drop_sound = '_horizon/sound/weapons/guns/revolver/bigboy_out.wav'
 	rack_sound = '_horizon/sound/weapons/guns/revolver/bigboy_hammer.wav'
 	fire_sound = '_horizon/sound/weapons/guns/revolver/bigboy.wav'
+	gunshot_animation_information = list("pixel_x" = 13, \
+										"pixel_y" = 3)
+	recoil_animation_information = list("recoil_angle_upper" = -25,
+										"recoil_angle_lower" = -50)
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/poppy
 	carry_weight = 3 KILOGRAMS

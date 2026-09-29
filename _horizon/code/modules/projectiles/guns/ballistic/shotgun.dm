@@ -1,15 +1,5 @@
 // Remove this dumb knockback shit pls
-/obj/item/gun/ballistic/shotgun
-	gunshot_animation_information = list(
-		"pixel_x" = 24, \
-		"pixel_y" = 1, \
-		"inactive_wben_suppressed" = TRUE, \
-		"add_pixel_x_sawn" = -5, \
-	)
-	recoil_animation_information = list(
-		"recoil_angle_upper" = -15, \
-		"recoil_angle_lower" = -30, \
-	)
+/obj/item/gun/ballistic/shotgun/hd_gun
 	icon = '_horizon/icons/obj/items/guns/40x32.dmi'
 	icon_state = "ithaca"
 	base_icon_state = "ithaca"
@@ -44,6 +34,16 @@
 	load_sound_volume = 80
 	safety_off_sound = '_horizon/sound/weapons/guns/shotgun/shotgun_safety2.wav'
 	safety_on_sound = '_horizon/sound/weapons/guns/shotgun/shotgun_safety1.wav'
+	gunshot_animation_information = list(
+		"pixel_x" = 24, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+		"add_pixel_x_sawn" = -5, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
 	force = 12
 	pb_knockback = 0
 	can_suppress = TRUE
@@ -52,7 +52,7 @@
 	slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE
 
 // DOUBLE BARRELED SHOTGUN
-/obj/item/gun/ballistic/shotgun/doublebarrel
+/obj/item/gun/ballistic/shotgun/hd_gun/doublebarrel
 	pb_knockback = 0
 	empty_icon_state = FALSE
 	bolt_type = BOLT_TYPE_BREAK_ACTION
@@ -63,7 +63,7 @@
 	cylinder_shows_ammo_count = TRUE
 
 // The legendary
-/obj/item/gun/ballistic/shotgun/doublebarrel/bobox
+/obj/item/gun/ballistic/shotgun/hd_gun/doublebarrel/bobox
 	name = "\"Палач рока\""
 	desc = "\"Фирменный\" дробовик с двумя стволами. Не в бровь, а в глаз."
 	icon = '_horizon/icons/obj/items/guns/shotgun.dmi'
@@ -90,7 +90,7 @@
 	slot_flags = ITEM_SLOT_BELT
 
 // ITHACA SHOTGUN
-/obj/item/gun/ballistic/shotgun/ithaca
+/obj/item/gun/ballistic/shotgun/hd_gun/ithaca
 	name = "\improper modelo 37 \"Liquidador\""
 	icon = '_horizon/icons/obj/items/guns/40x32.dmi'
 	icon_state = "ithaca"
@@ -99,7 +99,7 @@
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/lethal
 
 
-/obj/item/gun/ballistic/shotgun/hunting
+/obj/item/gun/ballistic/shotgun/hd_gun/hunting
 	name = "ОД Папасши \"Охотник\""
 	desc = "Охотничный дробовик Папасши. Калибр - 12-ый."
 	icon_state = "huntingshot"
@@ -107,7 +107,7 @@
 	empty_icon_state = TRUE
 
 // ??? SHOTGUN
-/obj/item/gun/ballistic/shotgun/riot
+/obj/item/gun/ballistic/shotgun/hd_gun/riot
 	name = "\improper Riot-S12 \"Downer\""
 	desc = "Дробовик компании Riot Solution с фиксированной тактическим прикладом. Был разработан в качестве решения для подавления беспорядков нелетальной силой. \
 		Тем не менее летальные боеприпасы без труда можно использовать. \
@@ -118,15 +118,25 @@
 	inhand_icon_state = "riot"
 	empty_indicator = FALSE
 	can_be_sawn_off = FALSE
+	gunshot_animation_information = list(
+		"pixel_x" = 25, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+		"add_pixel_x_sawn" = -4, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
 	suppressor_x_offset = 14
 
-/obj/item/gun/ballistic/shotgun/automatic
+/obj/item/gun/ballistic/shotgun/automatic/hd_gun
 	bolt_type = BOLT_TYPE_LOCKING
 	lock_back_sound = '_horizon/sound/weapons/guns/shotgun/semigun_lock_back.wav'
 	bolt_drop_sound = '_horizon/sound/weapons/guns/shotgun/semigun_lockin.wav'
 
 // BENELLI M4 SHOTGUN
-/obj/item/gun/ballistic/shotgun/automatic/combat
+/obj/item/gun/ballistic/shotgun/automatic/hd_gun/combat
 	name = "\improper Shottex CQB shotgun"
 	desc = "Полуавтоматический дробовик в обвесе. Имеет магазин в 6(+1) патрон. Калибр - 12-ый."
 	icon = '_horizon/icons/obj/items/guns/40x32.dmi'
@@ -137,10 +147,20 @@
 	fire_sound = '_horizon/sound/weapons/guns/shotgun/semigun.wav'
 	suppressed_sound = '_horizon/sound/weapons/guns/shotgun/semigun_silenced.wav'
 	empty_indicator = FALSE
+	gunshot_animation_information = list(
+		"pixel_x" = 23, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+		"add_pixel_x_sawn" = -4, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
 	suppressor_x_offset = 13
 
 /// Adds a seclite (flashlight) attachment point to this shotgun.
-/obj/item/gun/ballistic/shotgun/automatic/combat/add_seclight_point()
+/obj/item/gun/ballistic/shotgun/automatic/hd_gun/combat/add_seclight_point()
 	AddComponent(/datum/component/seclite_attachable, \
 		light_overlay_icon = 'icons/obj/weapons/guns/flashlights.dmi', \
 		light_overlay = "flight", \
@@ -148,7 +168,7 @@
 		overlay_y = 10)
 
 // BROWNING 2000 SHOTGUN
-/obj/item/gun/ballistic/shotgun/automatic/b2000
+/obj/item/gun/ballistic/shotgun/automatic/hd_gun/b2000
 	name = "\improper Shottex \"Classical\""
 	desc = "Классический помповый дробовик компании Shottex, их слоган: \"Без дробовика - и жизнь худа!\". \
 		Вмещает в себя 4(+1) патрона. Калибр - 12-ый."
@@ -160,10 +180,20 @@
 	rack_sound = '_horizon/sound/weapons/guns/shotgun/semigun_cycle.wav'
 	fire_sound = '_horizon/sound/weapons/guns/shotgun/semigun.wav'
 	suppressed_sound = '_horizon/sound/weapons/guns/shotgun/semigun_silenced.wav'
+	gunshot_animation_information = list(
+		"pixel_x" = 25, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+		"add_pixel_x_sawn" = -5, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/lethal
 
 // BELADOR 2021 SILENCED SHOTGUN
-/obj/item/gun/ballistic/shotgun/automatic/b2021
+/obj/item/gun/ballistic/shotgun/automatic/hd_gun/b2021
 	name = "\improper Shottex \"Pigeon\""
 	desc = "Дробовик компании Shottex \"Голубь\" сочетает в себе кастомизацию, грубую отладку и убойную точность. \
 		Имеет встроенный глушитель. \
@@ -179,15 +209,25 @@
 	rack_sound = '_horizon/sound/weapons/guns/shotgun/semigun_cycle.wav'
 	fire_sound = '_horizon/sound/weapons/guns/shotgun/rape_gun.wav'
 	suppressed_sound = '_horizon/sound/weapons/guns/shotgun/belador_silenced.wav'
+	gunshot_animation_information = list(
+		"pixel_x" = 25, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+		"add_pixel_x_sawn" = -5, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/b2021
 
-/obj/item/gun/ballistic/shotgun/automatic/b2021/Initialize(mapload)
+/obj/item/gun/ballistic/shotgun/automatic/hd_gun/b2021/Initialize(mapload)
 	. = ..()
 	var/obj/item/suppressor/suppressor = new(src)
 	install_suppressor(suppressor)
 
 // AA12 i guess AUTOMATIC SHOTGUN
-/obj/item/gun/ballistic/shotgun/bulldog
+/obj/item/gun/ballistic/shotgun/hd_gun/bulldog
 	name = "\improper Modelo 1337 \"Torturador\""
 	desc = "Полуавтоматический дробовик магазинного типа. Производитель - испанцы из Modelo. \
 		К его шахте заряжания подходят только барабанные магазины на 8(+1 в стволе) пуль! \
@@ -215,12 +255,22 @@
 	eject_sound = '_horizon/sound/weapons/guns/shotgun/autogun_magout.ogg'
 	suppressed_sound = '_horizon/sound/weapons/guns/shotgun/belador_silenced.wav'
 	load_sound_volume = 40
+	gunshot_animation_information = list(
+		"pixel_x" = 25, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+		"add_pixel_x_sawn" = -5, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
 	pin = /obj/item/firing_pin
 	can_suppress = TRUE
 	suppressor_x_offset = 12
 
 // SAIGA-12 AUTOMATIC SHOTGUN
-/obj/item/gun/ballistic/shotgun/abyss
+/obj/item/gun/ballistic/shotgun/hd_gun/abyss
 	name = "\improper АД-12 Папасши"
 	desc = "Автоматический дробовик Папасши магазинной системы заряжания. Вмещает в себя 20 патрон. \
 		Калибр - 12-ый."
@@ -250,12 +300,22 @@
 	eject_sound = '_horizon/sound/weapons/guns/shotgun/autogun_magout.ogg'
 	suppressed_sound = '_horizon/sound/weapons/guns/shotgun/belador_silenced.wav'
 	load_sound_volume = 40
+	gunshot_animation_information = list(
+		"pixel_x" = 31, \
+		"pixel_y" = 0, \
+		"inactive_wben_suppressed" = TRUE, \
+		"add_pixel_x_sawn" = -5, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
 	pin = /obj/item/firing_pin
 	spawn_magazine_type = /obj/item/ammo_box/magazine/abyss_shotgun_drum
 	suppressor_x_offset = 8
 
 // KS23 | TOZ-123 DESTROYER
-/obj/item/gun/ballistic/shotgun/bolas
+/obj/item/gun/ballistic/shotgun/hd_gun/bolas
 	name = "\improper ДС-4 Папасши"
 	desc = "Громоздкий дробовик, вмещающий в себя 4 огромных патрона. \
 		Калибр - 4-ый."
@@ -271,6 +331,10 @@
 		'_horizon/sound/weapons/guns/shotgun/bolas_load2.wav', \
 		'_horizon/sound/weapons/guns/shotgun/bolas_load3.wav', \
 	)
+	client_recoil_animation_information = list(
+		"strength" = 1.5,
+		"duration" = 3.5,
+	)
 	lock_back_sound = '_horizon/sound/weapons/guns/shotgun/bolas_lock_back.wav'
 	bolt_drop_sound = '_horizon/sound/weapons/guns/shotgun/bolas_lockin.wav'
 	rack_sound = '_horizon/sound/weapons/guns/shotgun/bolas_pump.wav'
@@ -279,7 +343,7 @@
 	suppressor_x_offset = 11
 
 // SPAS 12
-/obj/item/gun/ballistic/shotgun/denominator
+/obj/item/gun/ballistic/shotgun/hd_gun/denominator
 	name = "\improper Riot-S12 \"Special\""
 	desc = "Автоматический дробовик с помповым заряжанием. Имеет выбор с полуавтоматического режима на автоматический. \
 	Нажми на СКМ, когда помпа в закрытом положении и предохранитель отключен."
@@ -299,9 +363,8 @@
 	foldable = TRUE
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/spas
 
-/// Middle-click (or tertiary click) on the SPAS-12 toggles fire selector.
-/// Uses upstream's item_interaction_secondary API (shift-click by default).
-/obj/item/gun/ballistic/shotgun/denominator/item_interaction_secondary(mob/living/user, obj/item/tool, list/modifiers)
+/obj/item/gun/ballistic/shotgun/hd_gun/denominator/item_interaction_secondary(mob/living/user, obj/item/tool, list/modifiers)
+	. = ..()
 	if(bolt_locked || (!(safety_flags & GUN_SAFETY_ENABLED)))
 		var/wontbudge = "Флажок предохранителя не поддаётся."
 		if(!(safety_flags & GUN_SAFETY_ENABLED))
@@ -320,7 +383,7 @@
 	sound_hint()
 	return ITEM_INTERACT_SUCCESS
 
-/obj/item/gun/ballistic/shotgun/denominator/shoot_live_shot(mob/living/user)
+/obj/item/gun/ballistic/shotgun/hd_gun/denominator/shoot_live_shot(mob/living/user)
 	. = ..()
 	if(semi)
 		playsound(src, spas_semi_click, 80, FALSE)

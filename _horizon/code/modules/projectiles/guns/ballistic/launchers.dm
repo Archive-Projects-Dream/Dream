@@ -1,8 +1,8 @@
 // grenade launcher
-/obj/item/gun/ballistic/revolver/grenadelauncher
+/obj/item/gun/ballistic/revolver/grenadelauncher/hd_gun
 	pin = /obj/item/firing_pin
 
-/obj/item/gun/ballistic/shotgun/grenadelauncher/batata
+/obj/item/gun/ballistic/shotgun/grenadelauncher/hd_gun/batata
 	name = "40mm Batata Frita explosive fragmentation launcher"
 	desc = "A pump-operated grenade launcher that filled the need for yet another firearm instead of an important invention or update."
 	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
