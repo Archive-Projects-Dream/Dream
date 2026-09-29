@@ -34,14 +34,6 @@
         load_sound_volume = 80
         safety_off_sound = '_horizon/sound/weapons/guns/shotgun/shotgun_safety2.wav'
         safety_on_sound = '_horizon/sound/weapons/guns/shotgun/shotgun_safety1.wav'
-                "pixel_x" = 24, \
-                "pixel_y" = 1, \
-                "inactive_wben_suppressed" = TRUE, \
-                "add_pixel_x_sawn" = -5, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30, \
-        )
         force = 12
         pb_knockback = 0
         can_suppress = TRUE
@@ -116,14 +108,6 @@
         inhand_icon_state = "riot"
         empty_indicator = FALSE
         can_be_sawn_off = FALSE
-                "pixel_x" = 25, \
-                "pixel_y" = 1, \
-                "inactive_wben_suppressed" = TRUE, \
-                "add_pixel_x_sawn" = -4, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30, \
-        )
         suppressor_x_offset = 14
 
 /obj/item/gun/ballistic/shotgun/automatic
@@ -143,14 +127,6 @@
         fire_sound = '_horizon/sound/weapons/guns/shotgun/semigun.wav'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/semigun_silenced.wav'
         empty_indicator = FALSE
-                "pixel_x" = 23, \
-                "pixel_y" = 1, \
-                "inactive_wben_suppressed" = TRUE, \
-                "add_pixel_x_sawn" = -4, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30, \
-        )
         suppressor_x_offset = 13
 
 /// Adds a seclite (flashlight) attachment point to this shotgun.
@@ -174,14 +150,6 @@
         rack_sound = '_horizon/sound/weapons/guns/shotgun/semigun_cycle.wav'
         fire_sound = '_horizon/sound/weapons/guns/shotgun/semigun.wav'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/semigun_silenced.wav'
-                "pixel_x" = 25, \
-                "pixel_y" = 1, \
-                "inactive_wben_suppressed" = TRUE, \
-                "add_pixel_x_sawn" = -5, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30, \
-        )
         spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/lethal
 
 // BELADOR 2021 SILENCED SHOTGUN
@@ -201,14 +169,6 @@
         rack_sound = '_horizon/sound/weapons/guns/shotgun/semigun_cycle.wav'
         fire_sound = '_horizon/sound/weapons/guns/shotgun/rape_gun.wav'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/belador_silenced.wav'
-                "pixel_x" = 25, \
-                "pixel_y" = 1, \
-                "inactive_wben_suppressed" = TRUE, \
-                "add_pixel_x_sawn" = -5, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30, \
-        )
         spawn_magazine_type = /obj/item/ammo_box/magazine/internal/shot/b2021
 
 /obj/item/gun/ballistic/shotgun/automatic/b2021/Initialize(mapload)
@@ -245,14 +205,6 @@
         eject_sound = '_horizon/sound/weapons/guns/shotgun/autogun_magout.ogg'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/belador_silenced.wav'
         load_sound_volume = 40
-                "pixel_x" = 25, \
-                "pixel_y" = 1, \
-                "inactive_wben_suppressed" = TRUE, \
-                "add_pixel_x_sawn" = -5, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30, \
-        )
         pin = /obj/item/firing_pin
         can_suppress = TRUE
         suppressor_x_offset = 12
@@ -288,14 +240,6 @@
         eject_sound = '_horizon/sound/weapons/guns/shotgun/autogun_magout.ogg'
         suppressed_sound = '_horizon/sound/weapons/guns/shotgun/belador_silenced.wav'
         load_sound_volume = 40
-                "pixel_x" = 31, \
-                "pixel_y" = 0, \
-                "inactive_wben_suppressed" = TRUE, \
-                "add_pixel_x_sawn" = -5, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30, \
-        )
         pin = /obj/item/firing_pin
         spawn_magazine_type = /obj/item/ammo_box/magazine/abyss_shotgun_drum
         suppressor_x_offset = 8
@@ -316,9 +260,6 @@
                 '_horizon/sound/weapons/guns/shotgun/bolas_load1.wav', \
                 '_horizon/sound/weapons/guns/shotgun/bolas_load2.wav', \
                 '_horizon/sound/weapons/guns/shotgun/bolas_load3.wav', \
-        )
-                "strength" = 1.5,
-                "duration" = 3.5,
         )
         lock_back_sound = '_horizon/sound/weapons/guns/shotgun/bolas_lock_back.wav'
         bolt_drop_sound = '_horizon/sound/weapons/guns/shotgun/bolas_lockin.wav'

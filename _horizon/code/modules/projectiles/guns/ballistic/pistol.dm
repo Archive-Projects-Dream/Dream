@@ -26,13 +26,6 @@
         load_sound = '_horizon/sound/weapons/guns/pistol/pistol_magin.wav'
         load_empty_sound = '_horizon/sound/weapons/guns/pistol/pistol_magin.wav'
         rack_sound = '_horizon/sound/weapons/guns/pistol/pistol_rack.wav'
-                "pixel_x" = 15, \
-                "pixel_y" = 1, \
-                "inactive_wben_suppressed" = TRUE, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30, \
-        )
         suppressor_x_offset = 10
         w_class = WEIGHT_CLASS_NORMAL
         carry_weight = 1 KILOGRAMS
@@ -58,15 +51,6 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "b93r"
         base_icon_state = "b93r"
-                "pixel_x" = 15, \
-                "pixel_y" = 2, \
-                "inactive_wben_suppressed" = TRUE, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30, \
-                "recoil_burst_speed" = 0.5, \
-                "return_burst_speed" = 0.5, \
-        )
         burst_size = 3
         suppressor_x_offset = 11
         w_class = WEIGHT_CLASS_NORMAL
@@ -81,10 +65,6 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "m1911"
         base_icon_state = "m1911"
-                "pixel_x" = 16, \
-                "pixel_y" = 2, \
-                "inactive_wben_suppressed" = TRUE,
-        )
         fire_sound = '_horizon/sound/weapons/guns/pistol/colt1.wav'
         rack_sound = '_horizon/sound/weapons/guns/pistol/pistol_rack.wav'
         force = 10
@@ -99,10 +79,6 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "USP"
         base_icon_state = "USP"
-                "pixel_x" = 16, \
-                "pixel_y" = 2, \
-                "inactive_wben_suppressed" = TRUE,
-        )
         fire_sound = list('_horizon/sound/weapons/guns/pistol/USP1.ogg', '_horizon/sound/weapons/guns/pistol/USP2.ogg')
         rack_sound = '_horizon/sound/weapons/guns/pistol/john_rack.wav'
         lock_back_sound = '_horizon/sound/weapons/guns/pistol/john_lockback.wav'
@@ -151,13 +127,6 @@
         base_icon_state = "combatmaster"
         fire_sound = list('_horizon/sound/weapons/guns/pistol/combatmaster1.wav', '_horizon/sound/weapons/guns/pistol/combatmaster2.wav')
         suppressed_sound = '_horizon/sound/weapons/guns/pistol/combatmaster_silenced.wav'
-                "pixel_x" = 15, \
-                "pixel_y" = 1, \
-                "inactive_wben_suppressed" = TRUE, \
-        )
-                "recoil_angle_upper" = -15, \
-                "recoil_angle_lower" = -30,
-        )
         force = 10
         suppressor_x_offset = 12
         spawn_magazine_type = /obj/item/ammo_box/magazine/combatmaster9mm
@@ -176,12 +145,6 @@
                                         '_horizon/sound/weapons/guns/pistol/glock2.wav')
         suppressed_sound = list('_horizon/sound/weapons/guns/pistol/glock_suppressed1.wav', \
                                         '_horizon/sound/weapons/guns/pistol/glock_suppressed2.wav')
-                "pixel_x" = 15, \
-                "pixel_y" = 5, \
-        )
-                "recoil_angle_upper" = -20, \
-                "recoil_angle_lower" = -35, \
-        )
         force = 10
         spawn_magazine_type = /obj/item/ammo_box/magazine/glock9mm
         mag_display = TRUE
@@ -204,16 +167,6 @@
         suppressed_sound = '_horizon/sound/weapons/guns/pistol/walter_silenced.wav'
         safety_on_sound = '_horizon/sound/weapons/guns/pistol/walter_safety.wav'
         safety_off_sound = '_horizon/sound/weapons/guns/pistol/walter_safety.wav'
-                "pixel_x" = 11, \
-                "pixel_y" = 1, \
-                "inactive_wben_suppressed" = TRUE, \
-        )
-                "recoil_angle_upper" = -10, \
-                "recoil_angle_lower" = -20, \
-        )
-                "strength" = 0.35,
-                "duration" = 2,
-        )
         spawn_magazine_type = /obj/item/ammo_box/magazine/ppk22lr
         mag_display = TRUE
         can_suppress = TRUE
@@ -233,9 +186,6 @@
         inhand_icon_state = "one"
         icon_state = "aniquilador"
         base_icon_state = "aniquilador"
-                "pixel_x" = 16, \
-                "pixel_y" = 2, \
-        )
         fire_sound = '_horizon/sound/weapons/guns/pistol/one.ogg'
         rack_sound = '_horizon/sound/weapons/guns/pistol/one_rack.ogg'
         lock_back_sound = '_horizon/sound/weapons/guns/pistol/one_lockback.ogg'
@@ -287,9 +237,6 @@
         inhand_icon_state = "five7"
         icon_state = "glockl"
         base_icon_state = "glockl"
-                "pixel_x" = 16, \
-                "pixel_y" = 2, \
-        )
         fire_sound = list('_horizon/sound/weapons/guns/pistol/john1.wav', '_horizon/sound/weapons/guns/pistol/john2.wav')
         rack_sound = '_horizon/sound/weapons/guns/pistol/john_rack.wav'
         lock_back_sound = '_horizon/sound/weapons/guns/pistol/john_lockback.wav'
@@ -312,12 +259,6 @@
         inhand_icon_state = "pm9"
         icon_state = "pm9"
         base_icon_state = "pm9"
-                "pixel_x" = 16, \
-                "pixel_y" = 2, \
-        )
-                "strength" = 1,
-                "duration" = 2,
-        )
         fire_sound = '_horizon/sound/weapons/guns/pistol/pm9.wav'
         suppressed_sound = '_horizon/sound/weapons/guns/pistol/pm9_suppressed.wav'
         rack_sound = '_horizon/sound/weapons/guns/pistol/pm9_rack.wav'

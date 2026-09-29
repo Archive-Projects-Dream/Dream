@@ -61,18 +61,6 @@
         burst_size = 2
         can_suppress = TRUE
         suppressor_x_offset = 9
-                "pixel_x" = 15, \
-                "pixel_y" = 2, \
-                "inactive_wben_suppressed" = TRUE, \
-        )
-                "recoil_angle_upper" = -10, \
-                "recoil_angle_lower" = -20, \
-                "recoil_burst_speed" = 0.5, \
-                "return_burst_speed" = 0.5, \
-        )
-                "strength" = 0.1,
-                "duration" = 1,
-        )
         custom_price = 10000
 
 /obj/item/gun/ballistic/automatic/remis/smg/bastardo
@@ -105,18 +93,6 @@
         burst_size = 2
         can_suppress = TRUE
         suppressor_x_offset = 6
-                "pixel_x" = 15, \
-                "pixel_y" = 2, \
-                "inactive_wben_suppressed" = TRUE, \
-        )
-                "recoil_angle_upper" = -10, \
-                "recoil_angle_lower" = -20, \
-                "recoil_burst_speed" = 0.5, \
-                "return_burst_speed" = 0.5, \
-        )
-                "strength" = 0.15, \
-                "duration" = 1, \
-        )
         custom_price = 20000
 
 /obj/item/gun/ballistic/automatic/remis/smg/thump
@@ -149,9 +125,6 @@
         burst_size = 3
         can_suppress = TRUE
         suppressor_x_offset = 6
-                "strength" = 0.25, \
-                "duration" = 1, \
-        )
 
 /// Adds a seclite (flashlight) attachment point to this SMG.
 /obj/item/gun/ballistic/automatic/remis/smg/thump/add_seclight_point()
@@ -181,9 +154,6 @@
         can_suppress = TRUE
         can_unsuppress = FALSE
         w_class = WEIGHT_CLASS_SMALL
-                "strength" = 0.15, \
-                "duration" = 1, \
-        )
 
 /obj/item/gun/ballistic/automatic/remis/smg/solitario/suppressed/Initialize(mapload)
         . = ..()
@@ -232,16 +202,4 @@
         burst_size = 2
         can_suppress = TRUE
         suppressor_x_offset = 2
-                "pixel_x" = 21, \
-                "pixel_y" = 5, \
-                "inactive_wben_suppressed" = TRUE, \
-        )
-                "recoil_angle_upper" = -10, \
-                "recoil_angle_lower" = -20, \
-                "recoil_burst_speed" = 0.5, \
-                "return_burst_speed" = 0.5, \
-        )
-                "strength" = 0.2,
-                "duration" = 1,
-        )
         custom_price = 20000

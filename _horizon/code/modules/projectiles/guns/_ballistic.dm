@@ -1,7 +1,4 @@
 /obj/item/gun/ballistic
-                "strength" = 0.35,
-                "duration" = 2,
-        )
         /// Why is this not already a variable?
         var/bolt_drop_sound_vary = FALSE
         /// Wording for the cylinder, for break action guns

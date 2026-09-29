@@ -30,15 +30,6 @@
 	equip_sound = '_horizon/sound/weapons/guns/pistol/pistol_holster.wav'
 	pickup_sound = '_horizon/sound/weapons/guns/pistol/pistol_draw.wav'
 	dry_fire_sound = '_horizon/sound/weapons/guns/revolver/empty_revolver.wav'
-		"pixel_x" = 12, \
-		"pixel_y" = 5, \
-	)
-		"recoil_angle_upper" = -15, \
-		"recoil_angle_lower" = -30, \
-	)
-		"strength" = 0.5,
-		"duration" = 2.5,
-	)
 	w_class = WEIGHT_CLASS_NORMAL
 	carry_weight = 1.5 KILOGRAMS
 
@@ -68,15 +59,6 @@
 	bolt_drop_sound = '_horizon/sound/weapons/guns/revolver/gado_out.wav'
 	// hammer sound
 	rack_sound = '_horizon/sound/weapons/guns/revolver/gado_hammer.wav'
-		"pixel_x" = 13, \
-		"pixel_y" = 3, \
-	)
-		"recoil_angle_upper" = -15,
-		"recoil_angle_lower" = -30, \
-	)
-		"strength" = 0.5,
-		"duration" = 2.5,
-	)
 	safety_flags = GUN_SAFETY_HAS_SAFETY | GUN_SAFETY_ENABLED | GUN_SAFETY_OVERLAY_ENABLED | GUN_SAFETY_OVERLAY_DISABLED
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/gado
 	carry_weight = 2 KILOGRAMS
@@ -91,12 +73,6 @@
 	lefthand_file = '_horizon/icons/obj/items/guns/inhands/pistol_lefthand.dmi'
 	righthand_file = '_horizon/icons/obj/items/guns/inhands/pistol_righthand.dmi'
 	inhand_icon_state = "newnambu"
-		"pixel_x" = 13, \
-		"pixel_y" = 3, \
-	)
-		"recoil_angle_upper" = -10, \
-		"recoil_angle_lower" = -25, \
-	)
 	fire_sound = '_horizon/sound/weapons/guns/revolver/nova.wav'
 	alternative_fire_sound = '_horizon/sound/weapons/guns/revolver/nova_alt.wav'
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/nova
@@ -122,15 +98,6 @@
 	lock_back_sound = '_horizon/sound/weapons/guns/revolver/bigboy_in.wav'
 	bolt_drop_sound = '_horizon/sound/weapons/guns/revolver/bigboy_out.wav'
 	rack_sound = '_horizon/sound/weapons/guns/revolver/bigboy_hammer.wav'
-		"pixel_x" = 13, \
-		"pixel_y" = 3, \
-	)
-		"recoil_angle_upper" = -25, \
-		"recoil_angle_lower" = -30, \
-	)
-		"strength" = 0.8,
-		"duration" = 3,
-	)
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/poppy
 	carry_weight = 3 KILOGRAMS
 
@@ -146,7 +113,5 @@
 	bolt_drop_sound = '_horizon/sound/weapons/guns/revolver/bigboy_out.wav'
 	rack_sound = '_horizon/sound/weapons/guns/revolver/bigboy_hammer.wav'
 	fire_sound = '_horizon/sound/weapons/guns/revolver/bigboy.wav'
-										"pixel_y" = 3)
-										"recoil_angle_lower" = -50)
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/poppy
 	carry_weight = 3 KILOGRAMS

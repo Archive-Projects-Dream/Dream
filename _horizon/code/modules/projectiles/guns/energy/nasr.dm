@@ -37,9 +37,6 @@
 	carry_weight = 5 KILOGRAMS
 	w_class = WEIGHT_CLASS_NORMAL
 	selfcharge = TRUE
-										"pixel_x" = 16, \
-										"pixel_y" = 2)
-										"recoil_angle_lower" = -30)
 	custom_price = 100000
 
 /obj/item/gun/energy/nasr/process(delta_time)

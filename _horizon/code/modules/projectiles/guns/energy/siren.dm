@@ -29,9 +29,6 @@
 	charge_sections = 5
 	display_empty = TRUE
 	selfcharge = TRUE
-										"pixel_x" = 28, \
-										"pixel_y" = 13)
-										"recoil_angle_lower" = -25)
 	custom_price = 100000
 	force = 15
 	w_class = WEIGHT_CLASS_HUGE
