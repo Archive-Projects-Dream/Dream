@@ -16,10 +16,9 @@
 /// Trying to beat someone while the gun is unsafe will not attempt to fire a round
 #define GUN_SAFETY_NO_FLOGGING (1<<4)
 
-/// Default safety flags: gun HAS a safety, but it spawns DISABLED so the
-/// gun can fire immediately. Players can toggle safety via right-click
-/// (attack_self_secondary) on non-wieldable guns, or via the safety verb.
-#define GUN_SAFETY_FLAGS_DEFAULT (GUN_SAFETY_HAS_SAFETY)
+/// Default safety flags: gun HAS a safety and it spawns ENABLED (ON).
+/// The gun cannot fire until the player toggles safety off (right-click).
+#define GUN_SAFETY_FLAGS_DEFAULT (GUN_SAFETY_HAS_SAFETY|GUN_SAFETY_ENABLED)
 
 // ~Autofire stat aliases
 /// Legacy alias - upstream uses AUTOFIRE_STAT_IDLE for "off / not firing"
