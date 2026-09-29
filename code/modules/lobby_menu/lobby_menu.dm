@@ -471,11 +471,15 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 			if(!(language in list(LOBBY_LANGUAGE_ENGLISH, LOBBY_LANGUAGE_RUSSIAN)))
 				return TRUE
 			var/datum/preference/language_preference = GLOB.preference_entries_by_key[/datum/preference/choiced/lobby_language]
-			if(!language_preference)
+			var/datum/preferences/current_prefs = client?.prefs
+			if(!language_preference || !current_prefs)
 				return TRUE
-			if(client.prefs.update_preference(language_preference, language))
-				client.prefs.save_preferences()
-				// apply_to_client fires on_language_changed(), which re-inits the lobby
+			// update_preference() is gated by is_accessible(), which depends on the
+			// preferences window being open on the game tab, so write the value
+			// directly instead - the lobby has to work from any state.
+			if(current_prefs.write_preference(language_preference, language))
+				current_prefs.save_preferences()
+				language_preference.apply_to_client(client, language)
 		if("refresh_preview")
 			INVOKE_ASYNC(src, PROC_REF(update_character_preview), TRUE)
 
