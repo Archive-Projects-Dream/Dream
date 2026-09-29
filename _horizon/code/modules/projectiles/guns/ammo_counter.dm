@@ -164,22 +164,27 @@
         icon_state = "safety1"
         w_class = WEIGHT_CLASS_TINY
 
-/obj/item/attachment/ammo_counter/afterattack(obj/item/target, mob/user, proximity_flag, click_parameters)
+/// Attach to ballistic gun via item_interaction (click gun with attachment).
+/obj/item/gun/ballistic/item_interaction(mob/living/user, obj/item/tool, list/modifiers)
         . = ..()
-        if(!proximity_flag)
+        if(.)
                 return
-        if(istype(target, /obj/item/gun/ballistic))
-                var/obj/item/gun/ballistic/gun = target
-                if(!istype(gun, /obj/item/gun/ballistic))
-                        return
-                var/datum/component/ammo_hud/existing = gun.GetComponent(/datum/component/ammo_hud)
+
+        // Ammo counter attachment
+        if(istype(tool, /obj/item/attachment/ammo_counter))
+                if(!user.is_holding(src))
+                        balloon_alert(user, "hold the gun!")
+                        return ITEM_INTERACT_BLOCKING
+                var/datum/component/ammo_hud/existing = GetComponent(/datum/component/ammo_hud)
                 if(existing)
-                        to_chat(user, span_notice("[gun] already has an ammo counter!"))
-                        return
-                if(!user.transferItemToLoc(src, gun))
-                        return
-                gun.AddComponent(/datum/component/ammo_hud)
-                var/datum/component/ammo_hud/our_counter = gun.GetComponent(/datum/component/ammo_hud)
-                our_counter.wake_up(source = gun, user = user, slot = ITEM_SLOT_HANDS)
-                to_chat(user, span_notice("You attach [src] to [gun]."))
+                        balloon_alert(user, "already has a counter!")
+                        return ITEM_INTERACT_BLOCKING
+                if(!user.transferItemToLoc(tool, src))
+                        balloon_alert(user, "can't attach!")
+                        return ITEM_INTERACT_BLOCKING
+                AddComponent(/datum/component/ammo_hud)
+                var/datum/component/ammo_hud/our_counter = GetComponent(/datum/component/ammo_hud)
+                our_counter.wake_up(source = src, user = user, slot = ITEM_SLOT_HANDS)
+                balloon_alert(user, "ammo counter attached")
                 playsound(src, 'sound/items/flashlight_on.ogg', 25, TRUE)
+                return ITEM_INTERACT_SUCCESS
