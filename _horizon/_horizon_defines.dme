@@ -12,6 +12,7 @@
 #include "code\__DEFINES\_helpers.dm"
 #include "code\__DEFINES\_signals.dm"
 #include "code\__DEFINES\_signals_horizon.dm"
+#include "code\__DEFINES\attachments.dm"
 #include "code\__DEFINES\buildmode.dm"
 #include "code\__DEFINES\cooldowns_horizon.dm"
 #include "code\__DEFINES\dir_slash.dm"
