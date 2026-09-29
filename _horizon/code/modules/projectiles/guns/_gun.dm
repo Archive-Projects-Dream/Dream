@@ -139,6 +139,9 @@
                 AddComponent(/datum/component/two_handed, \
                         wieldsound = '_horizon/sound/weapons/guns/stock_open.wav', \
                         unwieldsound = '_horizon/sound/weapons/guns/stock_close.wav')
+        // Safety indicator HUD button
+        if(safety_flags & GUN_SAFETY_HAS_SAFETY)
+                new /datum/action/item_action/toggle_safety(src)
 
 /obj/item/gun/update_icon(updates)
         . = ..()
@@ -377,6 +380,9 @@
         sound_hint()
         update_appearance()
         user.update_mouse_pointer()
+        // Update safety HUD button icon
+        for(var/datum/action/item_action/toggle_safety/safety_action in actions)
+                safety_action.update_icon()
 
 /obj/item/gun/ui_action_click(mob/user, actiontype) /// Allows users to spew facts
         if(istype(actiontype, /datum/action/item_action/toggle_stock))

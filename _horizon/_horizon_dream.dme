@@ -77,6 +77,7 @@
 #include "code\modules\projectiles\guns\_gun.dm"
 #include "code\modules\projectiles\guns\_pin.dm"
 #include "code\modules\projectiles\guns\gun_defines.dm"
+#include "code\modules\projectiles\guns\safety_indicator.dm"
 #include "code\modules\projectiles\guns\ballistic\gun_parts.dm"
 #include "code\modules\projectiles\guns\ballistic\guncleaning.dm"
 #include "code\modules\projectiles\guns\ballistic\launchers.dm"
