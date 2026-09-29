@@ -387,6 +387,8 @@
 /obj/item/gun/ui_action_click(mob/user, actiontype) /// Allows users to spew facts
         if(istype(actiontype, /datum/action/item_action/toggle_stock))
                 toggle_stock(user)
+        else if(istype(actiontype, /datum/action/item_action/toggle_safety))
+                toggle_safety(user)
         else
                 return ..()
 
