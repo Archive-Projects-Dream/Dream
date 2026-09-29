@@ -8,7 +8,7 @@
     world_icon_state = "BB"
     caliber = CALIBER_BATTERY
     projectile_type = /obj/projectile/bullet/p50
-    bounce_sound = list('_horizon/sound/weapons/guns/pistol/pistol_shell1.wav', '_horizon/sound/weapons/guns/pistol/pistol_shell2.wav', '_horizon/sound/weapons/guns/pistol/pistol_shell3.wav')
+    bounce_sound = pick('_horizon/sound/weapons/guns/pistol/pistol_shell1.wav', '_horizon/sound/weapons/guns/pistol/pistol_shell2.wav', '_horizon/sound/weapons/guns/pistol/pistol_shell3.wav')
     bounce_volume = 35
     stack_type = /obj/item/ammo_box/magazine/ammo_stack/batteries
     w_class = WEIGHT_CLASS_TINY
@@ -23,7 +23,7 @@
     world_icon_state = "AA"
     caliber = CALIBER_BATTERY
     projectile_type = /obj/projectile/bullet/p50
-    bounce_sound = list('_horizon/sound/weapons/guns/pistol/pistol_shell1.wav', '_horizon/sound/weapons/guns/pistol/pistol_shell2.wav', '_horizon/sound/weapons/guns/pistol/pistol_shell3.wav')
+    bounce_sound = pick('_horizon/sound/weapons/guns/pistol/pistol_shell1.wav', '_horizon/sound/weapons/guns/pistol/pistol_shell2.wav', '_horizon/sound/weapons/guns/pistol/pistol_shell3.wav')
     bounce_volume = 35
     stack_type = null
     w_class = WEIGHT_CLASS_TINY

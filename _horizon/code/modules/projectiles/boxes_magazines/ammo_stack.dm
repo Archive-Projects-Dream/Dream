@@ -97,6 +97,8 @@
                 to_chat(user, span_warning("I can't stack empty casings."))
                 return
         var/obj/item/ammo_box/magazine/ammo_stack = new stack_type(drop_location())
+        if(!ammo_stack.stored_ammo)
+                ammo_stack.stored_ammo = list()
         user.transferItemToLoc(src, ammo_stack, silent = TRUE)
         ammo_stack.give_round(src)
         user.transferItemToLoc(ammo_casing, ammo_stack, silent = TRUE)

@@ -15,7 +15,7 @@
 	lock_back_sound = '_horizon/sound/weapons/guns/launcher/batata_lock_back.ogg'
 	bolt_drop_sound = '_horizon/sound/weapons/guns/launcher/batata_lockin.wav'
 	rack_sound = '_horizon/sound/weapons/guns/launcher/batata_rack.ogg'
-	load_sound = list(
+	load_sound = pick(
 		'_horizon/sound/weapons/guns/launcher/batata_load1.wav', \
 		'_horizon/sound/weapons/guns/launcher/batata_load2.wav', \
 		'_horizon/sound/weapons/guns/launcher/batata_load3.wav', \
