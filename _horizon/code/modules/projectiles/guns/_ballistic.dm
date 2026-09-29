@@ -252,6 +252,21 @@
         else if(over == user && !user.is_holding(src) && isturf(loc))
                 if(!internal_magazine && magazine)
                         eject_magazine(user)
+
+///Toggles between open cylinder and closed cylinder
+/obj/item/gun/ballistic/proc/toggle_cylinder_open(mob/user)
+        cylinder_open = !cylinder_open
+        //sound_hint()
+        if(cylinder_open)
+                playsound(src, bolt_drop_sound, lock_back_sound_volume, lock_back_sound_vary)
+                chambered = null
+        else
+                playsound(src, lock_back_sound, bolt_drop_sound_volume, bolt_drop_sound_vary)
+                chamber_round()
+        //if(user)
+        //      to_chat(user, span_notice("I [cylinder_open ? "open" : "close"] [src]'s [cylinder_wording]"))
+        update_appearance()
+
 /*
 /obj/item/gun/ballistic/before_can_shoot_checks(mob/living/user, autofire_start = FALSE)
         . = ..()
@@ -445,20 +460,6 @@
                 needs_update = TRUE
         if(needs_update)
                 update_appearance()
-
-///Toggles between open cylinder and closed cylinder
-/obj/item/gun/ballistic/proc/toggle_cylinder_open(mob/user)
-        cylinder_open = !cylinder_open
-        //sound_hint()
-        if(cylinder_open)
-                playsound(src, bolt_drop_sound, lock_back_sound_volume, lock_back_sound_vary)
-                chambered = null
-        else
-                playsound(src, lock_back_sound, bolt_drop_sound_volume, bolt_drop_sound_vary)
-                chamber_round()
-        //if(user)
-        //      to_chat(user, span_notice("I [cylinder_open ? "open" : "close"] [src]'s [cylinder_wording]"))
-        update_appearance()
 */
 ///Gives us info about ammo count, open cylinder, etc
 /obj/item/gun/ballistic/proc/chamber_examine(mob/user)
