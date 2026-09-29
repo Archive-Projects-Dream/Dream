@@ -111,6 +111,7 @@
 #include "code\modules\projectiles\projectile\energy\nasr.dm"
 #include "code\modules\projectiles\projectile\energy\siren.dm"
 #include "code\modules\projectiles\projectile\special\blood.dm"
+#include "code\modules\visual_changes\blood.dm"
 #include "code\modules\visual_changes\debris.dm"
 #include "code\modules\visual_changes\debris_additions.dm"
 #include "code\modules\visual_changes\gun_smoke.dm"
