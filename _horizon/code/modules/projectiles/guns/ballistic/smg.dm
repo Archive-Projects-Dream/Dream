@@ -1,34 +1,34 @@
 // c20r
 /obj/item/gun/ballistic/automatic/c20r
-        pin = /obj/item/firing_pin
+	pin = /obj/item/firing_pin
 
 // m90
 /obj/item/gun/ballistic/automatic/m90
-        pin = /obj/item/firing_pin
+	pin = /obj/item/firing_pin
 
 /obj/item/gun/ballistic/automatic/remis/smg
-        worn_icon = '_horizon/icons/obj/items/guns/worn/back.dmi'
-        equip_sound = '_horizon/sound/weapons/guns/weap_away.ogg'
-        drop_sound = '_horizon/sound/weapons/guns/drop_lightgun.wav'
-        slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE
-        suppressed = SUPPRESSED_NONE
-        full_auto = TRUE
-        w_class = WEIGHT_CLASS_BULKY
+	worn_icon = '_horizon/icons/obj/items/guns/worn/back.dmi'
+	equip_sound = '_horizon/sound/weapons/guns/weap_away.ogg'
+	drop_sound = '_horizon/sound/weapons/guns/drop_lightgun.wav'
+	slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE
+	suppressed = SUPPRESSED_NONE
+	full_auto = TRUE
+	w_class = WEIGHT_CLASS_BULKY
 
 // ppsh
 /obj/item/gun/ballistic/automatic/remis/smg/ppsh
-        name = "\improper ППС"
-        desc = "Автоматический пистолет пулемёт Папасши, простой в производстве. Вмещает в себя магазины по 32 патрона. \
-                Калибр - 9мм."
-        icon = '_horizon/icons/obj/items/guns/smg.dmi'
-        base_icon_state = "ppsh"
-        icon_state = "ppsh"
-        spawn_magazine_type = /obj/item/ammo_box/magazine/ppsh9mm
-        weapon_weight = WEAPON_MEDIUM
-        force = 10
-        fire_delay = 2
-        burst_size = 3
-        custom_price = 4000
+	name = "\improper ППС"
+	desc = "Автоматический пистолет пулемёт Папасши, простой в производстве. Вмещает в себя магазины по 32 патрона. \
+		Калибр - 9мм."
+	icon = '_horizon/icons/obj/items/guns/smg.dmi'
+	base_icon_state = "ppsh"
+	icon_state = "ppsh"
+	spawn_magazine_type = /obj/item/ammo_box/magazine/ppsh9mm
+	weapon_weight = WEAPON_MEDIUM
+	force = 10
+	fire_delay = 2
+	burst_size = 3
+	custom_price = 4000
 
 // hksmg
 /obj/item/gun/ballistic/automatic/remis/smg/solitario
@@ -47,174 +47,174 @@
 		"strength" = 0.1,
 		"duration" = 1,
 	)
-        name = "\improper Solitario Inseguro R5 submachine gun"
-        desc = "A reliable submachine gun with a high-magazine capacity maufactured by popular civilian arms dealer S&I"
-        icon = '_horizon/icons/obj/items/guns/smg.dmi'
-        lefthand_file = '_horizon/icons/obj/items/guns/inhands/smg_lefthand.dmi'
-        righthand_file = '_horizon/icons/obj/items/guns/inhands/smg_righthand.dmi'
-        inhand_icon_state = "hksmg"
-        base_icon_state = "hksmg"
-        icon_state = "hksmg"
-        rack_sound = '_horizon/sound/weapons/guns/smg/hksmg_rack.wav'
-        lock_back_sound = '_horizon/sound/weapons/guns/smg/hksmg_lockback.wav'
-        bolt_drop_sound = '_horizon/sound/weapons/guns/smg/hksmg_lockin.wav'
-        load_sound = '_horizon/sound/weapons/guns/smg/hksmg_magin.wav'
-        load_empty_sound = '_horizon/sound/weapons/guns/smg/hksmg_magin.wav'
-        eject_empty_sound = '_horizon/sound/weapons/guns/smg/hksmg_magout.wav'
-        eject_sound = '_horizon/sound/weapons/guns/smg/hksmg_magout.wav'
-        safety_off_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
-        safety_on_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
-        fire_sound = '_horizon/sound/weapons/guns/smg/hksmg.wav'
-        suppressed_sound = '_horizon/sound/weapons/guns/smg/hksmg_silenced.ogg'
-        spawn_magazine_type =   /obj/item/ammo_box/magazine/hksmg22lr
-        weapon_weight = WEAPON_LIGHT
-        bolt_type = BOLT_TYPE_LOCKING
-        slot_flags = ITEM_SLOT_BELT
-        force = 10
-        recoil = 0.2
-        fire_delay = 2
-        burst_size = 2
-        can_suppress = TRUE
-        suppressor_x_offset = 9
-        custom_price = 10000
+	name = "\improper Solitario Inseguro R5 submachine gun"
+	desc = "A reliable submachine gun with a high-magazine capacity maufactured by popular civilian arms dealer S&I"
+	icon = '_horizon/icons/obj/items/guns/smg.dmi'
+	lefthand_file = '_horizon/icons/obj/items/guns/inhands/smg_lefthand.dmi'
+	righthand_file = '_horizon/icons/obj/items/guns/inhands/smg_righthand.dmi'
+	inhand_icon_state = "hksmg"
+	base_icon_state = "hksmg"
+	icon_state = "hksmg"
+	rack_sound = '_horizon/sound/weapons/guns/smg/hksmg_rack.wav'
+	lock_back_sound = '_horizon/sound/weapons/guns/smg/hksmg_lockback.wav'
+	bolt_drop_sound = '_horizon/sound/weapons/guns/smg/hksmg_lockin.wav'
+	load_sound = '_horizon/sound/weapons/guns/smg/hksmg_magin.wav'
+	load_empty_sound = '_horizon/sound/weapons/guns/smg/hksmg_magin.wav'
+	eject_empty_sound = '_horizon/sound/weapons/guns/smg/hksmg_magout.wav'
+	eject_sound = '_horizon/sound/weapons/guns/smg/hksmg_magout.wav'
+	safety_off_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
+	safety_on_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
+	fire_sound = '_horizon/sound/weapons/guns/smg/hksmg.wav'
+	suppressed_sound = '_horizon/sound/weapons/guns/smg/hksmg_silenced.ogg'
+	spawn_magazine_type =   /obj/item/ammo_box/magazine/hksmg22lr
+	weapon_weight = WEAPON_LIGHT
+	bolt_type = BOLT_TYPE_LOCKING
+	slot_flags = ITEM_SLOT_BELT
+	force = 10
+	recoil = 0.2
+	fire_delay = 2
+	burst_size = 2
+	can_suppress = TRUE
+	suppressor_x_offset = 9
+	custom_price = 10000
 
 /obj/item/gun/ballistic/automatic/remis/smg/bastardo
-        name = "\improper Feio Bastardo R1 submachine gun"
-        desc = "A fully-automatic submachine gun issued to ZoomTech officers and military force with an accelerated fire delay, comes with a folding stock, and a threaded barrel for suppression."
-        icon = '_horizon/icons/obj/items/guns/48x32.dmi'
-        lefthand_file = '_horizon/icons/obj/items/guns/inhands/smg_lefthand.dmi'
-        righthand_file = '_horizon/icons/obj/items/guns/inhands/smg_righthand.dmi'
-        worn_icon_state = "vityaz"
-        inhand_icon_state = "vityaz"
-        base_icon_state = "vityaz"
-        icon_state = "vityaz"
-        load_sound = '_horizon/sound/weapons/guns/smg/hksmg_magin.wav'
-        load_empty_sound = '_horizon/sound/weapons/guns/smg/hksmg_magin.wav'
-        eject_empty_sound = '_horizon/sound/weapons/guns/smg/hksmg_magout.wav'
-        eject_sound = '_horizon/sound/weapons/guns/smg/hksmg_magout.wav'
-        safety_off_sound = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
-        safety_on_sound = '_horizon/sound/weapons/guns/rifle/aksafety1.wav'
-        rack_sound = '_horizon/sound/weapons/guns/rifle/akrack.wav'
-        suppressed_sound = '_horizon/sound/weapons/guns/smg/vityaz_silenced.ogg'
-        fire_sound = '_horizon/sound/weapons/guns/smg/vityaz.ogg'
-        fireselector_auto = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
-        fireselector_burst = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
-        fireselector_semi = '_horizon/sound/weapons/guns/rifle/aksafety1.wav'
-        spawn_magazine_type =   /obj/item/ammo_box/magazine/bastardo9mm
-        weapon_weight = WEAPON_MEDIUM
-        force = 10
-        recoil = 0.2
-        fire_delay = 2
-        burst_size = 2
-        can_suppress = TRUE
-        suppressor_x_offset = 6
-        custom_price = 20000
+	name = "\improper Feio Bastardo R1 submachine gun"
+	desc = "A fully-automatic submachine gun issued to ZoomTech officers and military force with an accelerated fire delay, comes with a folding stock, and a threaded barrel for suppression."
+	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
+	lefthand_file = '_horizon/icons/obj/items/guns/inhands/smg_lefthand.dmi'
+	righthand_file = '_horizon/icons/obj/items/guns/inhands/smg_righthand.dmi'
+	worn_icon_state = "vityaz"
+	inhand_icon_state = "vityaz"
+	base_icon_state = "vityaz"
+	icon_state = "vityaz"
+	load_sound = '_horizon/sound/weapons/guns/smg/hksmg_magin.wav'
+	load_empty_sound = '_horizon/sound/weapons/guns/smg/hksmg_magin.wav'
+	eject_empty_sound = '_horizon/sound/weapons/guns/smg/hksmg_magout.wav'
+	eject_sound = '_horizon/sound/weapons/guns/smg/hksmg_magout.wav'
+	safety_off_sound = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
+	safety_on_sound = '_horizon/sound/weapons/guns/rifle/aksafety1.wav'
+	rack_sound = '_horizon/sound/weapons/guns/rifle/akrack.wav'
+	suppressed_sound = '_horizon/sound/weapons/guns/smg/vityaz_silenced.ogg'
+	fire_sound = '_horizon/sound/weapons/guns/smg/vityaz.ogg'
+	fireselector_auto = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
+	fireselector_burst = '_horizon/sound/weapons/guns/rifle/aksafety2.wav'
+	fireselector_semi = '_horizon/sound/weapons/guns/rifle/aksafety1.wav'
+	spawn_magazine_type =   /obj/item/ammo_box/magazine/bastardo9mm
+	weapon_weight = WEAPON_MEDIUM
+	force = 10
+	recoil = 0.2
+	fire_delay = 2
+	burst_size = 2
+	can_suppress = TRUE
+	suppressor_x_offset = 6
+	custom_price = 20000
 
 /obj/item/gun/ballistic/automatic/remis/smg/thump
-        name = "\improper Cesno Thump R2 submachine gun"
-        desc = "A fully-automatic submachine gun that fires in optional three-round bursts, comes with a threaded barrel, and was engineered as a direct upgrade to the Solitario to .45 ACP."
-        icon = '_horizon/icons/obj/items/guns/48x32.dmi'
-        lefthand_file = '_horizon/icons/obj/items/guns/inhands/smg_lefthand.dmi'
-        righthand_file = '_horizon/icons/obj/items/guns/inhands/smg_righthand.dmi'
-        worn_icon_state = "ump"
-        inhand_icon_state = "ump"
-        base_icon_state = "ump"
-        icon_state = "ump"
-        lock_back_sound = '_horizon/sound/weapons/guns/smg/thump_lockback.wav'
-        bolt_drop_sound = '_horizon/sound/weapons/guns/smg/thump_lockin.wav'
-        rack_sound = '_horizon/sound/weapons/guns/smg/thump_rack.wav'
-        load_sound = '_horizon/sound/weapons/guns/smg/thump_magin.wav'
-        load_empty_sound = '_horizon/sound/weapons/guns/smg/thump_magin.wav'
-        eject_empty_sound = '_horizon/sound/weapons/guns/smg/thump_magout.wav'
-        eject_sound = '_horizon/sound/weapons/guns/smg/thump_magout.wav'
-        safety_off_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
-        safety_on_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
-        fire_sound = '_horizon/sound/weapons/guns/smg/thump.wav'
-        suppressed_sound = '_horizon/sound/weapons/guns/smg/thump_silenced.wav'
-        spawn_magazine_type =   /obj/item/ammo_box/magazine/thump45
-        weapon_weight = WEAPON_MEDIUM
-        bolt_type = BOLT_TYPE_LOCKING
-        force = 10
-        recoil = 0.2
-        fire_delay = 1.7
-        burst_size = 3
-        can_suppress = TRUE
-        suppressor_x_offset = 6
+	name = "\improper Cesno Thump R2 submachine gun"
+	desc = "A fully-automatic submachine gun that fires in optional three-round bursts, comes with a threaded barrel, and was engineered as a direct upgrade to the Solitario to .45 ACP."
+	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
+	lefthand_file = '_horizon/icons/obj/items/guns/inhands/smg_lefthand.dmi'
+	righthand_file = '_horizon/icons/obj/items/guns/inhands/smg_righthand.dmi'
+	worn_icon_state = "ump"
+	inhand_icon_state = "ump"
+	base_icon_state = "ump"
+	icon_state = "ump"
+	lock_back_sound = '_horizon/sound/weapons/guns/smg/thump_lockback.wav'
+	bolt_drop_sound = '_horizon/sound/weapons/guns/smg/thump_lockin.wav'
+	rack_sound = '_horizon/sound/weapons/guns/smg/thump_rack.wav'
+	load_sound = '_horizon/sound/weapons/guns/smg/thump_magin.wav'
+	load_empty_sound = '_horizon/sound/weapons/guns/smg/thump_magin.wav'
+	eject_empty_sound = '_horizon/sound/weapons/guns/smg/thump_magout.wav'
+	eject_sound = '_horizon/sound/weapons/guns/smg/thump_magout.wav'
+	safety_off_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
+	safety_on_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
+	fire_sound = '_horizon/sound/weapons/guns/smg/thump.wav'
+	suppressed_sound = '_horizon/sound/weapons/guns/smg/thump_silenced.wav'
+	spawn_magazine_type =   /obj/item/ammo_box/magazine/thump45
+	weapon_weight = WEAPON_MEDIUM
+	bolt_type = BOLT_TYPE_LOCKING
+	force = 10
+	recoil = 0.2
+	fire_delay = 1.7
+	burst_size = 3
+	can_suppress = TRUE
+	suppressor_x_offset = 6
 
 /// Adds a seclite (flashlight) attachment point to this SMG.
 /obj/item/gun/ballistic/automatic/remis/smg/thump/add_seclight_point()
-        AddComponent(/datum/component/seclite_attachable, \
-                light_overlay_icon = 'icons/obj/weapons/guns/flashlights.dmi', \
-                light_overlay = "flight", \
-                overlay_x = 30, \
-                overlay_y = 14)
+	AddComponent(/datum/component/seclite_attachable, \
+		light_overlay_icon = 'icons/obj/weapons/guns/flashlights.dmi', \
+		light_overlay = "flight", \
+		overlay_x = 30, \
+		overlay_y = 14)
 
 // SUPPRESSED HK SMG
 /obj/item/gun/ballistic/automatic/remis/smg/solitario/suppressed
-        name = "Solitario-SD Inseguro R7 \"Saber\" submachine gun"
-        desc = "An integrally suppressed version of the Solitario, changed post-factory to be chambered in .380, however. This has made the drum mags incompatible."
-        icon = '_horizon/icons/obj/items/guns/48x32.dmi'
-        fire_sound = '_horizon/sound/weapons/guns/smg/hksmg380_silenced.ogg'
-        suppressed_sound = '_horizon/sound/weapons/guns/smg/hksmg380_silenced.ogg'
-        weapon_weight = WEAPON_MEDIUM
-        worn_icon_state = "hksmgs"
-        inhand_icon_state = "hksmgs"
-        base_icon_state = "hksmgs"
-        icon_state = "hksmgs"
-        fire_delay = 1.4
-        burst_size = 3
-        spawn_magazine_type = /obj/item/ammo_box/magazine/hksmg380
-        slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE
-        empty_icon_state = FALSE
-        can_suppress = TRUE
-        can_unsuppress = FALSE
-        w_class = WEIGHT_CLASS_SMALL
+	name = "Solitario-SD Inseguro R7 \"Saber\" submachine gun"
+	desc = "An integrally suppressed version of the Solitario, changed post-factory to be chambered in .380, however. This has made the drum mags incompatible."
+	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
+	fire_sound = '_horizon/sound/weapons/guns/smg/hksmg380_silenced.ogg'
+	suppressed_sound = '_horizon/sound/weapons/guns/smg/hksmg380_silenced.ogg'
+	weapon_weight = WEAPON_MEDIUM
+	worn_icon_state = "hksmgs"
+	inhand_icon_state = "hksmgs"
+	base_icon_state = "hksmgs"
+	icon_state = "hksmgs"
+	fire_delay = 1.4
+	burst_size = 3
+	spawn_magazine_type = /obj/item/ammo_box/magazine/hksmg380
+	slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE
+	empty_icon_state = FALSE
+	can_suppress = TRUE
+	can_unsuppress = FALSE
+	w_class = WEIGHT_CLASS_SMALL
 
 /obj/item/gun/ballistic/automatic/remis/smg/solitario/suppressed/Initialize(mapload)
-        . = ..()
-        var/obj/item/suppressor/S = new(src)
-        install_suppressor(S)
+	. = ..()
+	var/obj/item/suppressor/S = new(src)
+	install_suppressor(S)
 
 /obj/item/gun/ballistic/automatic/remis/smg/solitario/suppressed/no_mag
-        spawnwithmagazine = FALSE
+	spawnwithmagazine = FALSE
 
 // KAKAKAKAKAKAKAKAKAKKAKAKAKAKAKAKA REALLYGOODCOMICS GUN I LOVE REALLYGOODCOMICS YES SIR I AM AN AIR MARSHAL
 /obj/item/gun/ballistic/automatic/remis/smg/bolsa
-        name = "\improper Bolsa R6 submachine gun"
-        desc = "An antique, compact submachine gun that is prohibited to civillians in many stations. Discontinued, but it still has It's strengths, that being the extendable stock and the size."
-        icon = '_horizon/icons/obj/items/guns/48x32.dmi'
-        lefthand_file = '_horizon/icons/obj/items/guns/inhands/smg_lefthand.dmi'
-        righthand_file = '_horizon/icons/obj/items/guns/inhands/smg_righthand.dmi'
-        worn_icon_state = "uzi"
-        inhand_icon_state = "uzi"
-        base_icon_state = "uzi"
-        icon_state = "uzi"
-        load_sound = '_horizon/sound/weapons/guns/smg/bolsa_magin.wav'
-        load_empty_sound = '_horizon/sound/weapons/guns/smg/bolsa_magin.wav'
-        eject_empty_sound = '_horizon/sound/weapons/guns/smg/bolsa_magout.wav'
-        eject_sound = '_horizon/sound/weapons/guns/smg/bolsa_magout.wav'
-        rack_sound = '_horizon/sound/weapons/guns/smg/bolsa_rack.wav'
-        suppressed_sound = '_horizon/sound/weapons/guns/smg/bolsa_silenced.wav'
-        fire_sound = '_horizon/sound/weapons/guns/smg/bolsa.wav'
-        lock_back_sound = '_horizon/sound/weapons/guns/smg/bolsa_lockback.wav'
-        bolt_drop_sound = '_horizon/sound/weapons/guns/smg/bolsa_lockin.wav'
-        fireselector_auto = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
-        fireselector_burst = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
-        fireselector_semi = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
-        safety_off_sound = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
-        safety_on_sound = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
-        spawn_magazine_type =   /obj/item/ammo_box/magazine/uzi9mm
-        foldable = TRUE
-        folded = TRUE
-        w_class = WEIGHT_CLASS_NORMAL
-        weapon_weight = WEAPON_MEDIUM
-        bolt_type = BOLT_TYPE_OPEN
-        slot_flags = ITEM_SLOT_BELT
-        carry_weight = 2.2 KILOGRAMS
-        force = 10
-        recoil = 0.2
-        fire_delay = 2
-        burst_size = 2
-        can_suppress = TRUE
-        suppressor_x_offset = 2
-        custom_price = 20000
+	name = "\improper Bolsa R6 submachine gun"
+	desc = "An antique, compact submachine gun that is prohibited to civillians in many stations. Discontinued, but it still has It's strengths, that being the extendable stock and the size."
+	icon = '_horizon/icons/obj/items/guns/48x32.dmi'
+	lefthand_file = '_horizon/icons/obj/items/guns/inhands/smg_lefthand.dmi'
+	righthand_file = '_horizon/icons/obj/items/guns/inhands/smg_righthand.dmi'
+	worn_icon_state = "uzi"
+	inhand_icon_state = "uzi"
+	base_icon_state = "uzi"
+	icon_state = "uzi"
+	load_sound = '_horizon/sound/weapons/guns/smg/bolsa_magin.wav'
+	load_empty_sound = '_horizon/sound/weapons/guns/smg/bolsa_magin.wav'
+	eject_empty_sound = '_horizon/sound/weapons/guns/smg/bolsa_magout.wav'
+	eject_sound = '_horizon/sound/weapons/guns/smg/bolsa_magout.wav'
+	rack_sound = '_horizon/sound/weapons/guns/smg/bolsa_rack.wav'
+	suppressed_sound = '_horizon/sound/weapons/guns/smg/bolsa_silenced.wav'
+	fire_sound = '_horizon/sound/weapons/guns/smg/bolsa.wav'
+	lock_back_sound = '_horizon/sound/weapons/guns/smg/bolsa_lockback.wav'
+	bolt_drop_sound = '_horizon/sound/weapons/guns/smg/bolsa_lockin.wav'
+	fireselector_auto = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
+	fireselector_burst = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
+	fireselector_semi = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
+	safety_off_sound = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
+	safety_on_sound = '_horizon/sound/weapons/guns/smg/bolsa_safety.wav'
+	spawn_magazine_type =   /obj/item/ammo_box/magazine/uzi9mm
+	foldable = TRUE
+	folded = TRUE
+	w_class = WEIGHT_CLASS_NORMAL
+	weapon_weight = WEAPON_MEDIUM
+	bolt_type = BOLT_TYPE_OPEN
+	slot_flags = ITEM_SLOT_BELT
+	carry_weight = 2.2 KILOGRAMS
+	force = 10
+	recoil = 0.2
+	fire_delay = 2
+	burst_size = 2
+	can_suppress = TRUE
+	suppressor_x_offset = 2
+	custom_price = 20000
