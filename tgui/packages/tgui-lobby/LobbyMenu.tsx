@@ -1,7 +1,20 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { Tooltip } from 'tgui-core/components';
+import { storage } from 'common/storage';
+import {
+  type LobbyLanguage,
+  makeT,
+  playerCountLabel,
+} from './i18n';
 import { assetMap } from './assets';
-import { playCollapseSound, playExpandSound, playSelectSound } from './audio';
+import {
+  areSoundsEnabled,
+  loadSoundsEnabled,
+  playCollapseSound,
+  playExpandSound,
+  playSelectSound,
+  setSoundsEnabled,
+} from './audio';
 
 type StationTrait = {
   ref: string;
@@ -34,6 +47,13 @@ export type ServerState = {
   overflowJob: string | null;
   traitFeedback: string | null;
   transparent: boolean;
+  // html-lobby-v2 additions
+  language: LobbyLanguage;
+  characterName: string | null;
+  preferenceIssues: string[];
+  previewUrls: Record<string, string> | null;
+  videoUrl: string | null;
+  serverName: string | null;
 };
 
 type LobbyState = {
@@ -50,6 +70,8 @@ const DEFAULT_STATE: LobbyState = {
   isCollapsed: false,
   serverState: null,
 };
+
+const CRT_STORAGE_KEY = 'lobby-crt-enabled';
 
 function lobbyReducer(state: LobbyState, action: LobbyAction): LobbyState {
   switch (action.type) {
@@ -266,6 +288,289 @@ function TraitFeedback({ text }: { text: string }) {
   );
 }
 
+/** Typewriter welcome line with the character's name */
+function WelcomeLine({
+  name,
+  language,
+  collapsed,
+}: {
+  name: string | null;
+  language: LobbyLanguage;
+  collapsed: boolean;
+}) {
+  const t = useMemo(() => makeT(language), [language]);
+  const full = `${t('welcome')} ${name || t('guest')}`;
+  const [shownLen, setShownLen] = useState(full.length);
+
+  useEffect(() => {
+    setShownLen(0);
+    let interval: ReturnType<typeof setInterval> | undefined;
+    const timer = setTimeout(() => {
+      let i = 0;
+      interval = setInterval(() => {
+        i += 1;
+        setShownLen(i);
+        if (i >= full.length) {
+          clearInterval(interval);
+        }
+      }, 45);
+    }, 600);
+    return () => {
+      clearTimeout(timer);
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [full]);
+
+  return (
+    <div
+      className={`lobby__welcome ${collapsed ? 'lobby__welcome--collapsed' : ''}`}
+    >
+      {full.slice(0, shownLen)}
+      {shownLen < full.length && (
+        <span className="lobby__welcome-cursor">_</span>
+      )}
+    </div>
+  );
+}
+
+/** CM13-style warnings about the player's current preferences */
+function PreferenceIssues({
+  issues,
+  collapsed,
+}: {
+  issues: string[];
+  collapsed: boolean;
+}) {
+  if (issues.length === 0) {
+    return null;
+  }
+  return (
+    <div
+      className={`lobby__issues ${collapsed ? 'lobby__issues--collapsed' : ''}`}
+    >
+      {issues.map((issue, index) => (
+        <div key={index} className="lobby__issues-item">
+          {issue}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StatsRow({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div className="lobby__stats-row">
+      <span className="lobby__stats-label">{label}</span>
+      <span className="lobby__stats-value">{value || '—'}</span>
+    </div>
+  );
+}
+
+const GAME_PHASE_STATUS = {
+  startup: 'statusStartup',
+  pregame: 'statusPregame',
+  setting_up: 'statusSettingUp',
+  playing: 'statusPlaying',
+  postgame: 'statusPostgame',
+} as const;
+
+/** Extended round/server statistics panel under the info TV */
+function StatsPanel({
+  ss,
+  language,
+  collapsed,
+}: {
+  ss: ServerState;
+  language: LobbyLanguage;
+  collapsed: boolean;
+}) {
+  const t = useMemo(() => makeT(language), [language]);
+  const statusKey = GAME_PHASE_STATUS[ss.gamePhase];
+  return (
+    <div
+      className={`lobby__stats ${collapsed ? 'lobby__stats--collapsed' : ''}`}
+    >
+      <div className="lobby__stats-title">{t('statsTitle')}</div>
+      <StatsRow label={t('statsServer')} value={ss.serverName} />
+      <StatsRow label={t('statsMap')} value={ss.mapName} />
+      <StatsRow label={t('statsStatus')} value={t(statusKey)} />
+      <StatsRow label={t('statsShiftTime')} value={ss.shiftTime} />
+      <StatsRow
+        label={t('statsPlayers')}
+        value={String(ss.playerCount)}
+      />
+      <StatsRow label={t('statsReady')} value={String(ss.readyCount)} />
+      <StatsRow
+        label={t('statsAdmins')}
+        value={`${ss.adminReadyCount} / ${ss.adminCount}`}
+      />
+    </div>
+  );
+}
+
+const PREVIEW_DIRS = ['south', 'east', 'north', 'west'] as const;
+
+/** Character preview with client-side direction cycling */
+function CharacterPreview({
+  ss,
+  language,
+  collapsed,
+}: {
+  ss: ServerState;
+  language: LobbyLanguage;
+  collapsed: boolean;
+}) {
+  const t = useMemo(() => makeT(language), [language]);
+  const [dirIndex, setDirIndex] = useState(0);
+
+  const urls = ss.previewUrls;
+  if (!urls) {
+    return null;
+  }
+
+  const dir = PREVIEW_DIRS[dirIndex];
+  const url = urls[dir] ?? Object.values(urls)[0];
+
+  return (
+    <div
+      className={`lobby__preview ${collapsed ? 'lobby__preview--collapsed' : ''}`}
+    >
+      <div className="lobby__preview-title">{t('previewTitle')}</div>
+      <div className="lobby__preview-body">
+        {url && <img className="lobby__preview-img" src={url} alt="" />}
+      </div>
+      <div className="lobby__preview-buttons">
+        <button
+          className="lobby__text-btn"
+          onClick={() => {
+            playSelectSound();
+            setDirIndex((dirIndex + 1) % PREVIEW_DIRS.length);
+          }}
+        >
+          {t('rotate')}
+        </button>
+        <button
+          className="lobby__text-btn"
+          onClick={() => {
+            playSelectSound();
+            sendAction('refresh_preview');
+          }}
+        >
+          {t('refresh')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Lobby settings popup: language, CRT filter, interface sounds */
+function LobbySettings({
+  language,
+  crtEnabled,
+  setCrtEnabled,
+}: {
+  language: LobbyLanguage;
+  crtEnabled: boolean;
+  setCrtEnabled: (value: boolean) => void;
+}) {
+  const t = useMemo(() => makeT(language), [language]);
+  const [open, setOpen] = useState(false);
+  const [soundsOn, setSoundsOn] = useState(true);
+
+  useEffect(() => {
+    loadSoundsEnabled().then((enabled) => setSoundsOn(enabled));
+  }, []);
+
+  if (!open) {
+    return (
+      <button
+        className="lobby__settings-btn"
+        onClick={() => {
+          playSelectSound();
+          setOpen(true);
+        }}
+      >
+        {language === 'russian' ? 'RU' : 'EN'}
+      </button>
+    );
+  }
+
+  return (
+    <div className="lobby__modal-backdrop" onClick={() => setOpen(false)}>
+      <div
+        className="lobby__modal"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="lobby__modal-title">{t('settingsTitle')}</div>
+        <div className="lobby__modal-row">
+          <span className="lobby__stats-label">{t('languageLabel')}</span>
+          <div className="lobby__modal-actions">
+            <button
+              className={`lobby__text-btn ${language === 'english' ? 'lobby__text-btn--active' : ''}`}
+              onClick={() => {
+                playSelectSound();
+                sendAction('set_language', { language: 'english' });
+              }}
+            >
+              English
+            </button>
+            <button
+              className={`lobby__text-btn ${language === 'russian' ? 'lobby__text-btn--active' : ''}`}
+              onClick={() => {
+                playSelectSound();
+                sendAction('set_language', { language: 'russian' });
+              }}
+            >
+              Русский
+            </button>
+          </div>
+        </div>
+        <div className="lobby__modal-row">
+          <span className="lobby__stats-label">{t('crtLabel')}</span>
+          <div className="lobby__modal-actions">
+            <button
+              className={`lobby__text-btn ${crtEnabled ? 'lobby__text-btn--active' : ''}`}
+              onClick={() => {
+                playSelectSound();
+                const next = !crtEnabled;
+                setCrtEnabled(next);
+                storage.set(CRT_STORAGE_KEY, next);
+              }}
+            >
+              {crtEnabled ? t('on') : t('off')}
+            </button>
+          </div>
+        </div>
+        <div className="lobby__modal-row">
+          <span className="lobby__stats-label">{t('soundsLabel')}</span>
+          <div className="lobby__modal-actions">
+            <button
+              className={`lobby__text-btn ${soundsOn ? 'lobby__text-btn--active' : ''}`}
+              onClick={() => {
+                const next = !areSoundsEnabled();
+                setSoundsEnabled(next);
+                setSoundsOn(next);
+                if (next) {
+                  playSelectSound();
+                }
+              }}
+            >
+              {soundsOn ? t('on') : t('off')}
+            </button>
+          </div>
+        </div>
+        <div className="lobby__modal-row lobby__modal-row--right">
+          <button className="lobby__text-btn" onClick={() => setOpen(false)}>
+            {t('closeLabel')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const SHUTTER_TRAVEL_PX = 143;
 const SHUTTER_MOVE_MS = 400;
 const SHUTTER_WAIT_MS = 200;
@@ -288,6 +593,8 @@ export function LobbyMenu() {
   const [state, dispatch] = useReducer(lobbyReducer, DEFAULT_STATE);
   const [animating, setAnimating] = useState(false);
   const [tvActive, setTvActive] = useState(true);
+  const [fadingOut, setFadingOut] = useState(false);
+  const [crtEnabled, setCrtEnabled] = useState(false);
   const shutterRef = useRef<HTMLDivElement>(null);
   const collapseRef = useRef<HTMLDivElement>(null);
 
@@ -301,6 +608,15 @@ export function LobbyMenu() {
     Byond.subscribeTo('state', (payload: Partial<ServerState>) => {
       dispatch({ type: 'serverUpdate', payload });
     });
+
+    // The server hides the browser shortly after this message
+    Byond.subscribeTo('fadeOut', () => setFadingOut(true));
+  }, []);
+
+  useEffect(() => {
+    storage.get(CRT_STORAGE_KEY).then((val) => {
+      setCrtEnabled(val === undefined ? false : !!val);
+    });
   }, []);
 
   useEffect(() => {
@@ -313,6 +629,9 @@ export function LobbyMenu() {
   if (!ss) {
     return null;
   }
+
+  const language = ss.language || 'english';
+  const t = makeT(language);
 
   const backgroundStyle = ss.transparent
     ? undefined
@@ -456,32 +775,47 @@ export function LobbyMenu() {
   const postgame = ss.gamePhase === 'postgame';
   let tvLines: string[];
   if (postgame) {
-    tvLines = ['Game ended,', 'restart soon'];
+    tvLines = [t('gameEnded'), t('restartSoon')];
   } else if (roundStarted) {
     tvLines = [
       ss.mapName,
-      `${ss.playerCount} player${ss.playerCount !== 1 ? 's' : ''} online`,
-      `${ss.shiftTime} in`,
+      playerCountLabel(language, ss.playerCount),
+      `${ss.shiftTime} ${t('shiftIn')}`,
     ];
   } else if (ss.isAdmin) {
     tvLines = [
-      `Starting in ${ss.countdown}`,
-      `${ss.playerCount} player${ss.playerCount !== 1 ? 's' : ''}`,
-      `${ss.readyCount} players ready`,
-      `${ss.adminReadyCount} / ${ss.adminCount} admins ready`,
+      `${t('startingIn')} ${countdownLabel(ss.countdown, t)}`,
+      playerCountLabel(language, ss.playerCount),
+      `${ss.readyCount} ${t('playersReady')}`,
+      `${ss.adminReadyCount} / ${ss.adminCount} ${t('adminsReady')}`,
     ];
   } else {
     tvLines = [
-      ss.countdown,
-      `${ss.playerCount} player${ss.playerCount !== 1 ? 's' : ''}`,
+      countdownLabel(ss.countdown, t),
+      playerCountLabel(language, ss.playerCount),
     ];
   }
 
   return (
     <div
-      className={`lobby ${ss.transparent ? 'lobby--transparent' : ''}`}
+      className={`lobby ${ss.transparent ? 'lobby--transparent' : ''} ${
+        fadingOut ? 'lobby--fading' : ''
+      }`}
       style={backgroundStyle}
     >
+      {!ss.transparent && ss.videoUrl && (
+        <video
+          className="lobby__video"
+          src={ss.videoUrl}
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+      )}
+
+      {!ss.transparent && crtEnabled && <div className="lobby__crt" />}
+
       <div className="lobby__anchor">
         <LobbyElement top={0} left={-61} zIndex={1} collapsed={collapsed}>
           <img className="lobby__sprite" src={icon('background')} alt="" />
@@ -489,36 +823,44 @@ export function LobbyMenu() {
 
         {!!ss.canReady && (
           <LobbyElement top={8} left={-65} zIndex={3} collapsed={collapsed}>
-            <SpriteButton
-              iconState={ss.isReady ? 'ready' : 'not_ready'}
-              onClick={() => sendAction('ready_toggle')}
-            />
+            <Tooltip content={ss.isReady ? t('ttNotReady') : t('ttReady')} position="bottom">
+              <SpriteButton
+                iconState={ss.isReady ? 'ready' : 'not_ready'}
+                onClick={() => sendAction('ready_toggle')}
+              />
+            </Tooltip>
           </LobbyElement>
         )}
 
         {!!ss.canJoin && (
           <LobbyElement top={13} left={-58} zIndex={3} collapsed={collapsed}>
-            <SpriteButton
-              iconState="join_game"
-              onClick={(e) => sendAction('join', { ctrlClick: e.ctrlKey })}
-            />
+            <Tooltip content={t('ttJoin')} position="bottom">
+              <SpriteButton
+                iconState="join_game"
+                onClick={(e) => sendAction('join', { ctrlClick: e.ctrlKey })}
+              />
+            </Tooltip>
           </LobbyElement>
         )}
 
         <LobbyElement top={40} left={-54} zIndex={3} collapsed={collapsed}>
-          <SpriteButton
-            iconState="observe"
-            enabled={!!ss.canObserve}
-            onClick={() => sendAction('observe')}
-          />
+          <Tooltip content={t('ttObserve')} position="bottom">
+            <SpriteButton
+              iconState="observe"
+              enabled={!!ss.canObserve}
+              onClick={() => sendAction('observe')}
+            />
+          </Tooltip>
         </LobbyElement>
 
         <LobbyElement top={70} left={-54} zIndex={3} collapsed={collapsed}>
-          <SpriteButton
-            iconState="character_setup"
-            enabled={!!ss.assetsReady}
-            onClick={() => sendAction('character_setup')}
-          />
+          <Tooltip content={t('ttCharacterSetup')} position="bottom">
+            <SpriteButton
+              iconState="character_setup"
+              enabled={!!ss.assetsReady}
+              onClick={() => sendAction('character_setup')}
+            />
+          </Tooltip>
         </LobbyElement>
 
         <LobbyElement
@@ -539,23 +881,25 @@ export function LobbyMenu() {
           slide
           elRef={collapseRef}
         >
-          <button
-            className="sprite-btn sprite-btn--no-press"
-            onClick={handleToggleCollapse}
-            disabled={animating}
-          >
-            <img
-              className="sprite-btn__normal"
-              src={icon(collapseIcon)}
-              alt=""
-            />
-            <img
-              className="sprite-btn__hover"
-              src={icon(`${collapseIcon}_highlighted`)}
-              alt=""
-            />
-            <img className="lobby__blip" src={icon(blipState)} alt="" />
-          </button>
+          <Tooltip content={collapsed ? t('ttExpand') : t('ttCollapse')} position="bottom">
+            <button
+              className="sprite-btn sprite-btn--no-press"
+              onClick={handleToggleCollapse}
+              disabled={animating}
+            >
+              <img
+                className="sprite-btn__normal"
+                src={icon(collapseIcon)}
+                alt=""
+              />
+              <img
+                className="sprite-btn__hover"
+                src={icon(`${collapseIcon}_highlighted`)}
+                alt=""
+              />
+              <img className="lobby__blip" src={icon(blipState)} alt="" />
+            </button>
+          </Tooltip>
         </LobbyElement>
 
         {[
@@ -564,11 +908,12 @@ export function LobbyMenu() {
             left: -26,
             enabled: !!ss.canPoll,
             badge: ss.hasNewPoll,
+            tooltip: t('ttPoll'),
           },
-          { id: 'crew_manifest', left: 2 },
-          { id: 'settings', left: 29, enabled: !!ss.assetsReady },
-          { id: 'changelog', left: 57 },
-        ].map(({ id, left, enabled, badge }) => (
+          { id: 'crew_manifest', left: 2, tooltip: t('ttManifest') },
+          { id: 'settings', left: 29, enabled: !!ss.assetsReady, tooltip: t('ttSettings') },
+          { id: 'changelog', left: 57, tooltip: t('ttChangelog') },
+        ].map(({ id, left, enabled, badge, tooltip }) => (
           <LobbyElement
             key={id}
             top={122}
@@ -576,24 +921,28 @@ export function LobbyMenu() {
             zIndex={6}
             collapsed={collapsed}
           >
-            <SpriteButton
-              iconState={id}
-              enabled={enabled}
-              onClick={() => sendAction(id)}
-            >
-              {!!badge && (
-                <img className="lobby__badge" src={icon('new_poll')} alt="" />
-              )}
-            </SpriteButton>
+            <Tooltip content={tooltip} position="bottom">
+              <SpriteButton
+                iconState={id}
+                enabled={enabled}
+                onClick={() => sendAction(id)}
+              >
+                {!!badge && (
+                  <img className="lobby__badge" src={icon('new_poll')} alt="" />
+                )}
+              </SpriteButton>
+            </Tooltip>
           </LobbyElement>
         ))}
 
         {!!ss.isLocalhost && (
           <LobbyElement top={146} left={-54} zIndex={3} collapsed={collapsed}>
-            <SpriteButton
-              iconState="start_now"
-              onClick={() => sendAction('start_now')}
-            />
+            <Tooltip content={t('ttStartNow')} position="bottom">
+              <SpriteButton
+                iconState="start_now"
+                onClick={() => sendAction('start_now')}
+              />
+            </Tooltip>
           </LobbyElement>
         )}
 
@@ -663,6 +1012,37 @@ export function LobbyMenu() {
           )}
         </div>
       </div>
+
+      <StatsPanel ss={ss} language={language} collapsed={collapsed} />
+
+      <CharacterPreview ss={ss} language={language} collapsed={collapsed} />
+
+      <WelcomeLine
+        name={ss.characterName}
+        language={language}
+        collapsed={collapsed}
+      />
+
+      <PreferenceIssues
+        issues={ss.preferenceIssues || []}
+        collapsed={collapsed}
+      />
+
+      <LobbySettings
+        language={language}
+        crtEnabled={crtEnabled}
+        setCrtEnabled={setCrtEnabled}
+      />
     </div>
   );
+}
+
+function countdownLabel(countdown: string, t: ReturnType<typeof makeT>): string {
+  if (countdown === 'DELAYED') {
+    return t('delayed');
+  }
+  if (countdown === 'SOON') {
+    return t('soon');
+  }
+  return countdown;
 }

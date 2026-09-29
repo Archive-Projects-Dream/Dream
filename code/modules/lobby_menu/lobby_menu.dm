@@ -4,6 +4,16 @@ GLOBAL_VAR(lobby_background_transparent)
 #define LOBBY_TITLE_ASSET_NAME "lobby_title_screen.png"
 GLOBAL_VAR(lobby_title_asset_registered)
 
+/// [HORIZON-ADD] Name of the registered lobby background video asset, empty string when none was found
+GLOBAL_VAR(lobby_video_asset_name)
+
+/// [HORIZON-ADD] Time the client gets to play its fade-out animation before the browser is hidden
+#define LOBBY_FADE_OUT_TIME 0.45 SECONDS
+/// [HORIZON-ADD] Minimum time between character preview re-renders
+#define LOBBY_PREVIEW_REFRESH_COOLDOWN 8 SECONDS
+/// [HORIZON-ADD] Directions rendered for the lobby character preview, css-facing name -> dir
+#define LOBBY_PREVIEW_DIRS list("south" = SOUTH, "east" = EAST, "north" = NORTH, "west" = WEST)
+
 /proc/register_lobby_title_asset()
 	if(GLOB.lobby_title_asset_registered)
 		return
@@ -34,6 +44,20 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	var/datum/tgui_window/window
 	/// Whether we've already registered for asset subsystem init signals
 	var/assets_signals_registered = FALSE
+	/// [HORIZON-ADD] Whether the lobby browser is currently shown (mirrors update_visibility)
+	var/shown = FALSE
+	/// [HORIZON-ADD] Sequence counter for preview asset names, so re-renders bust the client cache
+	var/preview_sequence = 0
+	/// [HORIZON-ADD] Cached preview asset URLs, direction name -> url
+	var/list/preview_urls
+	/// [HORIZON-ADD] world.time of the last preview render, used for throttling
+	var/preview_last_refresh = 0
+	/// [HORIZON-ADD] Set when the preview should be re-rendered on the next init
+	var/preview_dirty = TRUE
+	/// [HORIZON-ADD] Length of prefs.recently_updated_keys the last time we checked
+	var/last_prefs_update_count = 0
+	/// [HORIZON-ADD] Pending fade-out timer id
+	var/fade_timer
 
 /datum/lobby_menu/New(client/client)
 	src.client = client
@@ -91,6 +115,10 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	window?.unsubscribe(src)
 	window = null
 	client = null
+	preview_urls = null
+	if(fade_timer)
+		deltimer(fade_timer)
+		fade_timer = null
 	return ..()
 
 /// Loads the bundle, sends assets, and pushes initial state into the browser.
@@ -126,6 +154,11 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"adminCount" = length(GLOB.admins),
 		"shiftTime" = (SSticker.round_start_time == 0) ? "Pre-Game" : round_timestamp(),
 	))
+	// [HORIZON-ADD] Watch for preference edits so the character preview can refresh
+	var/update_count = length(client?.prefs?.recently_updated_keys)
+	if(update_count != last_prefs_update_count)
+		last_prefs_update_count = update_count
+		INVOKE_ASYNC(src, PROC_REF(update_character_preview))
 
 /datum/lobby_menu/proc/on_client_qdel()
 	SIGNAL_HANDLER
@@ -138,18 +171,43 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 /// Swaps between the lobby screen and the map screen based on whether the client's mob is a new_player
 /datum/lobby_menu/proc/update_visibility()
 	var/should_show = istype(client?.mob, /mob/dead/new_player) && !client.interviewee
-	if(GLOB.lobby_background_transparent)
-		// In transparent mode the browser overlays the map, selector always shows map_screen
-		winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
-		winset(client, "lobby_menu", "is-visible=[should_show]")
-	else
-		// In opaque mode, swap the CHILD selector between lobby_screen and map_screen
-		winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[should_show ? SKIN_LOBBY_SCREEN : SKIN_MAP_SCREEN]")
 	if(should_show)
+		shown = TRUE
+		// [HORIZON-ADD] re-render the character preview whenever the lobby is (re)shown
+		preview_dirty = TRUE
+		if(GLOB.lobby_background_transparent)
+			// In transparent mode the browser overlays the map, selector always shows map_screen
+			winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
+			winset(client, "lobby_menu", "is-visible=true")
+		else
+			// In opaque mode, swap the CHILD selector between lobby_screen and map_screen
+			winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_LOBBY_SCREEN]")
 		START_PROCESSING(SSlobby_menu, src)
 		send_init()
 	else
+		shown = FALSE
 		STOP_PROCESSING(SSlobby_menu, src)
+		if(GLOB.lobby_background_transparent)
+			// In transparent mode the browser overlays the map, selector always shows map_screen
+			winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
+		else
+			// In opaque mode, swap the CHILD selector between lobby_screen and map_screen
+			winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
+		// [HORIZON-ADD] give the client time to play its fade-out animation before hiding
+		window?.send_message("fadeOut")
+		if(fade_timer)
+			deltimer(fade_timer)
+		fade_timer = addtimer(CALLBACK(src, PROC_REF(apply_hidden_visibility)), LOBBY_FADE_OUT_TIME, TIMER_STOPPABLE)
+
+/// [HORIZON-ADD] Applies the hidden browser state once the fade-out animation has had time to play
+/datum/lobby_menu/proc/apply_hidden_visibility()
+	fade_timer = null
+	if(shown || !client)
+		return
+	if(GLOB.lobby_background_transparent)
+		winset(client, "lobby_menu", "is-visible=false")
+	else
+		winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
 
 /datum/lobby_menu/proc/on_ticker_pregame()
 	SIGNAL_HANDLER
@@ -247,6 +305,13 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"canPoll" = !is_guest_key(client?.key) && SSdbcore.Connect(),
 		"overflowJob" = null,
 		"transparent" = GLOB.lobby_background_transparent,
+		// [HORIZON-ADD] html-lobby-v2 additions
+		"language" = get_language(),
+		"characterName" = get_character_name(),
+		"preferenceIssues" = get_preference_issues(),
+		"serverName" = CONFIG_GET(string/server),
+		"videoUrl" = get_lobby_video_url(),
+		"previewUrls" = preview_urls,
 	))
 
 	check_new_polls()
@@ -259,6 +324,10 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		if(SSatoms.initialized != INITIALIZATION_INNEW_REGULAR)
 			RegisterSignal(SSatoms, COMSIG_SUBSYSTEM_POST_INITIALIZE, PROC_REF(on_assets_ready))
 			assets_signals_registered = TRUE
+
+	// [HORIZON-ADD] render the character preview in the background if it needs an update
+	if(preview_dirty)
+		INVOKE_ASYNC(src, PROC_REF(update_character_preview))
 
 /datum/lobby_menu/proc/on_assets_ready(datum/source)
 	SIGNAL_HANDLER
@@ -396,7 +465,105 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 				"stationTraits" = get_station_traits(),
 				"traitFeedback" = feedback,
 			))
+		// [HORIZON-ADD] html-lobby-v2 actions
+		if("set_language")
+			var/language = payload["language"]
+			if(!(language in list(LOBBY_LANGUAGE_ENGLISH, LOBBY_LANGUAGE_RUSSIAN)))
+				return TRUE
+			var/datum/preference/language_preference = GLOB.preference_entries_by_key[/datum/preference/choiced/lobby_language]
+			if(!language_preference)
+				return TRUE
+			if(client.prefs.update_preference(language_preference, language))
+				client.prefs.save_preferences()
+				// apply_to_client fires on_language_changed(), which re-inits the lobby
+		if("refresh_preview")
+			INVOKE_ASYNC(src, PROC_REF(update_character_preview), TRUE)
 
 	return TRUE
 
+/// [HORIZON-ADD] Returns the lobby language preference for this client
+/datum/lobby_menu/proc/get_language()
+	var/language = client?.prefs?.read_preference(/datum/preference/choiced/lobby_language)
+	return language || LOBBY_LANGUAGE_ENGLISH
+
+/// [HORIZON-ADD] Called when the lobby language preference is written; refreshes the lobby text
+/datum/lobby_menu/proc/on_language_changed(value)
+	if(!client || !window)
+		return
+	send_init()
+
+/// [HORIZON-ADD] Returns the current character's name for the welcome line
+/datum/lobby_menu/proc/get_character_name()
+	return client?.prefs?.read_preference(/datum/preference/name/real_name)
+
+/// [HORIZON-ADD] Returns lobby-facing warnings about the player's current preferences
+/datum/lobby_menu/proc/get_preference_issues()
+	var/mob/dead/new_player/player = client?.mob
+	if(!istype(player))
+		return list()
+	return player.get_preference_issues(get_language())
+
+/// [HORIZON-ADD] Renders the current character into four directional preview images
+/// and registers them as assets. Sends the urls to the browser once done.
+/datum/lobby_menu/proc/update_character_preview(force = FALSE)
+	set waitfor = FALSE
+	if(!client?.prefs)
+		return
+	if(!force && world.time < preview_last_refresh + LOBBY_PREVIEW_REFRESH_COOLDOWN)
+		preview_dirty = TRUE
+		return
+	preview_last_refresh = world.time
+	preview_dirty = FALSE
+
+	var/datum/preferences/prefs = client.prefs
+	var/mob/living/carbon/human/dummy/mannequin = new()
+	// Dress the mannequin once; silicon jobs return an /image instead
+	var/rendered = prefs.render_new_preview_appearance(mannequin, TRUE)
+	var/icon_source = istype(rendered, /image) ? rendered : mannequin
+
+	var/list/new_urls = list()
+	preview_sequence += 1
+	for(var/dir_name in LOBBY_PREVIEW_DIRS)
+		var/icon/flat = getFlatIcon(icon_source, LOBBY_PREVIEW_DIRS[dir_name])
+		if(!flat)
+			continue
+		var/asset_name = "lobby_preview_[client.ckey]_[preview_sequence]_[dir_name].png"
+		SSassets.transport.register_asset(asset_name, flat)
+		SSassets.transport.send_assets(client, asset_name)
+		new_urls[dir_name] = SSassets.transport.get_asset_url(asset_name)
+
+	qdel(mannequin)
+
+	preview_urls = length(new_urls) ? new_urls : null
+	// Only push an update when we actually have urls, a null update
+	// would clear the preview on the client side
+	if(shown && preview_urls)
+		send_update(list("previewUrls" = preview_urls))
+
+/// [HORIZON-ADD] Returns the url of a lobby background video, if one is configured.
+/// Videos are picked up from config/lobby_art/ (.webm or .mp4) and cached per server boot.
+/datum/lobby_menu/proc/get_lobby_video_url()
+	if(GLOB.lobby_background_transparent)
+		return null
+	if(isnull(GLOB.lobby_video_asset_name))
+		var/list/candidates = list()
+		for(var/filename in flist("[global.config.directory]/lobby_art/"))
+			var/extension = copytext(filename, findlasttext(filename, "."))
+			if(extension in list(".webm", ".mp4"))
+				candidates += filename
+		if(!length(candidates))
+			// Negative cache so we don't rescan on every init
+			GLOB.lobby_video_asset_name = ""
+			return null
+		var/chosen = pick(candidates)
+		GLOB.lobby_video_asset_name = "lobby_video_[ckey(chosen)]"
+		SSassets.transport.register_asset(GLOB.lobby_video_asset_name, fcopy_rsc("[global.config.directory]/lobby_art/[chosen]"))
+	if(!GLOB.lobby_video_asset_name)
+		return null
+	SSassets.transport.send_assets(client, GLOB.lobby_video_asset_name)
+	return SSassets.transport.get_asset_url(GLOB.lobby_video_asset_name)
+
 #undef LOBBY_TITLE_ASSET_NAME
+#undef LOBBY_FADE_OUT_TIME
+#undef LOBBY_PREVIEW_REFRESH_COOLDOWN
+#undef LOBBY_PREVIEW_DIRS

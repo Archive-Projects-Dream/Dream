@@ -53,6 +53,65 @@ img {
   &--transparent {
     background: transparent !important;
   }
+
+  // [HORIZON-ADD] played right before the server hides the browser
+  &--fading {
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+  }
+}
+
+// [HORIZON-ADD] looping background video, sits under the sprite UI
+.lobby__video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+
+// [HORIZON-ADD] optional CRT overlay over the whole lobby
+.lobby__crt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.12) 0px,
+      rgba(0, 0, 0, 0.12) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(0, 0, 0, 0.35) 100%
+    );
+  animation: crt-flicker 4s infinite;
+}
+
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 0.82;
+  }
+  94% {
+    opacity: 1;
+  }
 }
 
 .lobby__anchor {
@@ -220,6 +279,273 @@ img {
     pointer-events: none;
     image-rendering: pixelated;
   }
+}
+
+// [HORIZON-ADD] extended stats panel below the info TV
+.lobby__stats {
+  position: absolute;
+  right: s(4px);
+  top: calc(50% - #{s(100px)});
+  z-index: 3;
+  width: s(136px);
+  padding: s(6px) s(8px);
+  box-sizing: border-box;
+  background: rgba(6, 10, 18, 0.72);
+  border: s(1px) solid rgba(120, 160, 200, 0.35);
+  font-family: 'Grand9K Pixel', monospace;
+  color: #cfe3ff;
+  transition: transform $move-dur $ease-out, opacity 0.2s linear;
+
+  &--collapsed {
+    transition: transform $move-dur $ease-in, opacity 0.2s linear;
+    transform: translateX(s(150px));
+    opacity: 0;
+  }
+}
+
+.lobby__stats-title {
+  font-family: 'Pixellari', monospace;
+  font-size: s(9px);
+  color: #ffffff;
+  border-bottom: s(1px) solid rgba(120, 160, 200, 0.35);
+  padding-bottom: s(3px);
+  margin-bottom: s(4px);
+}
+
+.lobby__stats-row {
+  display: flex;
+  justify-content: space-between;
+  gap: s(6px);
+  font-size: s(7px);
+  line-height: 1.6;
+}
+
+.lobby__stats-label {
+  color: rgba(207, 227, 255, 0.65);
+  white-space: nowrap;
+}
+
+.lobby__stats-value {
+  color: #ffffff;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: s(86px);
+}
+
+// [HORIZON-ADD] character preview panel on the left edge
+.lobby__preview {
+  position: absolute;
+  left: s(6px);
+  top: calc(50% - #{s(150px)});
+  z-index: 3;
+  width: s(112px);
+  background: rgba(6, 10, 18, 0.72);
+  border: s(1px) solid rgba(120, 160, 200, 0.35);
+  font-family: 'Pixellari', monospace;
+  color: #cfe3ff;
+  transition: transform $move-dur $ease-out, opacity 0.2s linear;
+
+  &--collapsed {
+    transition: transform $move-dur $ease-in, opacity 0.2s linear;
+    transform: translateY(s(-150px));
+    opacity: 0;
+  }
+}
+
+.lobby__preview-title {
+  font-size: s(9px);
+  color: #ffffff;
+  text-align: center;
+  padding: s(4px) 0 s(2px) 0;
+  border-bottom: s(1px) solid rgba(120, 160, 200, 0.35);
+}
+
+.lobby__preview-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: s(112px);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(40, 60, 90, 0.5) 0%,
+    rgba(0, 0, 0, 0) 75%
+  );
+}
+
+.lobby__preview-img {
+  image-rendering: pixelated;
+  height: s(96px);
+  width: auto;
+}
+
+.lobby__preview-buttons {
+  display: flex;
+  border-top: s(1px) solid rgba(120, 160, 200, 0.35);
+}
+
+.lobby__preview-buttons .lobby__text-btn {
+  flex: 1;
+  border-left: s(1px) solid rgba(120, 160, 200, 0.35);
+
+  &:first-child {
+    border-left: none;
+  }
+}
+
+// [HORIZON-ADD] small pixellari text button used in preview/settings UI
+.lobby__text-btn {
+  appearance: none;
+  background: rgba(20, 32, 52, 0.9);
+  border: none;
+  color: #cfe3ff;
+  font-family: 'Pixellari', monospace;
+  font-size: s(8px);
+  padding: s(5px) s(8px);
+  cursor: pointer;
+  transition: background 0.1s linear, color 0.1s linear;
+
+  &:hover {
+    background: rgba(52, 84, 130, 0.95);
+    color: #ffffff;
+  }
+
+  &--active {
+    background: rgba(72, 120, 184, 0.95);
+    color: #ffffff;
+  }
+}
+
+// [HORIZON-ADD] typewriter welcome line
+.lobby__welcome {
+  position: absolute;
+  top: s(22px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  font-family: 'Pixellari', monospace;
+  font-size: s(13px);
+  color: #ffffff;
+  text-shadow: 0 s(2px) 0 rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  transition: opacity 0.2s linear;
+
+  &--collapsed {
+    opacity: 0;
+  }
+}
+
+.lobby__welcome-cursor {
+  animation: welcome-cursor-blink 0.8s steps(1) infinite;
+}
+
+@keyframes welcome-cursor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+// [HORIZON-ADD] preference warnings
+.lobby__issues {
+  position: absolute;
+  bottom: s(20px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  max-width: 70%;
+  display: flex;
+  flex-direction: column;
+  gap: s(4px);
+  transition: opacity 0.2s linear;
+
+  &--collapsed {
+    opacity: 0;
+  }
+}
+
+.lobby__issues-item {
+  font-family: 'Pixellari', monospace;
+  font-size: s(9px);
+  color: #ffd9d9;
+  background: rgba(60, 10, 10, 0.78);
+  border: s(1px) solid rgba(255, 120, 120, 0.45);
+  padding: s(4px) s(8px);
+  text-align: center;
+}
+
+// [HORIZON-ADD] settings quick button (language badge)
+.lobby__settings-btn {
+  position: absolute;
+  right: s(8px);
+  bottom: s(8px);
+  z-index: 60;
+  appearance: none;
+  background: rgba(6, 10, 18, 0.72);
+  border: s(1px) solid rgba(120, 160, 200, 0.35);
+  color: #cfe3ff;
+  font-family: 'Pixellari', monospace;
+  font-size: s(9px);
+  padding: s(4px) s(8px);
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(52, 84, 130, 0.95);
+    color: #ffffff;
+  }
+}
+
+// [HORIZON-ADD] settings modal
+.lobby__modal-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lobby__modal {
+  width: s(190px);
+  background: rgba(10, 16, 28, 0.96);
+  border: s(1px) solid rgba(120, 160, 200, 0.5);
+  padding: s(8px) s(10px) s(6px) s(10px);
+  font-family: 'Pixellari', monospace;
+  color: #cfe3ff;
+}
+
+.lobby__modal-title {
+  font-size: s(11px);
+  color: #ffffff;
+  text-align: center;
+  border-bottom: s(1px) solid rgba(120, 160, 200, 0.35);
+  padding-bottom: s(4px);
+  margin-bottom: s(6px);
+}
+
+.lobby__modal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: s(8px);
+  margin-bottom: s(6px);
+
+  &--right {
+    justify-content: flex-end;
+  }
+}
+
+.lobby__modal-actions {
+  display: flex;
+  gap: s(4px);
 }
 
 .lobby__trait-wrapper {
