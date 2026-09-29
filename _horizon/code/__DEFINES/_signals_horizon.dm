@@ -3,6 +3,10 @@
 // horizon mechanics (projectile embedding, gunpoint, storage, wound messages,
 // two-handed wield check).
 
+// ~ Gun ammo HUD
+/// Sent to gun to update the ammo HUD overlay. (gun)
+#define COMSIG_UPDATE_AMMO_HUD "update_ammo_hud"
+
 // ~ Two-handed wield check
 /// Sent to a two-handed item to ask whether it is currently wielded with both hands.
 /// Returns COMPONENT_TWOHANDED_WIELDED when wielded.
