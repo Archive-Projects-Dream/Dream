@@ -1,5 +1,5 @@
 /obj/item/gun/ballistic/automatic
-	select = 3
+	var/select = 3
 	/// The sound effect for switching your gun back to semi-automatic
 	var/fireselector_semi = '_horizon/sound/weapons/guns/rifle/msafety.wav'
 	var/fireselector_semi_vary = FALSE
