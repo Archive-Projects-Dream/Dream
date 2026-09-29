@@ -429,6 +429,7 @@
 		if (bolt_type == BOLT_TYPE_OPEN && !bolt_locked)
 			chamber_round()
 		update_appearance()
+		SEND_SIGNAL(src, COMSIG_UPDATE_AMMO_HUD) // [HORIZON-ADD] ammo counter refresh
 		return TRUE
 	else
 		to_chat(user, span_warning("You cannot seem to get [src] out of your hands!"))
@@ -523,6 +524,7 @@
 		chamber_round()
 	ammo.update_appearance()
 	update_appearance()
+	SEND_SIGNAL(src, COMSIG_UPDATE_AMMO_HUD) // [HORIZON-ADD] ammo counter refresh
 	return TRUE
 
 /obj/item/gun/ballistic/proc/check_if_held(mob/user)
@@ -655,6 +657,7 @@
 		balloon_alert(user, "[num_unloaded] [cartridge_wording]\s unloaded")
 	playsound(user, eject_sound, eject_sound_volume, eject_sound_vary)
 	update_appearance()
+	SEND_SIGNAL(src, COMSIG_UPDATE_AMMO_HUD) // [HORIZON-ADD] ammo counter refresh
 
 /obj/item/gun/ballistic/examine(mob/user)
 	. = ..()

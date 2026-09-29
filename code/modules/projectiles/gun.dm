@@ -431,10 +431,11 @@
 	if(check_botched(user, target))
 		return NONE
 
-	var/obj/item/bodypart/other_hand = user.has_hand_for_held_index(user.get_inactive_hand_index()) //returns non-disabled inactive hands
-	if(weapon_weight == WEAPON_HEAVY && (user.get_inactive_held_item() || !other_hand))
-		balloon_alert(user, "use both hands!")
-		return ITEM_INTERACT_BLOCKING
+	// [HORIZON-EDIT] One-handed firing of heavy guns is allowed now. The old
+	// hard block backfired while wielding: /datum/component/two_handed parks
+	// an /obj/item/offhand dummy in the inactive hand, so the check triggered
+	// exactly when the gun WAS held with both hands. Horizon's _gun.dm
+	// applies a spread_unwielded penalty instead (Shiptest-style).
 	//DUAL (or more!) WIELDING
 	var/bonus_spread = 0
 	var/loop_counter = 0

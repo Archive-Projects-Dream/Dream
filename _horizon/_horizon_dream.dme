@@ -63,6 +63,7 @@
 #include "code\modules\projectiles\ammunition\ballistic\shotgun.dm"
 #include "code\modules\projectiles\ammunition\energy\energy.dm"
 #include "code\modules\projectiles\attachments\_attachment.dm"
+#include "code\modules\projectiles\attachments\laser_sight.dm"
 #include "code\modules\projectiles\boxes_magazines\_ammo_box.dm"
 #include "code\modules\projectiles\boxes_magazines\_magazine.dm"
 #include "code\modules\projectiles\boxes_magazines\ammo_stack.dm"

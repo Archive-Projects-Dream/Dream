@@ -50,9 +50,16 @@
 	suppressor_x_offset = 13
 	bolt_type = BOLT_TYPE_LOCKING
 	slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE
+	// Shiptest-style: one-handed fire allowed, but inaccurate without
+	// a two-handed grip (offset by a laser sight attachment).
+	spread_unwielded = 12
 
 // DOUBLE BARRELED SHOTGUN
-/obj/item/gun/ballistic/shotgun/hd_gun/doublebarrel
+// [HORIZON-EDIT] Reparented from /obj/item/gun/ballistic/shotgun/hd_gun to
+// /obj/item/gun/ballistic/shotgun/doublebarrel/hd_gun so it inherits the
+// double barrel's 2-shell dual tube, sawability and WEAPON_MEDIUM weight
+// (the old path wrongly inherited the 4-shell pump tube + WEAPON_HEAVY).
+/obj/item/gun/ballistic/shotgun/doublebarrel/hd_gun
 	pb_knockback = 0
 	empty_icon_state = FALSE
 	bolt_type = BOLT_TYPE_BREAK_ACTION
@@ -61,13 +68,38 @@
 	semi_auto = TRUE
 	cylinder_shows_open = TRUE
 	cylinder_shows_ammo_count = TRUE
+	cylinder_wording = "barrel"
+	wielded_inhand_state = FALSE
+	// horizon look & feel (was inherited from shotgun/hd_gun before the repath)
+	worn_icon = '_horizon/icons/obj/items/guns/worn/back.dmi'
+	worn_icon_state = "shotgun"
+	equip_sound = '_horizon/sound/weapons/guns/weap_away.ogg'
+	drop_sound = '_horizon/sound/weapons/guns/drop_heavygun.wav'
+	pickup_sound = '_horizon/sound/weapons/guns/shotgun/shotgun_draw.wav'
+	fire_sound = '_horizon/sound/weapons/guns/shotgun/shotgun.wav'
+	suppressed_sound = list('_horizon/sound/weapons/guns/shotgun/countryforold1.wav', '_horizon/sound/weapons/guns/shotgun/countryforold2.wav')
+	lock_back_sound = '_horizon/sound/weapons/guns/shotgun/db_in.wav'
+	bolt_drop_sound = '_horizon/sound/weapons/guns/shotgun/db_out.wav'
+	load_sound = '_horizon/sound/weapons/guns/shotgun/db_load.wav'
+	slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE
+	gunshot_animation_information = list(
+		"pixel_x" = 24, \
+		"pixel_y" = 1, \
+		"inactive_wben_suppressed" = TRUE, \
+	)
+	recoil_animation_information = list(
+		"recoil_angle_upper" = -15, \
+		"recoil_angle_lower" = -30, \
+	)
 
 // The legendary
-/obj/item/gun/ballistic/shotgun/hd_gun/doublebarrel/bobox
+/obj/item/gun/ballistic/shotgun/doublebarrel/hd_gun/bobox
 	name = "\"Палач рока\""
 	desc = "\"Фирменный\" дробовик с двумя стволами. Не в бровь, а в глаз."
 	icon = '_horizon/icons/obj/items/guns/shotgun.dmi'
 	inhand_icon_state = "bobox"
+	lefthand_file = '_horizon/icons/obj/items/guns/inhands/shotgun_lefthand.dmi'
+	righthand_file = '_horizon/icons/obj/items/guns/inhands/shotgun_righthand.dmi'
 	base_icon_state = "bobox"
 	icon_state = "bobox"
 	worn_icon_state = "bobox"

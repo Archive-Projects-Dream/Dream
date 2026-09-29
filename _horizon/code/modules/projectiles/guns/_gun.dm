@@ -47,6 +47,12 @@
 	/// NO FULL AUTO IN BUILDINGS!
 	var/full_auto = FALSE
 
+	// ~SHIPTEST-STYLE UNWIELDED SPREAD
+	/// Extra random spread when firing this gun without a two-handed grip
+	/// (wielded_inhand_state guns). 0 = no penalty. Used with the laser sight
+	/// attachment, which reduces both spread and spread_unwielded.
+	var/spread_unwielded = 0
+
 	// Folding stock variables
 	/// Allows the gun's stock to be folded and unfolded.
 	var/foldable = FALSE
@@ -252,10 +258,11 @@
 	if(!can_shoot())
 		shoot_with_empty_chamber(shooter)
 		return NONE
-	var/obj/item/bodypart/other_hand = shooter.has_hand_for_held_index(shooter.get_inactive_hand_index())
-	if(weapon_weight == WEAPON_HEAVY && (shooter.get_inactive_held_item() || !other_hand))
-		balloon_alert(shooter, "use both hands!")
-		return NONE
+	// [HORIZON-EDIT] Heavy guns can be fired one-handed now. The old hard
+	// block backfired while wielding: the two-handed component parks an
+	// /obj/item/offhand dummy in the inactive hand, so "use both hands!"
+	// triggered exactly when the gun WAS held with both hands. Unwielded
+	// firing is penalized through spread_unwielded in process_fire instead.
 	return TRUE
 
 /// Signal handler for COMSIG_AUTOFIRE_SHOT. The signature must match upstream's
@@ -369,3 +376,21 @@
 	name = "Toggle Stock"
 	button_icon = '_horizon/icons/hud/actions.dmi'
 	button_icon_state = "stock"
+
+// =============================================================================
+// SHIPTEST-STYLE UNWIELDED SPREAD
+// Two-handed guns (wielded_inhand_state) can always be fired one-handed, but
+// get extra random spread unless they are wielded (TRAIT_WIELDED is granted by
+// /datum/component/two_handed while wielded). The laser sight attachment
+// reduces both spread and spread_unwielded to offset this.
+// =============================================================================
+
+/obj/item/gun/process_fire(atom/target, mob/living/user, message = TRUE, params = null, zone_override = "", bonus_spread = 0)
+	if(spread_unwielded && !HAS_TRAIT(src, TRAIT_WIELDED))
+		bonus_spread += rand(0, spread_unwielded)
+	return ..()
+
+/obj/item/gun/process_burst(mob/living/user, atom/target, message = TRUE, params = null, zone_override = "", random_spread = 0, burst_spread_mult = 0, iteration = 0)
+	if(spread_unwielded && !HAS_TRAIT(src, TRAIT_WIELDED))
+		random_spread += rand(0, spread_unwielded)
+	return ..()

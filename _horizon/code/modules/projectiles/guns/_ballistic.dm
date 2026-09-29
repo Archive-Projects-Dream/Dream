@@ -202,7 +202,9 @@
 			if(chambered && !chambered.loaded_projectile)
 				chambered.forceMove(drop_location())
 				chambered = null
-			var/num_loaded = magazine?.attackby(A, user, params, TRUE)
+			// [HORIZON-EDIT] upstream's ammo_box attackby() was replaced by
+			// try_load(); the old call silently loaded nothing.
+			var/num_loaded = magazine?.try_load(user, A, silent = TRUE)
 			if(num_loaded)
 				//to_chat(user, span_notice("I load [num_loaded] [cartridge_wording]\s into [src]."))
 				playsound(src, load_sound, load_sound_volume, load_sound_vary)
@@ -210,6 +212,7 @@
 					chamber_round()
 				A.update_appearance()
 				update_appearance()
+				SEND_SIGNAL(src, COMSIG_UPDATE_AMMO_HUD)
 			return
 	if(istype(A, /obj/item/suppressor))
 		var/obj/item/suppressor/suppressor = A
@@ -248,13 +251,50 @@
 /obj/item/gun/ballistic/attack_hand(mob/user, list/modifiers)
 	if(cylinder_open && user.is_holding(src))
 		add_fingerprint(user)
-		var/obj/item/casing = magazine?.get_round(FALSE)
+		var/obj/item/ammo_casing/casing = pull_cylinder_round()
 		if(casing)
 			casing.forceMove(drop_location())
 			user.put_in_hands(casing)
 			update_appearance()
 			return
 	return ..()
+
+// [HORIZON-EDIT] Unloading break actions. Nevado pulled rounds out of an open
+// cylinder from attack_hand, but in this codebase attack_hand never fires for
+// items you are already holding (clicking your hand slot routes to attack_self
+// instead), which made revolvers and break action guns impossible to unload.
+// attack_self while the cylinder is open now pulls a round; with the cylinder
+// closed it keeps the normal meaning (rack / hammer / empty magazine eject).
+/obj/item/gun/ballistic/attack_self(mob/living/user)
+	if(cylinder_open && user.is_holding(src))
+		var/obj/item/ammo_casing/casing = pull_cylinder_round()
+		if(casing)
+			add_fingerprint(user)
+			casing.forceMove(drop_location())
+			user.put_in_hands(casing)
+			update_appearance()
+			SEND_SIGNAL(src, COMSIG_UPDATE_AMMO_HUD)
+			return TRUE
+	return ..()
+
+/// Takes the front-most round out of an open cylinder / internal magazine
+/// without rotating it. The round is removed from the magazine by forceMove()
+/// (Exited hook). Returns null when everything has been pulled.
+/obj/item/gun/ballistic/proc/pull_cylinder_round()
+	if(!magazine)
+		return null
+	var/list/ammo = magazine.stored_ammo
+	for(var/i in 1 to length(ammo))
+		var/obj/item/ammo_casing/round = ammo[i]
+		if(ispath(round)) // lazy map-spawned casings
+			round = new round(magazine)
+			ammo[i] = round
+		if(QDELETED(round))
+			continue // empty cylinder chamber (null slot)
+		if(chambered == round)
+			chambered = null
+		return round
+	return null
 
 /obj/item/gun/ballistic/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
 	if(!isliving(user) || !user.Adjacent(src) || HAS_TRAIT(user, TRAIT_INCAPACITATED))
@@ -335,10 +375,32 @@
 	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
 		if(!magazine)
 			return
-		if(isnull(spin_cylinder) || spin_cylinder)
-			chambered = magazine.get_round(TRUE)
-		else if(length(magazine.stored_ammo))
-			chambered = magazine.stored_ammo[1]
+		var/list/ammo = magazine.stored_ammo
+		if(istype(magazine, /obj/item/ammo_box/magazine/internal/cylinder))
+			// Cylinders rotate natively and keep the round under the hammer
+			// inside the magazine (spent casings stay in until pulled out).
+			// Upstream's get_round() ignores the keep argument - the rotation
+			// is what matters here.
+			if(isnull(spin_cylinder) || spin_cylinder)
+				chambered = magazine.get_round()
+			else if(length(ammo))
+				chambered = ammo[1]
+			else
+				chambered = null
+		else if(length(ammo))
+			// Plain break-action magazines (e.g. the double barrel's dual
+			// tube) don't rotate on their own. Emulate Nevado's
+			// get_round(keep = TRUE): take the last round and move it to the
+			// front, under the hammer. The round stays in the magazine.
+			var/obj/item/ammo_casing/rotated = ammo[length(ammo)]
+			if(ispath(rotated))
+				rotated = new rotated(magazine)
+				ammo[length(ammo)] = rotated
+			ammo -= rotated
+			ammo.Insert(1, rotated)
+			chambered = rotated
+		else
+			chambered = null
 		if(replace_new_round && chambered)
 			magazine.give_round(new chambered.type)
 		return
@@ -349,6 +411,14 @@
 /obj/item/gun/ballistic/handle_chamber(mob/living/user, empty_chamber = TRUE, from_firing = TRUE, chamber_next_round = TRUE)
 	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
 		return
+	return ..()
+
+///Loading internal magazines: break actions (revolvers, double barrels) can
+///only be fed with the cylinder/barrel broken open, like in Nevado.
+/obj/item/gun/ballistic/load_gun(obj/item/ammo, mob/living/user)
+	if(bolt_type == BOLT_TYPE_BREAK_ACTION && !cylinder_open)
+		balloon_alert(user, "[cylinder_wording] is closed!")
+		return FALSE
 	return ..()
 
 ///Eject the magazine. Supports ejecting straight into a specific hand slot
@@ -389,6 +459,7 @@
 	if(display_message && !tac_load)
 		to_chat(user, span_notice("I pull the [magazine_wording] out of [src]."))
 	update_appearance()
+	SEND_SIGNAL(src, COMSIG_UPDATE_AMMO_HUD) // [HORIZON-ADD] ammo counter refresh
 
 ///After firing a break action gun the hammer resets, so every shot needs a new
 ///trigger pull (single action: re-cock by hand; double action: auto-cocks via
