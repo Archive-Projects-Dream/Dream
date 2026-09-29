@@ -35,11 +35,9 @@
         var/obj/projectile/exam_proj = GLOB.proj_by_path_key[projectile_type]
         if(!istype(exam_proj) || (pellets == 0))
                 return readout
-        readout += span_notice("<b>Projectile Minimum Force:</b> [exam_proj.damage]")
-        readout += span_notice("<b>Projectile Maximum Force:</b> [exam_proj.damage]")
+        readout += span_notice("<b>Projectile Force:</b> [exam_proj.damage]")
         if(exam_proj.wound_bonus)
                 readout += span_notice("<b>Projectile Wound Bonus:</b> [exam_proj.wound_bonus]")
-        readout += span_notice("<b>Projectile Sharpness:</b> [capitalize_like_old_man(translate_sharpness(exam_proj.get_sharpness()))]")
         return readout.Join("\n")
 
 /obj/item/ammo_casing/proc/update_icon_world()
