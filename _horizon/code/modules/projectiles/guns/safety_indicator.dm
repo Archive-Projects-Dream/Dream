@@ -9,35 +9,49 @@
 /// Positioned just above the drop/throw button (ui_drop_throw area).
 /// Clicking it toggles the safety (same as right-click on the gun).
 /datum/action/item_action/toggle_safety
-        name = "Toggle Safety"
-        button_icon = '_horizon/icons/ui/gun_actions.dmi'
-        button_icon_state = "safety1"
-        default_button_position = "EAST-1:28,SOUTH+1:27"
+	name = "Toggle Safety"
+	button_icon = '_horizon/icons/ui/gun_actions.dmi'
+	button_icon_state = "safety1"
+	default_button_position = "EAST-1:28,SOUTH+1:27"
 
 /datum/action/item_action/toggle_safety/New(Target)
-        . = ..()
-        update_icon()
+	. = ..()
+	update_icon()
 
 /datum/action/item_action/toggle_safety/proc/update_icon()
-        if(!target || !istype(target, /obj/item/gun))
-                return
-        var/obj/item/gun/G = target
-        if(G.safety_flags & GUN_SAFETY_ENABLED)
-                button_icon_state = "safety1"
-        else
-                button_icon_state = "safety0"
-        build_all_button_icons()
+	if(!target || !istype(target, /obj/item/gun))
+		return
+	var/obj/item/gun/G = target
+	if(G.safety_flags & GUN_SAFETY_ENABLED)
+		button_icon_state = "safety1"
+	else
+		button_icon_state = "safety0"
+	build_all_button_icons()
 
 /// When clicked, toggle the gun's safety.
 /datum/action/item_action/toggle_safety/Trigger(mob/clicker, trigger_flags)
-        . = ..()
-        if(.)
-                return
-        if(!target || !istype(target, /obj/item/gun))
-                return
-        var/obj/item/gun/G = target
-        if(!(G.safety_flags & GUN_SAFETY_HAS_SAFETY))
-                return
-        G.toggle_safety(clicker)
-        update_icon()
-        return TRUE
+	if(!(trigger_flags & TRIGGER_FORCE_AVAILABLE) && !IsAvailable(feedback = TRUE))
+		return FALSE
+	if(SEND_SIGNAL(src, COMSIG_ACTION_TRIGGER, src) & COMPONENT_ACTION_BLOCK_TRIGGER)
+		return FALSE
+	if(!target || !istype(target, /obj/item/gun))
+		return FALSE
+	var/obj/item/gun/G = target
+	if(!(G.safety_flags & GUN_SAFETY_HAS_SAFETY))
+		return FALSE
+	G.toggle_safety(clicker)
+	update_icon()
+	return TRUE
+
+// =============================================================================
+// item_action_slot_check override for guns
+// =============================================================================
+// Upstream's item_action_slot_check() only grants actions if slot & slot_flags.
+// Guns have slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE, so actions
+// never get granted when the gun is held in hands (ITEM_SLOT_HANDS).
+// This override forces all gun item actions to be granted when in hands.
+
+/obj/item/gun/item_action_slot_check(slot, mob/user, datum/action/action)
+	if(slot & ITEM_SLOT_HANDS)
+		return TRUE
+	return ..()
