@@ -240,24 +240,19 @@
                         return
         return ..()
 
-/obj/item/gun/ballistic/MouseDrop(atom/over, src_location, over_location, src_control, over_control, params)
-        . = ..()
-        if(!isliving(usr) || !usr.Adjacent(src) || HAS_TRAIT(usr, TRAIT_INCAPACITATED))
+/obj/item/gun/ballistic/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
+        if(!isliving(user) || !user.Adjacent(src) || HAS_TRAIT(user, TRAIT_INCAPACITATED))
                 return
-        var/mob/living/user = usr
         if(istype(over, /atom/movable/screen/inventory/hand))
                 if(bolt_type == BOLT_TYPE_BREAK_ACTION)
                         toggle_cylinder_open(user)
                 else if(!internal_magazine && magazine)
                         var/atom/movable/screen/inventory/hand/hand_slot = over
                         eject_magazine(user, hand_index = hand_slot.held_index)
-        // Dragging the gun onto the player themselves when the gun is on
-        // the ground (not in hands) and has a magazine = eject the magazine
-        // into the player's hand.
         else if(over == user && !user.is_holding(src) && isturf(loc))
                 if(!internal_magazine && magazine)
                         eject_magazine(user)
-
+/*
 /obj/item/gun/ballistic/before_can_shoot_checks(mob/living/user, autofire_start = FALSE)
         . = ..()
         //double action revolvers should automatically get cocked when firing
@@ -464,7 +459,7 @@
         //if(user)
         //      to_chat(user, span_notice("I [cylinder_open ? "open" : "close"] [src]'s [cylinder_wording]"))
         update_appearance()
-
+*/
 ///Gives us info about ammo count, open cylinder, etc
 /obj/item/gun/ballistic/proc/chamber_examine(mob/user)
         . = list()
