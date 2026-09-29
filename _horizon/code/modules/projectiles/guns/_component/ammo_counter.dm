@@ -159,32 +159,61 @@
 
 /obj/item/attachment/ammo_counter
 	name = "ammunition counter"
-	desc = "A computerized ammunition tracker for use on conventional firearms. Shows remaining ammo as a HUD overlay."
+	desc = "A computerized ammunition tracker for use on conventional firearms. Includes a small toggle for telling the user when ammo is depleted. Capable of mounting on both a railing or a scope, depending on the user's preference."
 	icon = '_horizon/icons/obj/items/guns/attachments.dmi'
 	icon_state = "ammo_counter"
 	w_class = WEIGHT_CLASS_TINY
 
-/// Attach to ballistic gun via item_interaction (click gun with attachment).
-/obj/item/gun/ballistic/item_interaction(mob/living/user, obj/item/tool, list/modifiers)
-	. = ..()
-	if(.)
-		return
+	attach_features_flags = ATTACH_REMOVABLE_HAND|ATTACH_TOGGLE
+	slot = ATTACHMENT_SLOT_SCOPE
+	pixel_shift_x = 0
+	pixel_shift_y = 0
 
-	// Ammo counter attachment
-	if(istype(tool, /obj/item/attachment/ammo_counter))
-		if(!user.is_holding(src))
-			balloon_alert(user, "hold the gun!")
-			return ITEM_INTERACT_BLOCKING
-		var/datum/component/ammo_hud/existing = GetComponent(/datum/component/ammo_hud)
-		if(existing)
-			balloon_alert(user, "already has a counter!")
-			return ITEM_INTERACT_BLOCKING
-		if(!user.transferItemToLoc(tool, src))
-			balloon_alert(user, "can't attach!")
-			return ITEM_INTERACT_BLOCKING
-		AddComponent(/datum/component/ammo_hud)
-		var/datum/component/ammo_hud/our_counter = GetComponent(/datum/component/ammo_hud)
-		our_counter.wake_up(source = src, user = user, slot = ITEM_SLOT_HANDS)
-		balloon_alert(user, "ammo counter attached")
-		playsound(src, 'sound/items/click.ogg', 25, TRUE)
-		return ITEM_INTERACT_SUCCESS
+	/// Whether the empty-magazine alarm beep is enabled (uses the gun's empty_alarm).
+	var/alarm_enabled = TRUE
+
+/// Attaching to a ballistic gun adds the ammo HUD component to it.
+/obj/item/attachment/ammo_counter/apply_attachment(obj/item/gun/gun, mob/user)
+	. = ..()
+	if(!istype(gun, /obj/item/gun/ballistic))
+		to_chat(user, span_notice("[gun] has no magazine for [src] to track!"))
+		return FALSE
+	if(gun.GetComponent(/datum/component/ammo_hud))
+		to_chat(user, span_notice("[gun] already has an ammo counter installed!"))
+		return FALSE
+	gun.AddComponent(/datum/component/ammo_hud)
+	gun.GetComponent(/datum/component/ammo_hud).wake_up(source = gun, user = user, slot = ITEM_SLOT_HANDS)
+	return TRUE
+
+/// Detaching removes the ammo HUD component again.
+/obj/item/attachment/ammo_counter/remove_attachment(obj/item/gun/gun, mob/user)
+	. = ..()
+	var/datum/component/ammo_hud/old_counter = gun.GetComponent(/datum/component/ammo_hud)
+	if(old_counter)
+		old_counter.turn_off()
+		qdel(old_counter)
+		return TRUE
+
+/// In-hand use: switch between the scope and rail mounting slots.
+/obj/item/attachment/ammo_counter/attack_self(mob/user)
+	. = ..()
+	playsound(src, 'sound/items/click.ogg', 25)
+	if(slot == initial(slot))
+		slot = ATTACHMENT_SLOT_RAIL
+	else
+		slot = initial(slot)
+	SEND_SIGNAL(src, COMSIG_ATTACHMENT_CHANGE_SLOT, slot)
+	to_chat(user, span_notice("You adjust [src] to fit on a gun's [slot]."))
+
+/// Toggle action button: turn the gun's empty-magazine alarm on/off.
+/obj/item/attachment/ammo_counter/toggle_attachment(obj/item/gun/gun, mob/user)
+	. = ..()
+	var/obj/item/gun/ballistic/ballistic_gun = gun
+	if(!istype(ballistic_gun))
+		return
+	// If the gun comes with an alarm by default, don't touch it.
+	if(initial(ballistic_gun.empty_alarm))
+		return
+	alarm_enabled = !alarm_enabled
+	ballistic_gun.empty_alarm = alarm_enabled
+	to_chat(user, span_notice("You turn [src]'s alarm [alarm_enabled ? "on" : "off"]."))

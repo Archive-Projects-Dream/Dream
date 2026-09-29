@@ -144,10 +144,10 @@
 /datum/component/attachment_holder/proc/do_attach(obj/item/attachment, mob/user, bypass_checks)
 	var/slot = SEND_SIGNAL(attachment, COMSIG_ATTACHMENT_GET_SLOT)
 	slot = attachment_slot_from_bflag(slot)
-	if(!(is_type_in_typecache(attachment,valid_types)))
+	if(!(is_type_in_typecache(attachment, valid_types)))
 		to_chat(user, span_notice("[attachment] is not a valid attachment for this [parent]!"))
 		return
-	if(!slot_room[slot])
+	if(!slot_room || !slot_room[slot])
 		to_chat(user, span_notice("[parent] does not contain room for [attachment]!"))
 		return
 	slot_room[slot]--
@@ -162,7 +162,7 @@
 	slot = attachment_slot_from_bflag(slot)
 	. = SEND_SIGNAL(attachment, COMSIG_ATTACHMENT_DETACH, parent, user)
 	if(.)
-		if(slot in slot_room)
+		if(slot_room && (slot in slot_room))
 			slot_room[slot]++
 		attachments -= attachment
 		var/atom/parent = src.parent

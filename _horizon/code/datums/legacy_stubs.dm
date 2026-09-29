@@ -16,19 +16,8 @@
 /turf/proc/pollute_turf(datum/pollutant/pollutant, amount = 1)
 	return
 
-// =============================================================================
-// Smoke effect system (legacy smoke_spread/bad)
-// Upstream renamed /datum/effect_system/smoke_spread to
-// /datum/effect_system/fluid_spread/smoke. We alias the legacy path so
-// horizon's launcher.dm compiles. Upstream's /datum/effect_system already
-// has a start() proc, so we only add set_up() as a stub.
-// =============================================================================
-
-/datum/effect_system/smoke_spread
-/datum/effect_system/smoke_spread/bad
-
-/datum/effect_system/smoke_spread/proc/set_up(amount = 5, silent = FALSE, turf/location)
-	return
+// (The legacy /datum/effect_system/smoke_spread stubs were removed -
+// launcher.dm now uses upstream's do_smoke() / fluid_spread smoke directly.)
 
 // =============================================================================
 // Ammo casing stubs for legacy ammo types

@@ -30,9 +30,8 @@
 
 /// When clicked, toggle the gun's safety.
 /datum/action/item_action/toggle_safety/Trigger(mob/clicker, trigger_flags)
-	if(!(trigger_flags & TRIGGER_FORCE_AVAILABLE) && !IsAvailable(feedback = TRUE))
-		return FALSE
-	if(SEND_SIGNAL(src, COMSIG_ACTION_TRIGGER, src) & COMPONENT_ACTION_BLOCK_TRIGGER)
+	// Run upstream's availability + COMSIG_ACTION_TRIGGER checks first.
+	if(!..())
 		return FALSE
 	if(!target || !istype(target, /obj/item/gun))
 		return FALSE

@@ -30,6 +30,8 @@
 
 /obj/item/gun/ballistic/update_icon_state()
 	. = ..()
+	if(empty_icon_state && !chambered)
+		icon_state = "[icon_state]_empty"
 	if((bolt_type == BOLT_TYPE_BREAK_ACTION) && uncocked_icon_state && bolt_locked)
 		icon_state = "[icon_state]_uncocked"
 	if(cylinder_open && cylinder_shows_open)
@@ -37,7 +39,13 @@
 
 /obj/item/gun/ballistic/update_overlays()
 	. = ..()
-	if(suppressed)
+	// Fire selector icon (upstream automatics like the C-20r use this).
+	if(selector_switch_icon)
+		if(burst_fire_selection)
+			. += "[base_icon_state]_burst"
+		else
+			. += "[base_icon_state]_semi"
+	if(suppressed && can_unsuppress) // integrated suppressors don't get an overlay
 		var/image/suppressor_overlay = image(icon, "[base_icon_state]_suppressor")
 		if(suppressor_x_offset)
 			suppressor_overlay.pixel_x = suppressor_x_offset
@@ -95,10 +103,14 @@
 	if(istype(magazine))
 		. += magazine.get_carry_weight()
 
-/obj/item/gun/ballistic/wrench_act(mob/living/user, obj/item/tool)
-	return
+// wrench_act() intentionally has no horizon override: upstream's version handles
+// caliber modification for can_modify_ammo guns.
 
 /obj/item/gun/ballistic/screwdriver_act(mob/living/user, obj/item/tool)
+	// Upstream uses screwdrivers to pry out firing pins - keep that working for
+	// guns that aren't caliber-modifiable.
+	if(!can_modify_ammo)
+		return ..()
 	if(!user.is_holding(src))
 		to_chat(user, span_warning("I need to hold [src] to modify it."))
 		return TRUE
@@ -271,82 +283,82 @@
 	//      to_chat(user, span_notice("I [cylinder_open ? "open" : "close"] [src]'s [cylinder_wording]"))
 	update_appearance()
 
-/*
+// =============================================================================
+// RESTORED Nevado break-action / cylinder gunplay (was commented out).
+// These versions are adapted to the current upstream core: where upstream core
+// already provides equivalent behaviour we chain into it with ..(), and only
+// the break-action specifics live here.
+// =============================================================================
+
+///Double action revolvers automatically get cocked when firing
 /obj/item/gun/ballistic/before_can_shoot_checks(mob/living/user, autofire_start = FALSE)
 	. = ..()
-	//double action revolvers should automatically get cocked when firing
 	if((bolt_type == BOLT_TYPE_BREAK_ACTION) && !cylinder_open && semi_auto && bolt_locked)
 		bolt_locked = FALSE
 		if(!autofire_start)
-			chamber_round()
+			chamber_round(TRUE)
 		update_appearance()
 
 /obj/item/gun/ballistic/can_shoot()
-	. = chambered
+	. = ..() // upstream: chambered?.loaded_projectile
+	if(!.)
+		return .
+	// You can't fire a break action gun with an open cylinder, and the hammer
+	// being down (bolt_locked) blocks firing until it is cocked again.
 	if(cylinder_open)
 		return FALSE
 	if((bolt_type == BOLT_TYPE_BREAK_ACTION) && bolt_locked)
 		return FALSE
+	return TRUE
 
-/obj/item/gun/ballistic/drop_bolt(mob/user)
-	playsound(src, bolt_drop_sound, bolt_drop_sound_volume, bolt_drop_sound_vary)
-	//if(user)
-	//      to_chat(user, span_notice("I drop the [bolt_wording] of [src]."))
-	chamber_round()
-	bolt_locked = FALSE
-	update_appearance()
-
-/obj/item/gun/ballistic/rack(mob/user, silent_rack = FALSE)
-	switch(bolt_type)
-		//If there's no bolt, nothing to rack
-		if(BOLT_TYPE_NO_BOLT)
+///Cock / decock the hammer on break action guns; behave like upstream otherwise.
+/obj/item/gun/ballistic/rack(mob/user = null)
+	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
+		if(cylinder_open)
+			if(user)
+				balloon_alert(user, "[cylinder_wording] is open!")
 			return
-		if(BOLT_TYPE_OPEN)
-			//If it's an open bolt, racking again would do nothing
-			if(!bolt_locked)
-				if(user)
-					to_chat(user, span_notice("[src]'s [bolt_wording] is already racked!"))
-				return
+		if(bolt_locked)
 			bolt_locked = FALSE
 			chamber_round(TRUE)
-			//if(user)
-			//      to_chat(user, span_notice("I rack the [bolt_wording] of [src]."))
-			//sound_hint()
-			update_appearance()
-		//Break actions only need racking if they are well, single action revolvers
-		if(BOLT_TYPE_BREAK_ACTION)
-			if(bolt_locked)
-				//if(user)
-				//      to_chat(user, span_notice("I cock the [bolt_wording] of [src]."))
-				chamber_round()
-			//else if(user)
-			//      to_chat(user, span_notice("I decock the [bolt_wording] of [src]."))
-			//sound_hint()
-			if(bolt_locked)
-				playsound(src, rack_sound, rack_sound_volume, rack_sound_vary)
-			else
-				playsound(src, unrack_sound, unrack_sound_volume, unrack_sound_vary)
-			bolt_locked = !bolt_locked
-			update_appearance()
+			playsound(src, rack_sound, rack_sound_volume, rack_sound_vary)
 		else
-			//if(user)
-			//      to_chat(user, span_notice("I rack the [bolt_wording] of [src]."))
-			process_chamber(!chambered, FALSE)
-			//sound_hint()
-			if(bolt_type == BOLT_TYPE_LOCKING && !chambered)
-				bolt_locked = TRUE
-				playsound(src, lock_back_sound, lock_back_sound_volume, lock_back_sound_vary)
-			else if(!silent_rack)
-				playsound(src, rack_sound, rack_sound_volume, rack_sound_vary)
-			update_appearance()
+			bolt_locked = TRUE
+			playsound(src, unrack_sound, unrack_sound_volume, unrack_sound_vary)
+		update_appearance()
+		return
+	return ..()
 
+///Chamber a round. Break action guns rotate their cylinder instead of running
+///upstream's magazine chambering, and the round stays inside the cylinder.
+/obj/item/gun/ballistic/chamber_round(spin_cylinder = TRUE, replace_new_round)
+	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
+		if(!magazine)
+			return
+		if(isnull(spin_cylinder) || spin_cylinder)
+			chambered = magazine.get_round(TRUE)
+		else if(length(magazine.stored_ammo))
+			chambered = magazine.stored_ammo[1]
+		if(replace_new_round && chambered)
+			magazine.give_round(new chambered.type)
+		return
+	return ..()
+
+///Break action guns keep their spent casings in the cylinder until it is opened
+///and they are pulled out by hand (see attack_hand below).
+/obj/item/gun/ballistic/handle_chamber(mob/living/user, empty_chamber = TRUE, from_firing = TRUE, chamber_next_round = TRUE)
+	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
+		return
+	return ..()
+
+///Eject the magazine. Supports ejecting straight into a specific hand slot
+///(drag & drop the gun onto a hand slot) and tactical reloads.
 /obj/item/gun/ballistic/eject_magazine(mob/user, \
-									display_message = TRUE, \
-									obj/item/ammo_box/magazine/tac_load = null, \
-									hand_index = null)
+	display_message = TRUE, \
+	obj/item/ammo_box/magazine/tac_load = null, \
+	hand_index = null)
 	if(bolt_type == BOLT_TYPE_OPEN)
 		chambered = null
-	//sound_hint()
 	if(magazine.ammo_count())
 		playsound(src, eject_sound, eject_sound_volume, eject_sound_vary)
 	else
@@ -363,108 +375,29 @@
 		magazine = null
 	if(old_mag)
 		if(user && iscarbon(user))
-			var/mob/living/carbon/C = user
+			var/mob/living/carbon/old_mag_receiver = user
 			// If the gun is wielded two-handed, unwield first to free
 			// the offhand so the magazine can go into the player's hand.
-			var/datum/component/two_handed/TH = GetComponent(/datum/component/two_handed)
-			if(TH?.wielded)
-				TH.unwield(C)
+			var/datum/component/two_handed/two_handed_component = GetComponent(/datum/component/two_handed)
+			if(two_handed_component?.wielded)
+				two_handed_component.unwield(old_mag_receiver)
 			if(!hand_index)
-				C.put_in_hands(old_mag)
+				old_mag_receiver.put_in_hands(old_mag)
 			else
-				C.put_in_hand(old_mag, hand_index)
+				old_mag_receiver.put_in_hand(old_mag, hand_index)
 		old_mag.update_appearance()
 	if(display_message && !tac_load)
 		to_chat(user, span_notice("I pull the [magazine_wording] out of [src]."))
 	update_appearance()
 
-/obj/item/gun/ballistic/fire_gun(atom/target, mob/living/user, flag, params)
-	prefire_empty_checks()
-	return ..()
-
-/obj/item/gun/ballistic/on_autofire_start(mob/living/shooter)
-	prefire_empty_checks()
-	return ..()
-
-/obj/item/gun/ballistic/do_autofire(datum/source, atom/target, mob/living/shooter, params)
-	prefire_empty_checks()
-	return ..()
-
-/obj/item/gun/ballistic/process_fire(atom/target, mob/living/user, message, params, zone_override, bonus_spread)
+///After firing a break action gun the hammer resets, so every shot needs a new
+///trigger pull (single action: re-cock by hand; double action: auto-cocks via
+///before_can_shoot_checks above).
+/obj/item/gun/ballistic/postfire_empty_checks(last_shot_succeeded)
 	. = ..()
-	postfire_empty_checks(.)
-
-/obj/item/gun/ballistic/process_burst(mob/living/user, atom/target, message, params, zone_override, sprd, randomized_gun_spread, randomized_bonus_spread, rand_spr, iteration)
-	. = ..()
-	postfire_empty_checks(.)
-
-/obj/item/gun/ballistic/shoot_with_empty_chamber(mob/living/user as mob|obj)
-	if(ismob(user) && dry_fire_message)
-		to_chat(user, dry_fire_message)
-	//sound_hint()
-	if(dry_fire_sound)
-		playsound(src, dry_fire_sound, 30, TRUE)
-	update_appearance()
-
-/obj/item/gun/ballistic/handle_chamber(mob/living/user, empty_chamber = FALSE, from_firing = FALSE, chamber_next_round = FALSE)
-	if((!semi_auto && from_firing) || (bolt_type == BOLT_TYPE_BREAK_ACTION))
-		return
-	var/obj/item/ammo_casing/casing = chambered //Get chambered round
-	//there's a chambered round
-	if(istype(casing))
-		if(QDELING(casing))
-			stack_trace("Trying to move a qdeleted casing of type [casing.type]!")
-			chambered = null
-		else if(casing_ejector || !from_firing)
-			casing.forceMove(drop_location()) //Eject casing onto ground.
-			casing.bounce_away(still_warm = TRUE)
-			SEND_SIGNAL(casing, COMSIG_CASING_EJECTED)
-			chambered = null
-		else if(empty_chamber)
-			chambered = null
-	if(chamber_next_round)
-		chamber_round()
-
-/obj/item/gun/ballistic/chamber_round(keep_bullet = FALSE, spin_cylinder = TRUE, replace_new_round = FALSE)
-	if(!magazine)
-		//stack_trace("[src] ([type]) tried to chamber a round without a magazine!") Why is this here?
-		return
-	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
-		if(spin_cylinder)
-			chambered = magazine.get_round(TRUE)
-		else
-			chambered = magazine.stored_ammo[1]
-	else if(magazine.ammo_count())
-		chambered = magazine.get_round(keep_bullet || bolt_type == BOLT_TYPE_NO_BOLT)
-		if(bolt_type != BOLT_TYPE_OPEN)
-			chambered.forceMove(src)
-		if(replace_new_round)
-			magazine.give_round(new chambered.type)
-
-/obj/item/gun/ballistic/prefire_empty_checks()
-	var/needs_update = FALSE
-	if(!chambered && !get_ammo())
-		if((bolt_type == BOLT_TYPE_OPEN) && !bolt_locked)
-			playsound(src, bolt_drop_sound, bolt_drop_sound_volume)
-			bolt_locked = TRUE
-			needs_update = TRUE
-	if(needs_update)
-		update_appearance()
-
-/obj/item/gun/ballistic/postfire_empty_checks(last_shot_succeeded = FALSE)
-	var/needs_update = FALSE
-	if(!chambered && !get_ammo() && last_shot_succeeded)
-		if(empty_alarm)
-			playsound(src, empty_alarm_sound, empty_alarm_volume, empty_alarm_vary)
-		if(bolt_type == BOLT_TYPE_LOCKING)
-			bolt_locked = TRUE
-			needs_update = TRUE
-	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
+	if(bolt_type == BOLT_TYPE_BREAK_ACTION && !cylinder_open)
 		bolt_locked = TRUE
-		needs_update = TRUE
-	if(needs_update)
 		update_appearance()
-*/
 ///Gives us info about ammo count, open cylinder, etc
 /obj/item/gun/ballistic/proc/chamber_examine(mob/user)
 	. = list()

@@ -68,13 +68,17 @@
 	if(foldable)
 		add_item_action(/datum/action/item_action/toggle_stock)
 	if(full_auto)
-		AddComponent(/datum/component/automatic_fire)
+		initialize_full_auto()
 	if(wielded_inhand_state)
 		AddComponent(/datum/component/two_handed, \
 			wieldsound = '_horizon/sound/weapons/guns/stock_open.wav', \
 			unwieldsound = '_horizon/sound/weapons/guns/stock_close.wav')
 	if(safety_flags & GUN_SAFETY_HAS_SAFETY)
 		add_item_action(/datum/action/item_action/toggle_safety)
+	// Shiptest attachment system: every gun gets a holder component.
+	// handle_attack() only reacts to TRAIT_ATTACHABLE items and crowbars,
+	// so normal interactions are untouched.
+	AddComponent(/datum/component/attachment_holder, slot_available, valid_attachments, slot_offsets, default_attachments)
 
 /obj/item/gun/update_icon(updates)
 	. = ..()
@@ -86,10 +90,10 @@
 	else if(sawn_inhand_state)
 		inhand_icon_state = "[initial(inhand_icon_state)][sawn_off ? "_sawn" : ""]"
 
-/obj/item/gun/update_icon_state()
-	. = ..()
-	if(empty_icon_state && !chambered)
-		icon_state = "[icon_state]_empty"
+// NOTE: the gun-level "_empty" icon_state suffix lives in the ballistic
+// override (see _ballistic.dm). It can't live here: this gun-level version
+// runs BEFORE core ballistic's icon_state reset (via the ..() chain), so any
+// suffix it appends gets wiped for every ballistic gun.
 
 /obj/item/gun/update_overlays()
 	. = ..()
@@ -156,6 +160,12 @@
 		return
 	if(firing_burst)
 		return
+	// Upstream signals: let mobs (implants, MODsuits, etc.) and the gun
+	// itself (attachments via attachment_holder) cancel the shot.
+	if(SEND_SIGNAL(user, COMSIG_MOB_TRYING_TO_FIRE_GUN, src, target, flag, params) & COMPONENT_CANCEL_GUN_FIRE)
+		return
+	if(SEND_SIGNAL(src, COMSIG_GUN_TRY_FIRE, user, target, flag, params) & COMPONENT_CANCEL_GUN_FIRE)
+		return
 	//It's adjacent, is the user, or is on the user's person
 	if(flag)
 		//Can't shoot stuff inside us.
@@ -177,6 +187,11 @@
 			shoot_with_empty_chamber(user)
 			return
 
+	// Upstream: aiming at our own mouth with an adjacent shot starts the suicide do_after.
+	// Kept after the can_trigger_gun() check so the safety blocks it like any other shot.
+	if(flag && doafter_self_shoot && user.zone_selected == BODY_ZONE_PRECISE_MOUTH)
+		return handle_suicide(user, target, params)
+
 	//Just because you can pull the trigger doesn't mean it can shoot.
 	before_can_shoot_checks(user, FALSE)
 	if(!can_shoot())
@@ -190,7 +205,7 @@
 	var/bonus_spread = 0
 	var/loop_counter = 0
 	var/list/modifiers = params2list(params)
-	if(ishuman(user) && IS_HARM_INTENT(user, modifiers))
+	if(ishuman(user) && IS_HARM_INTENT(user, modifiers) && !HAS_TRAIT(user, TRAIT_NO_GUN_AKIMBO))
 		var/mob/living/carbon/human/human_user = user
 		for(var/obj/item/gun/other_gun in human_user.held_items)
 			if((other_gun == src) || (other_gun.weapon_weight >= WEAPON_MEDIUM))
@@ -202,7 +217,13 @@
 
 	return process_fire(target, user, TRUE, params, null, bonus_spread)
 
-/obj/item/gun/can_trigger_gun(mob/living/user)
+/obj/item/gun/can_trigger_gun(mob/living/user, akimbo_usage)
+	// Chain into upstream's checks (can_use_guns + firing pins), then add
+	// horizon's safety check on top. Signature matches upstream so callers
+	// using the akimbo_usage keyword argument don't runtime.
+	. = ..()
+	if(!.)
+		return .
 	if(!handle_pins(user))
 		return FALSE
 	// Safety checks: if safety is ENABLED (ON), the gun cannot fire.
@@ -210,19 +231,11 @@
 		return FALSE
 	return TRUE
 
-/obj/item/gun/check_botched(mob/living/user, params)
-	if(clumsy_check)
-		if(istype(user))
-			if(HAS_TRAIT(user, TRAIT_CLUMSY) && prob(40))
-				to_chat(user, span_userdanger("I shoot myself in the foot with [src]!"))
-				var/shot_foot = pick(BODY_ZONE_PRECISE_R_FOOT, BODY_ZONE_PRECISE_L_FOOT)
-				process_fire(user, user, FALSE, params, shot_foot)
-				SEND_SIGNAL(user, COMSIG_MOB_CLUMSY_SHOOT_FOOT)
-				user.dropItemToGround(src, TRUE)
-				return TRUE
+// check_botched() intentionally has no horizon override: upstream's version is
+// newer (tk_firing / NODROP / random valid zone handling) and is used directly.
 
 /obj/item/gun/on_autofire_start(mob/living/shooter)
-	if(semicd || shooter.stat)
+	if(fire_cd || semicd || shooter.incapacitated || shooter.stat)
 		return NONE
 	if(istype(src, /obj/item/gun/ballistic/automatic))
 		var/obj/item/gun/ballistic/automatic/automatic_source = src
@@ -239,10 +252,17 @@
 	if(!can_shoot())
 		shoot_with_empty_chamber(shooter)
 		return NONE
+	var/obj/item/bodypart/other_hand = shooter.has_hand_for_held_index(shooter.get_inactive_hand_index())
+	if(weapon_weight == WEAPON_HEAVY && (shooter.get_inactive_held_item() || !other_hand))
+		balloon_alert(shooter, "use both hands!")
+		return NONE
 	return TRUE
 
-/obj/item/gun/do_autofire(datum/source, atom/target, mob/living/shooter, params)
-	if(semicd || shooter.stat)
+/// Signal handler for COMSIG_AUTOFIRE_SHOT. The signature must match upstream's
+/// (datum/source, atom/target, mob/living/shooter, allow_akimbo, params) or the
+/// last two arguments shift and the mouse params are silently lost.
+/obj/item/gun/do_autofire(datum/source, atom/target, mob/living/shooter, allow_akimbo, params)
+	if(fire_cd || semicd || shooter.incapacitated || shooter.stat)
 		return NONE
 	if(istype(src, /obj/item/gun/ballistic/automatic))
 		var/obj/item/gun/ballistic/automatic/automatic_source = src
@@ -259,7 +279,7 @@
 	if(!can_shoot())
 		shoot_with_empty_chamber(shooter)
 		return NONE
-	INVOKE_ASYNC(src, PROC_REF(do_autofire_shot), source, target, shooter, params)
+	INVOKE_ASYNC(src, PROC_REF(do_autofire_shot), source, target, shooter, allow_akimbo, params)
 	return COMPONENT_AUTOFIRE_SHOT_SUCCESS //All is well, we can continue shooting
 
 /obj/item/gun/shoot_with_empty_chamber(mob/living/user as mob|obj)

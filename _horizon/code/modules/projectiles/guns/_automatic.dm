@@ -38,47 +38,46 @@
 /obj/item/gun/ballistic/automatic/burst_select()
 	var/mob/living/carbon/human/user = usr
 	var/datum/component/automatic_fire/full_auto = GetComponent(/datum/component/automatic_fire)
-	if(full_auto)
-		switch(select)
-			// semi auto
-			if(1)
-				if(burst_size_toggled != initial(burst_size))
-					select = 2
-				else
-					select = 3
-			// burst fire
-			if(2)
-				select = 3
-			// full auto
-			if(3)
-				select = 1
-	else if(burst_size_toggled != initial(burst_size))
-		select = !select
-	// how did this happen?
-	else
+
+	// Nothing to select between: no full auto component and no separate burst
+	// mode. (How did this happen?)
+	if(!full_auto && burst_size_toggled == initial(burst_size))
 		return
+
+	// Cycle the selector: 1 = semi, 2 = burst, 3 = full auto.
+	switch(select)
+		if(1) // semi -> burst, or straight to auto if there is no burst mode
+			select = (burst_size_toggled != initial(burst_size)) ? 2 : 3
+		if(2) // burst -> auto
+			select = 3
+		else // auto (or invalid) -> semi
+			select = 1
+
 	switch(select)
 		if(1)
 			burst_size = 1
-			full_auto.autofire_off()
-			full_auto.autofire_stat = AUTOFIRE_STAT_OFF
+			if(full_auto)
+				full_auto.autofire_off()
+				full_auto.autofire_stat = AUTOFIRE_STAT_OFF
 			to_chat(user, span_notice("I switch [src] to semi-automatic."))
 			playsound(user, fireselector_semi, fireselector_semi_volume, fireselector_semi_vary)
 		if(2)
 			burst_size = burst_size_toggled
 			fire_delay = fire_delay_toggled
-			full_auto.autofire_stat = AUTOFIRE_STAT_IDLE
-			full_auto.autofire_on(user.client)
+			if(full_auto)
+				full_auto.autofire_stat = AUTOFIRE_STAT_IDLE
+				full_auto.autofire_on(user.client)
 			to_chat(user, span_notice("I switch [src] to [burst_size]-round burst."))
 			playsound(user, fireselector_burst, fireselector_burst_volume, fireselector_burst_vary)
 		if(3)
-			burst_size = initial(burst_size)
-			full_auto.autofire_stat = AUTOFIRE_STAT_IDLE
-			full_auto.autofire_on(user.client)
+			burst_size = burst_size_auto
+			if(full_auto)
+				full_auto.autofire_stat = AUTOFIRE_STAT_IDLE
+				full_auto.autofire_on(user.client)
 			to_chat(user, span_notice("I switch [src] to automatic."))
 			playsound(user, fireselector_auto, fireselector_auto_volume, fireselector_auto_vary)
 
 	update_appearance()
 	if(ismob(loc))
-		var/mob/M = loc
-		M.update_action_buttons()
+		var/mob/holder = loc
+		holder.update_action_buttons()

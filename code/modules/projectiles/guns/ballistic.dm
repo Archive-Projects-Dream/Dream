@@ -262,63 +262,12 @@
 	. = ..()
 	icon_state = "[base_icon_state || initial(icon_state)][sawn_off ? "_sawn" : ""]"
 
-/obj/item/gun/ballistic/update_overlays()
-	. = ..()
-
-	if(selector_switch_icon)
-		if(burst_fire_selection)
-			. += "[initial(icon_state)]_burst"
-		else
-			. += "[initial(icon_state)]_semi"
-
-	if(show_bolt_icon)
-		if (bolt_type == BOLT_TYPE_LOCKING)
-			. += "[icon_state]_bolt[bolt_locked ? "_locked" : ""]"
-		if (bolt_type == BOLT_TYPE_OPEN && bolt_locked)
-			. += "[icon_state]_bolt"
-
-	if(suppressed && can_unsuppress) // if it can't be unsuppressed, we assume the suppressor is integrated into the gun itself and don't generate an overlay
-		var/mutable_appearance/MA = mutable_appearance(icon, "[icon_state]_suppressor")
-		if(suppressor_x_offset)
-			MA.pixel_w = suppressor_x_offset
-		if(suppressor_y_offset)
-			MA.pixel_z = suppressor_y_offset
-		. += MA
-
-	if(!chambered && empty_indicator) //this is duplicated in c20's update_overlayss due to a layering issue with the select fire icon.
-		. += "[icon_state]_empty"
-
-	if(gun_flags & TOY_FIREARM_OVERLAY)
-		. += "[icon_state]_toy"
-
-
-	if(!magazine || internal_magazine || !mag_display)
-		return
-
-	if(special_mags)
-		. += "[icon_state]_mag_[initial(magazine.icon_state)]"
-		if(mag_display_ammo && !magazine.ammo_count())
-			. += "[icon_state]_mag_empty"
-		return
-
-	. += "[icon_state]_mag"
-	if(!mag_display_ammo)
-		return
-
-	var/capacity_number
-	switch(get_ammo() / magazine.max_ammo)
-		if(1 to INFINITY) //cause we can have one in the chamber.
-			capacity_number = 100
-		if(0.8 to 1)
-			capacity_number = 80
-		if(0.6 to 0.8)
-			capacity_number = 60
-		if(0.4 to 0.6)
-			capacity_number = 40
-		if(0.2 to 0.4)
-			capacity_number = 20
-	if(capacity_number)
-		. += "[icon_state]_mag_[capacity_number]"
+/* [HORIZON-EDIT] update_overlays REMOVED - the horizon version in
+ * _horizon/code/modules/projectiles/guns/_ballistic.dm fully replaces this
+ * (base_icon_state-based overlay names, break action cylinder overlays, fire
+ * selector icon). Keeping this body as well made every overlay render twice
+ * through the ..() chain. See Nevado's "SEPTIC EDIT REMOVAL" for the same
+ * pattern in the source repository. */
 
 /obj/item/gun/ballistic/ui_action_click(mob/user, actiontype)
 	if(istype(actiontype, /datum/action/item_action/toggle_firemode))
@@ -346,17 +295,17 @@
 	update_item_action_buttons()
 
 // Didn't attempt to catch the casing.
-#define CASING_CATCH_NO_ATTEMPT	0
+#define CASING_CATCH_NO_ATTEMPT 0
 // Tried to catch, failed because casing was hot and hands were unprotected.
-#define CASING_CATCH_FAILED_SPICY	1
+#define CASING_CATCH_FAILED_SPICY       1
 // Tried to catch, failed because clumsy.
-#define CASING_CATCH_FAILED_CLUMSY	2
+#define CASING_CATCH_FAILED_CLUMSY      2
 // Tried to catch, failed because hands full.
-#define CASING_CATCH_FAILED_PLACEMENT	3
+#define CASING_CATCH_FAILED_PLACEMENT   3
 // Tried to catch, succeeded. Hands protected or casing was cold (not recently fired).
-#define CASING_CATCH_SUCCESSFUL	4
+#define CASING_CATCH_SUCCESSFUL 4
 // Tried to catch, succeeded. Casing was hot, hands were unprotected, hands burned.
-#define CASING_CATCH_SUCCESSFUL_OUCH	5
+#define CASING_CATCH_SUCCESSFUL_OUCH    5
 // Offset added to an ejected casing's fire timestamp;
 // if world.time is past the casing's fired timestamp plus this offset, casing is considered cold, and won't burn hands.
 #define CASING_HOT_DELAY (5 SECONDS)

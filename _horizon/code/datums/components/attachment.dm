@@ -149,14 +149,17 @@
 		if(parent.render_layer)
 			overlay_layer = parent.render_layer
 		if(parent.render_plane)
-			overlay_layer = parent.render_plane
-		overlays += mutable_appearance(parent.icon, "[parent.icon_state]-attached",overlay_layer,overlay_plane)
+			overlay_plane = parent.render_plane
+		overlays += mutable_appearance(parent.icon, "[parent.icon_state]-attached", overlay_layer, overlay_plane)
 
 /datum/component/attachment/proc/try_attach(obj/item/parent, obj/item/holder, mob/user, bypass_checks)
 	SIGNAL_HANDLER
 
 	if(!bypass_checks)
-		if(!parent.Adjacent(user) || (length(valid_parent_types) && (holder.type in valid_parent_types)))
+		// Reject if the gun we're attaching to is not a valid parent type.
+		// (is_type_in_list covers subtypes; the old `in` check was exact-match
+		// only and inverted, so it silently rejected every valid gun.)
+		if(!parent.Adjacent(user) || (length(valid_parent_types) && !is_type_in_list(holder, valid_parent_types)))
 			return FALSE
 
 	if(on_attach && !on_attach.Invoke(holder, user))
@@ -164,18 +167,14 @@
 
 	parent.forceMove(holder)
 
+	// Register the toggle/ammo action buttons through upstream's item action
+	// system so they are tracked, granted on equip and cleaned up properly.
 	if(attach_features_flags & ATTACH_TOGGLE)
-		var/obj/item/gun/G = holder
-		if(!G.actions)
-			G.actions = list()
-		G.actions += list(attachment_toggle_action)
+		holder.add_item_action(attachment_toggle_action)
 		attachment_toggle_action.gun = holder
 		attachment_toggle_action.Grant(user)
 	if(attach_features_flags & ATTACH_AMMOMODE)
-		var/obj/item/gun/G = holder
-		if(!G.actions)
-			G.actions = list()
-		G.actions += list(attachment_ammo_action)
+		holder.add_item_action(attachment_ammo_action)
 		attachment_ammo_action.gun = holder
 		attachment_ammo_action.Grant(user)
 
@@ -184,27 +183,29 @@
 /datum/component/attachment/proc/try_detach(obj/item/parent, obj/item/holder, mob/user)
 	SIGNAL_HANDLER
 
-	if(!parent.Adjacent(user) || (valid_parent_types && (holder.type in valid_parent_types)))
+	if(!parent.Adjacent(user) || (length(valid_parent_types) && !is_type_in_list(holder, valid_parent_types)))
 		return FALSE
 
-	if(on_attach && !on_detach.Invoke(holder, user))
+	// on_detach, NOT on_attach (old typo made the detach callback depend on
+	// the attach callback being set).
+	if(on_detach && !on_detach.Invoke(holder, user))
 		return FALSE
 
 	if(attach_features_flags & ATTACH_TOGGLE)
-		var/obj/item/gun/G = holder
-		if(G.actions)
-			G.actions -= list(attachment_toggle_action)
+		// Remove from the gun's action list without qdel()ing it - the action
+		// datum is reused if the attachment is re-attached later.
+		if(holder.actions)
+			holder.actions -= attachment_toggle_action
 		attachment_toggle_action.gun = null
 		attachment_toggle_action.Remove(user)
 
 	if(attach_features_flags & ATTACH_AMMOMODE)
-		var/obj/item/gun/G = holder
-		if(G.actions)
-			G.actions -= list(attachment_ammo_action)
+		if(holder.actions)
+			holder.actions -= attachment_ammo_action
 		attachment_ammo_action.gun = null
 		attachment_ammo_action.Remove(user)
 
-	if(user.can_put_in_hand(parent))
+	if(user && user.can_put_in_hand(parent))
 		user.put_in_hand(parent)
 		return TRUE
 	else
@@ -318,9 +319,13 @@
 	. = ..()
 	name = "Toggle [target:name]"
 
-/datum/action/attachment/toggle/Trigger()
-	..()
+/datum/action/attachment/toggle/Trigger(mob/clicker, trigger_flags)
+	// Signature must match upstream Trigger(mob/clicker, trigger_flags):
+	// action_button.dm calls it with the trigger_flags keyword argument.
+	if(!..())
+		return FALSE
 	SEND_SIGNAL(target, COMSIG_ATTACHMENT_TOGGLE, gun, owner)
+	return TRUE
 
 /datum/action/attachment/toggle/build_all_button_icons()
 	button_icon = target:icon
@@ -330,8 +335,10 @@
 /datum/action/attachment/ammo
 	name = "Toggle Energy Mode"
 
-/datum/action/attachment/ammo/Trigger()
-	. = ..()
+/datum/action/attachment/ammo/Trigger(mob/clicker, trigger_flags)
+	if(!..())
+		return FALSE
 	SEND_SIGNAL(target, COMSIG_ATTACHMENT_TOGGLE_AMMO, gun, owner)
+	return TRUE
 
 

@@ -32,7 +32,7 @@
 	var/shot_duration = gunshot_animation_information["duration"] || 2
 	var/shot_pixel_x = gunshot_animation_information["pixel_x"] || 0
 	var/shot_pixel_y = gunshot_animation_information["pixel_y"] || 0
-	var/image/shots_fired = image(shot_icon, shot_icon_state, src.layer-0.01)
+	var/image/shots_fired = image(shot_icon, shot_icon_state, src, src.layer - 0.01)
 	shots_fired.pixel_x = shot_pixel_x
 	shots_fired.pixel_y = shot_pixel_y
 	add_overlay(shots_fired)
@@ -64,7 +64,7 @@
 /// Burst fire recoil: more violent, with pixel offset.
 /obj/item/gun/proc/recoil_animation_burst(mob/user, burst_fire = FALSE)
 	var/recoil_burst_angle_upper = recoil_animation_information["recoil_burst_angle_upper"] || -5
-	var/recoil_burst_angle_lower = recoil_animation_information["recoil_burst_angle_upper"] || -10
+	var/recoil_burst_angle_lower = recoil_animation_information["recoil_burst_angle_lower"] || -10
 	var/recoil_burst_speed = recoil_animation_information["recoil_burst_speed"] || 0.5
 	var/return_burst_speed = recoil_animation_information["return_burst_speed"] || 0.5
 	var/recoil_burst_easing = recoil_animation_information["recoil_burst_easing"] || ELASTIC_EASING

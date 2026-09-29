@@ -8,7 +8,7 @@
 	shrapnel_type = null
 	range = 7
 
-/obj/projectile/bullet/l40mm/on_hit(atom/target, blocked = FALSE)
+/obj/projectile/bullet/l40mm/on_hit(atom/target, blocked = FALSE, pierce_hit)
 	. = ..()
 	explosion(target, devastation_range = -1, heavy_impact_range = 2, light_impact_range = 4, flame_range = 2, flash_range = 3, adminlog = FALSE, explosion_cause = src)
 	return BULLET_ACT_HIT
@@ -23,7 +23,7 @@
 	shrapnel_type = null
 	range = 7
 
-/obj/projectile/bullet/gas40mm/on_hit(atom/target, blocked = FALSE)
+/obj/projectile/bullet/gas40mm/on_hit(atom/target, blocked = FALSE, pierce_hit)
 	. = ..()
 	playsound(src, '_horizon/sound/effects/gassy.ogg', 95, TRUE, 1)
 	var/turf/gassyturf = get_turf(src)
@@ -41,12 +41,12 @@
 	shrapnel_type = null
 	range = 7
 
-/obj/projectile/bullet/smoke40mm/on_hit(atom/target, blocked = FALSE)
+/obj/projectile/bullet/smoke40mm/on_hit(atom/target, blocked = FALSE, pierce_hit)
 	. = ..()
 	playsound(src, '_horizon/sound/effects/gas.ogg', 50, TRUE, 1)
-	var/datum/effect_system/smoke_spread/bad/smoke = new
-	smoke.set_up(4, src)
-	smoke.start()
+	// Upstream smoke system (the old smoke_spread stub's set_up() did nothing,
+	// so 40mm smoke grenades produced no smoke at all).
+	do_smoke(4, src, drop_location(), smoke_type = /datum/effect_system/fluid_spread/smoke/bad)
 	return BULLET_ACT_HIT
 
 /obj/projectile/bullet/inc40mm
@@ -59,7 +59,7 @@
 	shrapnel_type = null
 	range = 7
 
-/obj/projectile/bullet/inc40mm/on_hit(atom/target, blocked = FALSE)
+/obj/projectile/bullet/inc40mm/on_hit(atom/target, blocked = FALSE, pierce_hit)
 	. = ..()
 	explosion(target, devastation_range = -1, light_impact_range = 1, flame_range = 5, flash_range = 3, adminlog = FALSE, explosion_cause = src)
 	return BULLET_ACT_HIT
