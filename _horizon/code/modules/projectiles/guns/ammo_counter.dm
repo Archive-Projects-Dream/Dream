@@ -160,8 +160,8 @@
 /obj/item/attachment/ammo_counter
         name = "ammunition counter"
         desc = "A computerized ammunition tracker for use on conventional firearms. Shows remaining ammo as a HUD overlay."
-        icon = '_horizon/icons/ui/gun_actions.dmi'
-        icon_state = "safety1"
+        icon = '_horizon/icons/obj/items/guns/attachments.dmi'
+        icon_state = "ammo_counter"
         w_class = WEIGHT_CLASS_TINY
 
 /// Attach to ballistic gun via item_interaction (click gun with attachment).
@@ -186,5 +186,5 @@
                 var/datum/component/ammo_hud/our_counter = GetComponent(/datum/component/ammo_hud)
                 our_counter.wake_up(source = src, user = user, slot = ITEM_SLOT_HANDS)
                 balloon_alert(user, "ammo counter attached")
-                playsound(src, 'sound/items/flashlight_on.ogg', 25, TRUE)
+                playsound(src, 'sound/items/click.ogg', 25, TRUE)
                 return ITEM_INTERACT_SUCCESS
