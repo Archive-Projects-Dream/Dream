@@ -63,10 +63,9 @@
 		if(player && HAS_TRAIT(player, TRAIT_MUSICIAN) && isliving(hearing_mob))
 			var/mob/living/living_hearer = hearing_mob
 			living_hearer.apply_status_effect(/datum/status_effect/good_music)
-		var/pref_volume = hearing_mob?.client?.prefs.read_preference(/datum/preference/numeric/volume/sound_instruments)
-		if(!pref_volume)
+		if(!(hearing_mob?.client?.prefs?.channel_volume["[CHANNEL_INSTRUMENTS]"])) // [HORIZON-EDIT] Master_Sounds
 			continue
-		hearing_mob.playsound_local(get_turf(parent), null, volume * (pref_volume/100), FALSE, instrument_key.frequency, exponential_falloff, channel, null, copy)
+		hearing_mob.playsound_local(get_turf(parent), null, volume, FALSE, instrument_key.frequency, exponential_falloff, channel, null, copy, mixer_channel = CHANNEL_INSTRUMENTS)
 		// Could do environment and echo later but not for now
 
 /**
