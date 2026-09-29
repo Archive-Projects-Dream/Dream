@@ -22,7 +22,7 @@
         worn_icon = '_horizon/icons/obj/items/guns/alter/worn/back.dmi'
         lefthand_file = '_horizon/icons/obj/items/guns/alter/inhands/rifle_lefthand.dmi'
         righthand_file = '_horizon/icons/obj/items/guns/alter/inhands/rifle_righthand.dmi'
-        equip_sound = pick('_horizon/sound/weapons/guns/rifle_holster1.ogg', '_horizon/sound/weapons/guns/rifle_holster2.ogg')
+        equip_sound = list('_horizon/sound/weapons/guns/rifle_holster1.ogg', '_horizon/sound/weapons/guns/rifle_holster2.ogg')
 
 /obj/item/gun/ballistic/automatic/remis/abyss/warfare/m545
         name = "\improper Peacekeeper 545"
@@ -225,7 +225,7 @@
         safety_off_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
         safety_on_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'
         rack_sound = '_horizon/sound/weapons/guns/rifle/mrack.wav'
-        aim_stress_sound = pick('_horizon/sound/weapons/guns/rifle/voice_steyr/canthide.wav',
+        aim_stress_sound = list('_horizon/sound/weapons/guns/rifle/voice_steyr/canthide.wav',
                                                 '_horizon/sound/weapons/guns/rifle/voice_steyr/seeyou.wav',
                                                 '_horizon/sound/weapons/guns/rifle/voice_steyr/targetacquired.wav',
                                                 '_horizon/sound/weapons/guns/rifle/voice_steyr/runpig.wav')
@@ -356,7 +356,7 @@
         rack_sound = '_horizon/sound/weapons/guns/rifle/bolties/federson_boltout.wav'
         bolt_drop_sound = '_horizon/sound/weapons/guns/rifle/bolties/federson_boltin.wav'
         drop_sound = '_horizon/sound/weapons/guns/drop_mediumgun.wav'
-        load_sound = pick('_horizon/sound/weapons/guns/rifle/bolties/federson_load1.wav', '_horizon/sound/weapons/guns/rifle/bolties/federson_load2.wav', '_horizon/sound/weapons/guns/rifle/bolties/federson_load3.wav')
+        load_sound = list('_horizon/sound/weapons/guns/rifle/bolties/federson_load1.wav', '_horizon/sound/weapons/guns/rifle/bolties/federson_load2.wav', '_horizon/sound/weapons/guns/rifle/bolties/federson_load3.wav')
         can_suppress = FALSE
         spawn_magazine_type = /obj/item/ammo_box/magazine/internal/federson
         rack_delay = 1
@@ -375,8 +375,8 @@
         spawn_magazine_type = /obj/item/ammo_box/magazine/a556g36
         fire_sound = '_horizon/sound/weapons/guns/rifle/g36.ogg'
         suppressed_sound = '_horizon/sound/weapons/guns/rifle/g36_suppressed.ogg'
-        load_sound = pick('_horizon/sound/weapons/guns/rifle/g36_magin1.ogg', '_horizon/sound/weapons/guns/rifle/g36_magin2.ogg')
-        load_empty_sound = pick('_horizon/sound/weapons/guns/rifle/g36_magin1.ogg', '_horizon/sound/weapons/guns/rifle/g36_magin2.ogg')
+        load_sound = list('_horizon/sound/weapons/guns/rifle/g36_magin1.ogg', '_horizon/sound/weapons/guns/rifle/g36_magin2.ogg')
+        load_empty_sound = list('_horizon/sound/weapons/guns/rifle/g36_magin1.ogg', '_horizon/sound/weapons/guns/rifle/g36_magin2.ogg')
         eject_sound = '_horizon/sound/weapons/guns/rifle/g36_magout.ogg'
         eject_empty_sound = '_horizon/sound/weapons/guns/rifle/g36_magout.ogg'
         safety_off_sound = '_horizon/sound/weapons/guns/rifle/msafety.wav'

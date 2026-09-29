@@ -37,7 +37,7 @@
         desc = "A machine pistol made by some crazy italians, capable of shooting in 3-round bursts. \
                 Uses 9mm ammo. Has a threaded barrel for suppressors."
         fire_sound = '_horizon/sound/weapons/guns/pistol/aps.ogg'
-        suppressed_sound = pick(
+        suppressed_sound = list(
                 '_horizon/sound/weapons/guns/pistol/glock_suppressed1.wav', \
                 '_horizon/sound/weapons/guns/pistol/glock_suppressed2.wav', \
         )
@@ -79,7 +79,7 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "USP"
         base_icon_state = "USP"
-        fire_sound = pick('_horizon/sound/weapons/guns/pistol/USP1.ogg', '_horizon/sound/weapons/guns/pistol/USP2.ogg')
+        fire_sound = list('_horizon/sound/weapons/guns/pistol/USP1.ogg', '_horizon/sound/weapons/guns/pistol/USP2.ogg')
         rack_sound = '_horizon/sound/weapons/guns/pistol/john_rack.wav'
         lock_back_sound = '_horizon/sound/weapons/guns/pistol/john_lockback.wav'
         bolt_drop_sound = '_horizon/sound/weapons/guns/pistol/john_lockin.wav'
@@ -125,7 +125,7 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "combatmaster"
         base_icon_state = "combatmaster"
-        fire_sound = pick('_horizon/sound/weapons/guns/pistol/combatmaster1.wav', '_horizon/sound/weapons/guns/pistol/combatmaster2.wav')
+        fire_sound = list('_horizon/sound/weapons/guns/pistol/combatmaster1.wav', '_horizon/sound/weapons/guns/pistol/combatmaster2.wav')
         suppressed_sound = '_horizon/sound/weapons/guns/pistol/combatmaster_silenced.wav'
         force = 10
         suppressor_x_offset = 12
@@ -141,9 +141,9 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "glock"
         base_icon_state = "glock"
-        fire_sound = pick('_horizon/sound/weapons/guns/pistol/glock1.wav', \
+        fire_sound = list('_horizon/sound/weapons/guns/pistol/glock1.wav', \
                                         '_horizon/sound/weapons/guns/pistol/glock2.wav')
-        suppressed_sound = pick('_horizon/sound/weapons/guns/pistol/glock_suppressed1.wav', \
+        suppressed_sound = list('_horizon/sound/weapons/guns/pistol/glock_suppressed1.wav', \
                                         '_horizon/sound/weapons/guns/pistol/glock_suppressed2.wav')
         force = 10
         spawn_magazine_type = /obj/item/ammo_box/magazine/glock9mm
@@ -162,7 +162,7 @@
         icon = '_horizon/icons/obj/items/guns/pistol.dmi'
         icon_state = "ppk"
         base_icon_state = "ppk"
-        fire_sound = pick('_horizon/sound/weapons/guns/pistol/walter1.wav',
+        fire_sound = list('_horizon/sound/weapons/guns/pistol/walter1.wav',
                                         '_horizon/sound/weapons/guns/pistol/walter2.wav')
         suppressed_sound = '_horizon/sound/weapons/guns/pistol/walter_silenced.wav'
         safety_on_sound = '_horizon/sound/weapons/guns/pistol/walter_safety.wav'
@@ -190,7 +190,7 @@
         rack_sound = '_horizon/sound/weapons/guns/pistol/one_rack.ogg'
         lock_back_sound = '_horizon/sound/weapons/guns/pistol/one_lockback.ogg'
         bolt_drop_sound = '_horizon/sound/weapons/guns/pistol/one_lockin.ogg'
-        aim_stress_sound = pick('_horizon/sound/weapons/guns/pistol/voice_anaquilador/anaquilador_getout.wav',
+        aim_stress_sound = list('_horizon/sound/weapons/guns/pistol/voice_anaquilador/anaquilador_getout.wav',
                                                 '_horizon/sound/weapons/guns/pistol/voice_anaquilador/anaquilador_noescape.wav')
         aim_spare_sound = '_horizon/sound/weapons/guns/rifle/voice_steyr/spare.wav'
         force = 10
@@ -237,7 +237,7 @@
         inhand_icon_state = "five7"
         icon_state = "glockl"
         base_icon_state = "glockl"
-        fire_sound = pick('_horizon/sound/weapons/guns/pistol/john1.wav', '_horizon/sound/weapons/guns/pistol/john2.wav')
+        fire_sound = list('_horizon/sound/weapons/guns/pistol/john1.wav', '_horizon/sound/weapons/guns/pistol/john2.wav')
         rack_sound = '_horizon/sound/weapons/guns/pistol/john_rack.wav'
         lock_back_sound = '_horizon/sound/weapons/guns/pistol/john_lockback.wav'
         bolt_drop_sound = '_horizon/sound/weapons/guns/pistol/john_lockin.wav'

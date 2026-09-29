@@ -11,7 +11,7 @@
 	inhand_x_dimension = 64
 	inhand_y_dimension = 64
 	equip_sound = '_horizon/sound/weapons/guns/weap_away.ogg'
-	fire_sound = pick('_horizon/sound/weapons/guns/energy/railgun1.wav', '_horizon/sound/weapons/guns/energy/railgun2.wav', '_horizon/sound/weapons/guns/energy/railgun3.wav')
+	fire_sound = list('_horizon/sound/weapons/guns/energy/railgun1.wav', '_horizon/sound/weapons/guns/energy/railgun2.wav', '_horizon/sound/weapons/guns/energy/railgun3.wav')
 	safety_off_sound = '_horizon/sound/weapons/guns/energy/siren_safetyoff.wav'
 	safety_on_sound = '_horizon/sound/weapons/guns/energy/siren_safetyon.wav'
 	drop_sound = '_horizon/sound/weapons/guns/drop_heavygun.wav'

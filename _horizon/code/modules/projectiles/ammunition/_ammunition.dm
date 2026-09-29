@@ -8,7 +8,7 @@
         /// World icon state
         var/world_icon_state = "s-casing"
         /// The funny sound we make when we bounce on floors
-        var/bounce_sound = pick('_horizon/sound/bullet/casing_bounce1.wav', '_horizon/sound/bullet/casing_bounce2.wav', '_horizon/sound/bullet/casing_bounce3.wav')
+        var/bounce_sound = list('_horizon/sound/bullet/casing_bounce1.wav', '_horizon/sound/bullet/casing_bounce2.wav', '_horizon/sound/bullet/casing_bounce3.wav')
         /// The volume of the bouncing
         var/bounce_volume = 40
         /// Should bouncing vary

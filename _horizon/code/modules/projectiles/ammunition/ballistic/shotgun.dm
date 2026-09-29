@@ -2,7 +2,7 @@
 	icon_state = "12gauge_slug"
 	base_icon_state = "12gauge_slug"
 	world_icon_state = "gshells"
-	bounce_sound = pick('_horizon/sound/weapons/guns/shotgun/12cal1.wav', '_horizon/sound/weapons/guns/shotgun/12cal2.wav', '_horizon/sound/weapons/guns/shotgun/12cal3.wav')
+	bounce_sound = list('_horizon/sound/weapons/guns/shotgun/12cal1.wav', '_horizon/sound/weapons/guns/shotgun/12cal2.wav', '_horizon/sound/weapons/guns/shotgun/12cal3.wav')
 	bounce_volume = 45
 	stack_type = /obj/item/ammo_box/magazine/ammo_stack/shotgun
 

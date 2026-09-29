@@ -21,7 +21,7 @@
 	eject_sound = '_horizon/sound/weapons/guns/revolver/revolver_eject.wav'
 	drop_sound = '_horizon/sound/weapons/guns/drop_lightgun.wav'
 	// hammer sound
-	rack_sound = pick(
+	rack_sound = list(
 		'_horizon/sound/weapons/guns/revolver/hammer1.ogg', \
 		'_horizon/sound/weapons/guns/revolver/hammer2.ogg', \
 	)
@@ -51,7 +51,7 @@
 	icon_state = "bladerunner"
 	base_icon_state = "bladerunner"
 	uncocked_icon_state = FALSE
-	fire_sound = pick('_horizon/sound/weapons/guns/revolver/gado1.wav', '_horizon/sound/weapons/guns/revolver/gado3.wav', '_horizon/sound/weapons/guns/revolver/gado3.wav')
+	fire_sound = list('_horizon/sound/weapons/guns/revolver/gado1.wav', '_horizon/sound/weapons/guns/revolver/gado3.wav', '_horizon/sound/weapons/guns/revolver/gado3.wav')
 	safety_on_sound = '_horizon/sound/weapons/guns/revolver/gado_safetyon.ogg'
 	safety_off_sound = '_horizon/sound/weapons/guns/revolver/gado_safetyoff.ogg'
 	lock_back_sound = '_horizon/sound/weapons/guns/revolver/gado_in.wav'

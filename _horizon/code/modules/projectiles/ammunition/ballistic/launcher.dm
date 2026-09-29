@@ -7,7 +7,7 @@
 	world_icon_state = "40mmHE"
 	icon_state = "40mmHE"
 	base_icon_state = "40mmHE"
-	bounce_sound = pick('_horizon/sound/weapons/guns/launcher/heavy_shell1.wav', '_horizon/sound/weapons/guns/launcher/heavy_shell2.wav', '_horizon/sound/weapons/guns/launcher/heavy_shell3.wav')
+	bounce_sound = list('_horizon/sound/weapons/guns/launcher/heavy_shell1.wav', '_horizon/sound/weapons/guns/launcher/heavy_shell2.wav', '_horizon/sound/weapons/guns/launcher/heavy_shell3.wav')
 	bounce_volume = 65
 	projectile_type = /obj/projectile/bullet/l40mm
 	stack_type = null
