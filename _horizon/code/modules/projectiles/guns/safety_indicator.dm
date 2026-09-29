@@ -42,16 +42,3 @@
 	G.toggle_safety(clicker)
 	update_icon()
 	return TRUE
-
-// =============================================================================
-// item_action_slot_check override for guns
-// =============================================================================
-// Upstream's item_action_slot_check() only grants actions if slot & slot_flags.
-// Guns have slot_flags = ITEM_SLOT_BACK | ITEM_SLOT_SUITSTORE, so actions
-// never get granted when the gun is held in hands (ITEM_SLOT_HANDS).
-// This override forces all gun item actions to be granted when in hands.
-
-/obj/item/gun/item_action_slot_check(slot, mob/user, datum/action/action)
-	if(slot & ITEM_SLOT_HANDS)
-		return TRUE
-	return ..()

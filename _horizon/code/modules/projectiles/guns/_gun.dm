@@ -129,7 +129,7 @@
 /obj/item/gun/Initialize(mapload)
         . = ..()
         if(foldable)
-                new /datum/action/item_action/toggle_stock(src)
+                add_item_action(/datum/action/item_action/toggle_stock)
         if(full_auto)
                 AddComponent(/datum/component/automatic_fire)
         // Heavy weapons require two hands - add the two_handed component so
@@ -141,7 +141,7 @@
                         unwieldsound = '_horizon/sound/weapons/guns/stock_close.wav')
         // Safety indicator HUD button
         if(safety_flags & GUN_SAFETY_HAS_SAFETY)
-                new /datum/action/item_action/toggle_safety(src)
+                add_item_action(/datum/action/item_action/toggle_safety)
 
 /obj/item/gun/update_icon(updates)
         . = ..()
