@@ -44,7 +44,8 @@
 	set src in range(0)
 
 	var/mob/living/user = usr
-	if(!istype(user) || user.incapacitated())
+	// TG has no /mob/proc/incapacitated(); the trait covers it
+	if(!istype(user) || HAS_TRAIT(user, TRAIT_INCAPACITATED))
 		return
 
 	if(!can_access(user))
@@ -82,7 +83,8 @@
 
 /obj/structure/vehicle_locker/MouseDrop(atom/over_object, atom/src_location, atom/over_location, src_control, over_control, params)
 	var/mob/living/user = usr
-	if(!istype(user) || user.incapacitated())
+	// TG has no /mob/proc/incapacitated(); the trait covers it
+	if(!istype(user) || HAS_TRAIT(user, TRAIT_INCAPACITATED))
 		return
 	if(!can_access(user))
 		return

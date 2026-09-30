@@ -125,7 +125,8 @@
 		"abstract" = 1.0) //abstract for when you just want to hurt it
 	// This is more important than you think.
 	// Explosive waves can propagate through the vehicle and hit it multiple times
-	var/explosive_resistance = 200
+	// Plain assignment: /atom already declares explosive_resistance in TG
+	explosive_resistance = 200
 	//Placeholders
 	icon = '_horizon/icons/vehicles/obj/van.dmi'
 	icon_state = "van_base"
@@ -146,8 +147,6 @@
 		lighting_holder.set_light_on(vehicle_light_range || vehicle_light_power)
 	else if(light_range)
 		set_light_on(TRUE)
-	light_pixel_x = -bound_x
-	light_pixel_y = -bound_y
 	healthcheck()
 	update_appearance()
 	GLOB.all_multi_vehicles += src
@@ -253,7 +252,7 @@
 	return
 /obj/vehicle/multitile/proc/remove_seated_verbs(mob/living/seated_mob, seat)
 	return
-/obj/vehicle/multitile/set_seated_mob(seat, mob/living/seated_mob)
+/obj/vehicle/multitile/proc/set_seated_mob(seat, mob/living/seated_mob)
 	// Give/remove verbs
 	if(QDELETED(seated_mob))
 		var/mob/living/old_mob = seats[seat]
@@ -312,7 +311,8 @@
 /obj/vehicle/multitile/proc/load_role_reserved_slots()
 	return
 //Special armored vic healthcheck that mainly updates the hardpoint states
-/obj/vehicle/multitile/healthcheck()
+//proc/ definition: TG's /obj/vehicle has no healthcheck to override
+/obj/vehicle/multitile/proc/healthcheck()
 	var/all_broken = TRUE //Whether or not to call handle_all_modules_broken()
 	for(var/obj/item/hardpoint/installed_hardpoint in hardpoints)
 		if(installed_hardpoint.atom_integrity <= 0)
@@ -329,8 +329,6 @@
 	else if(lighting_holder && !lighting_holder.light)
 		lighting_holder.set_light_on(TRUE)
 	update_appearance()
-/obj/vehicle/multitile/proc/handle_all_modules_broken()
-	return
 /*
 ** PRESETS SPAWNERS
 */

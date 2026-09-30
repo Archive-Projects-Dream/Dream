@@ -1,12 +1,8 @@
 /*
- * Small helpers shared by the multitile vehicle system, ported from cmss13
- * (floor, get_random_turf_in_range) and kept here because Horizon-Dream does
- * not define them.
+ * Small helpers shared by the multitile vehicle system, ported from cmss13.
+ * cmss13's custom floor() proc is not ported: floor() is a BYOND builtin
+ * (and a reserved word) since 515, so call sites use it directly.
  */
-
-/// Rounds down to the nearest integer, like cmss13's floor().
-/proc/floor(x)
-	return round(x)
 
 /// Picks a random turf within dist_max of the center turf, at least dist_min away.
 /proc/get_random_turf_in_range(atom/center, dist_max, dist_min = 0)

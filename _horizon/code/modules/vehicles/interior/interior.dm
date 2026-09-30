@@ -195,7 +195,8 @@
 
 /// Local analog of cmss13's is_revivable(): a corpse that could still be brought back.
 /datum/interior/proc/is_revivable(mob/living/carbon/human/H)
-	if(H.suiciding)
+	// cmss13 used the H.suiciding var; TG tracks suicide as a trait
+	if(HAS_TRAIT(H, TRAIT_SUICIDED))
 		return FALSE
 	if(!H.get_organ_slot(ORGAN_SLOT_BRAIN))
 		return FALSE

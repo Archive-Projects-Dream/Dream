@@ -162,7 +162,8 @@
 	opacity = TRUE
 	name = "void"
 	desc = "Wow, it's really dark..."
-	pass_flags = NONE
+	// cmss13 also zeroed pass_flags here, but TG only defines pass_flags
+	// on /atom/movable; the void blocks passage through density alone
 
 /// Interior space reservation, from cmss13 code/modules/mapping/space_management/space_reservation.dm
 /datum/turf_reservation/interior

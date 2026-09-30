@@ -186,7 +186,8 @@
 	anchored = TRUE
 
 	var/image/chairbar = null
-	var/broken = FALSE
+	// Plain assignment: /obj/structure already declares var/broken in TG
+	broken = FALSE
 
 	var/buckle_offset_x = 0
 	var/mob_old_x = 0

@@ -6,8 +6,11 @@
 	requires_power = FALSE
 	icon = '_horizon/icons/turf/areas_interiors.dmi'
 	icon_state = "interior"
-	has_gravity = TRUE
-	valid_territory = FALSE
+	// cmss13's has_gravity = TRUE maps onto TG's area-level default_gravity
+	default_gravity = STANDARD_GRAVITY
+	// cmss13's valid_territory = FALSE maps onto clearing area_flags
+	// (drops VALID_TERRITORY, BLOBS_ALLOWED and CULT_PERMITTED)
+	area_flags = NONE
 	ambient_buzz = null
 
 /area/interior/vehicle/tank

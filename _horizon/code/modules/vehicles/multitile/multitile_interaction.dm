@@ -45,7 +45,9 @@
 		detach_clamp(user)
 		return
 	// Try to fit something in the vehicle without getting in ourselves
-	if(ishuman(user) && !user.combat_mode && user.pulling)
+	// combat_mode lives on /mob/living in TG, so narrow the type first
+	var/mob/living/carbon/human/human_user = user
+	if(istype(human_user) && !human_user.combat_mode && human_user.pulling)
 		var/mob_x = user.x - src.x
 		var/mob_y = user.y - src.y
 		for(var/entrance in entrances)
@@ -85,7 +87,9 @@
 			if(!thrown_grenade.active)
 				thrown_grenade.arm_grenade(user)
 		return
-	if(!isliving(user) || !user.combat_mode)
+	// combat_mode lives on /mob/living in TG, so narrow the type first
+	var/mob/living/living_user = user
+	if(!istype(living_user) || !living_user.combat_mode)
 		handle_player_entrance(user)
 		return
 	take_damage_type(attacked_with.force * 0.05, "blunt", user) //Melee weapons from people do very little damage

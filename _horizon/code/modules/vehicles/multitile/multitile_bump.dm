@@ -29,12 +29,29 @@
 //-------------------------TURFS-----------------------------
 //-----------------------------------------------------------
 
+// TG walls have no health pool like cmss13's (its hull walls sat at 3000
+// with 30 damage per ram, reinforced at 9000), so ramming chips away at
+// these vars instead; dents show the wear and the wall finally collapses
+// into a girder once the breakpoint is reached.
+/turf/closed/wall
+	/// Ram damage this wall has accumulated from multitile vehicles
+	var/vehicle_ram_damage_taken = 0
+	/// How much ramming the wall survives before collapsing (cmss13: HEALTH_WALL 3000 / HEALTH_WALL_REINFORCED 9000)
+	var/vehicle_ram_breakpoint = 3000
+
+/turf/closed/wall/r_wall
+	vehicle_ram_breakpoint = 9000
+
 /turf/closed/wall/handle_vehicle_bump(obj/vehicle/multitile/bumping_vehicle)
 	if(!(bumping_vehicle.vehicle_flags & VEHICLE_CLASS_WEAK))
-		take_damage(bumping_vehicle.wall_ram_damage)
 		bumping_vehicle.take_damage_type(10, "blunt", src)
 		playsound(src, '_horizon/sounds/effects/metal_crash.ogg', 35)
 		visible_message(span_danger("\The [bumping_vehicle] rams \the [src]!"))
+		vehicle_ram_damage_taken += bumping_vehicle.wall_ram_damage
+		add_dent(WALL_DENT_HIT)
+		if(vehicle_ram_damage_taken >= vehicle_ram_breakpoint)
+			vehicle_ram_damage_taken = 0
+			dismantle_wall(FALSE, TRUE)
 	return FALSE
 //-----------------------------------------------------------
 //-------------------------OBJECTS---------------------------
@@ -129,8 +146,9 @@
 /obj/machinery/door/handle_vehicle_bump(obj/vehicle/multitile/bumping_vehicle)
 	var/list/vehicle_dimensions = bumping_vehicle.get_dimensions()
 	// The door should be facing east/west when the vehicle is facing north/south, and north/south when the vehicle is facing east/west
-	// The door must also be wide enough for the vehicle to fit inside
-	if(((bumping_vehicle.dir & (NORTH|SOUTH) && dir & (EAST|WEST)) || (bumping_vehicle.dir & (EAST|WEST) && dir & (NORTH|SOUTH))) && width >= vehicle_dimensions["width"])
+	// cmss13 doors carried a width var for multi-tile doors; TG doors are all
+	// one tile wide, so only single-tile-wide vehicles can slip through
+	if(((bumping_vehicle.dir & (NORTH|SOUTH) && dir & (EAST|WEST)) || (bumping_vehicle.dir & (EAST|WEST) && dir & (NORTH|SOUTH))) && vehicle_dimensions["width"] <= 1)
 		// Driver needs access
 		var/mob/living/driver = bumping_vehicle.get_seat_mob(VEHICLE_DRIVER)
 		if(!requiresID() || (driver && allowed(driver)))
