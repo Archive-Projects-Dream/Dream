@@ -161,6 +161,11 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	var/should_show = istype(client?.mob, /mob/dead/new_player) && !client.interviewee
 	if(should_show)
 		shown = TRUE
+		// [HORIZON-ADD] cancel a pending hide from a rapid lobby re-entry,
+		// otherwise the stale timer could hide the just-restored lobby
+		if(fade_timer)
+			deltimer(fade_timer)
+			fade_timer = null
 		// [HORIZON-ADD] re-render the character preview whenever the lobby is (re)shown
 		preview_dirty = TRUE
 		if(GLOB.lobby_background_transparent)
@@ -173,19 +178,25 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		START_PROCESSING(SSlobby_menu, src)
 		send_init()
 	else
+		var/was_shown = shown
 		shown = FALSE
 		STOP_PROCESSING(SSlobby_menu, src)
-		if(GLOB.lobby_background_transparent)
-			// In transparent mode the browser overlays the map, selector always shows map_screen
-			winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
+		if(was_shown)
+			// [HORIZON-ADD] let the client play its fade-out animation first: the pane swap
+			// (opaque) or browser hiding (transparent) is deferred to apply_hidden_visibility()
+			// so the animation is actually visible. The browser itself persists while hidden,
+			// and send_init() on the next show resets the fade on the client side.
+			window?.send_message("fadeOut")
+			if(fade_timer)
+				deltimer(fade_timer)
+			fade_timer = addtimer(CALLBACK(src, PROC_REF(apply_hidden_visibility)), LOBBY_FADE_OUT_TIME, TIMER_STOPPABLE)
 		else
-			// In opaque mode, swap the CHILD selector between lobby_screen and map_screen
-			winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
-		// [HORIZON-ADD] give the client time to play its fade-out animation before hiding
-		window?.send_message("fadeOut")
-		if(fade_timer)
-			deltimer(fade_timer)
-		fade_timer = addtimer(CALLBACK(src, PROC_REF(apply_hidden_visibility)), LOBBY_FADE_OUT_TIME, TIMER_STOPPABLE)
+			// Already hidden - cancel any stale fade timer and make sure the map pane
+			// is the one showing (the skin defaults the selector to lobby_screen)
+			if(fade_timer)
+				deltimer(fade_timer)
+				fade_timer = null
+			apply_hidden_visibility()
 
 /// [HORIZON-ADD] Applies the hidden browser state once the fade-out animation has had time to play
 /datum/lobby_menu/proc/apply_hidden_visibility()

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { classes } from 'tgui-core/react';
 import { storage } from 'common/storage';
 import {
@@ -89,10 +89,22 @@ export function LobbyMenu() {
   const [themeDisabled, setThemeDisabled] = useState<boolean | undefined>();
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [soundsOn, setSoundsOn] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     Byond.subscribeTo('init', (payload: ServerState) => {
       setSs(payload);
+      // The lobby browser persists in the skin while the player is in the
+      // game, unlike the old setup where it was torn down and recreated.
+      // The server re-sends init whenever the lobby is shown again
+      // (returning to the lobby, respawning), so undo the fade-out that
+      // was applied on leaving - otherwise the finished fade-out animation
+      // keeps the whole lobby at opacity 0 and the screen stays black.
+      setFadingOut(false);
+      setHidden(false);
+      // The pane may have been hidden for a long time; nudge the
+      // background video to make sure it is still playing.
+      videoRef.current?.play()?.catch(() => {});
     });
 
     Byond.subscribeTo('state', (payload: Partial<ServerState>) => {
@@ -137,6 +149,12 @@ export function LobbyMenu() {
     document.body.style.backgroundColor = bg;
   }, [ss?.transparent]);
 
+  // (Re)start playback whenever the video element (re)mounts or its
+  // source changes - autoplay attributes alone are not reliable for that.
+  useEffect(() => {
+    videoRef.current?.play()?.catch(() => {});
+  }, [ss?.videoUrl, videoEnabled, ss?.transparent]);
+
   if (!ss || themeDisabled === undefined || filterDisabled === undefined) {
     return null;
   }
@@ -170,6 +188,7 @@ export function LobbyMenu() {
 
       {!ss.transparent && videoEnabled && ss.videoUrl && (
         <video
+          ref={videoRef}
           className="bgVideo"
           src={ss.videoUrl}
           autoPlay
