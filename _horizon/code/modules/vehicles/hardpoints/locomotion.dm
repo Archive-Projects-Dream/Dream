@@ -1,6 +1,6 @@
 /*
  * Locomotion hardpoints (wheels and treads), ported from cmss13
- * code/modules/vehicles/hardpoints/wheels/*.dm
+ * code/modules/vehicles/hardpoints/wheels/.dm
  *
  * cmss13's acid-spray environment damage for locomotion modules is not
  * ported (no xeno acid sprays in TG); the modules are otherwise identical.

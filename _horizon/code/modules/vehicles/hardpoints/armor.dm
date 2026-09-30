@@ -1,6 +1,6 @@
 /*
  * Armor hardpoints, ported from cmss13
- * code/modules/vehicles/hardpoints/armor/*.dm
+ * code/modules/vehicles/hardpoints/armor/.dm
  *
  * The snowplow's snow-layer clearing is adapted to leave generic debris;
  * TG turfs don't track cmss13-style snow bleed layers.

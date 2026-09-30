@@ -1,6 +1,6 @@
 /*
  * Secondary hardpoints (support guns), ported from cmss13
- * code/modules/vehicles/hardpoints/secondary/*.dm
+ * code/modules/vehicles/hardpoints/secondary/.dm
  */
 
 /obj/item/hardpoint/secondary

@@ -7,7 +7,7 @@
 
 SUBSYSTEM_DEF(interior)
 	name = "Interiors"
-	flags = SS_NO_FIRE|SS_NO_INIT
+	ss_flags = SS_NO_FIRE|SS_NO_INIT
 	var/list/datum/interior/interiors = list()
 
 /// Loads an interior, requires the interior datum

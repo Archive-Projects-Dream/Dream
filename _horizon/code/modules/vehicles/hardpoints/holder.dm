@@ -1,6 +1,6 @@
 /*
  * Holder hardpoints (the tank turret), ported from cmss13
- * code/modules/vehicles/hardpoints/holder/*.dm
+ * code/modules/vehicles/hardpoints/holder/.dm
  *
  * The turret's built-in smoke screen launcher is kept; the cmss13
  * powerloader interaction is not ported (no powerloaders in TG).

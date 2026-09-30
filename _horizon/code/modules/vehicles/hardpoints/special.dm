@@ -1,6 +1,6 @@
 /*
  * Special hardpoints (firing port weapons), ported from cmss13
- * code/modules/vehicles/hardpoints/special/*.dm
+ * code/modules/vehicles/hardpoints/special/.dm
  */
 
 /obj/item/hardpoint/special

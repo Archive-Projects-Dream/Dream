@@ -197,7 +197,7 @@
 			else if(islist(hardpoint_image))
 				var/list/image/hardpoint_image_list = hardpoint_image // Linter will complain about iterating on "an image" otherwise
 				for(var/image/subimage in hardpoint_image_list)
-						subimage.layer = layer + hardpoint.hdpt_layer * 0.1
+					subimage.layer = layer + hardpoint.hdpt_layer * 0.1
 			add_overlay(hardpoint_image)
 	if(clamped)
 		var/image/clamp_image = image(icon, icon_state = "vehicle_clamp", layer = layer+0.1)

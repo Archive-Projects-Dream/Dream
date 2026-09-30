@@ -1,6 +1,6 @@
 /*
  * Support hardpoints, ported from cmss13
- * code/modules/vehicles/hardpoints/support/*.dm
+ * code/modules/vehicles/hardpoints/support/.dm
  *
  * The cmss13 artillery module's turret-linked view shifting is kept; the ARC
  * antenna keeps its deploy/retract animation. The xeno wallhack sensor from

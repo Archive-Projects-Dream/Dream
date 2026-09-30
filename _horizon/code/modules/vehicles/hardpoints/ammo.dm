@@ -1,6 +1,6 @@
 /*
  * Hardpoint ammunition magazines, ported from cmss13
- * code/modules/vehicles/hardpoints/hardpoint_ammo/*.dm
+ * code/modules/vehicles/hardpoints/hardpoint_ammo.dm
  *
  * cmss13 magazines reference /datum/ammo types; in Horizon-Dream the
  * projectiles are bound to the hardpoints themselves, so the magazines are

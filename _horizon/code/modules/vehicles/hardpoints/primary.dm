@@ -1,6 +1,6 @@
 /*
  * Primary hardpoints (main guns), ported from cmss13
- * code/modules/vehicles/hardpoints/primary/*.dm
+ * code/modules/vehicles/hardpoints/primary/.dm
  *
  * Projectile stats live in projectiles.dm; the cmss13 IFF bullet trait
  * system is not ported, so guns simply fire at whatever is clicked.
