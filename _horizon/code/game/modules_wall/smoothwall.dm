@@ -13,9 +13,11 @@
 /atom
 	//A list of paths only that each turf should tile with
 	var/list/tiles_with
-	/// When TRUE, relativewall() also computes diagonal (corner-cut) links:
-	/// a diagonal bit is set only when both cardinals touching that corner
-	/// are open and something we tile with sits diagonally across it.
+	/// When TRUE, relativewall() also computes diagonal (corner-cut) links.
+	/// Everything in tiles_with connects cardinally, but only atoms that
+	/// carry a shadow mask (walls, opaque doors) actually seal a corner:
+	/// glass doors, windows and grilles keep it open, so masks meeting
+	/// across such a neighbour have to bridge it with a diagonal link.
 	var/smooth_diagonals = FALSE
 
 /atom/proc/relativewall() //atom because it should be useable both for walls, false walls, doors, windows, etc
@@ -37,43 +39,52 @@
 					break
 
 	if(smooth_diagonals)
-		junction |= relativewall_diagonals(junction)
+		junction |= relativewall_diagonals()
 
 	handle_icon_junction(junction)
 
 /*
  * Diagonal (corner-cut) junction bits, for masks that must stay connected when
- * two runs meet without a corner tile:
+ * two runs meet without a sealing corner tile:
  *
  *      ..#..             ..#..
  *      --...     ->      --%.. (% = diagonal link, drawn by BOTH shadows)
  *
- * A diagonal bit is only set when both cardinals touching that corner are open:
- * if either one is connected, the corner is already sealed by the regular
- * cardinal mask. NORTHEAST is literally NORTH|EAST, so a single `&` against
- * the cardinal junction covers both checks.
+ * A corner only counts as sealed when one of its cardinal sides carries a
+ * real shadow mask (a wall or an opaque door). Glass doors, windows and
+ * grilles are second-type connections: they tile cardinally like everything
+ * else in BASED_TILES, but they cast no shadow of their own, so the corner
+ * behind them stays open and the two masks have to bridge it diagonally.
  */
-/atom/proc/relativewall_diagonals(cardinal_junction)
+/atom/proc/relativewall_diagonals()
 	var/diagonal_junction = 0
 	var/turf/turf_check //The turf we are checking
 
 	for(var/first_iterator in GLOB.diagonals)
-		if(cardinal_junction & first_iterator)
+		if(corner_sealed(first_iterator))
 			continue
 		turf_check = get_step(src, first_iterator)
 		if(!istype(turf_check))
 			continue
-		for(var/second_iterator in tiles_with) //And for all types that we tile with
-			if(istype(turf_check, second_iterator))
-				diagonal_junction |= diagonal_junction_bit(first_iterator)
-				break
-
-			for(var/atom/third_iterator in turf_check)
-				if(istype(third_iterator, second_iterator))
-					diagonal_junction |= diagonal_junction_bit(first_iterator)
-					break
+		if(locate(/atom/movable/atom_shadow) in turf_check)
+			diagonal_junction |= diagonal_junction_bit(first_iterator)
 
 	return diagonal_junction
+
+/// TRUE when the turf in `direction` carries a shadow-casting atom: walls and
+/// opaque doors own an /atom/movable/atom_shadow. Glass doors, windows and
+/// grilles do not, so despite connecting cardinally they seal nothing.
+/atom/proc/turf_casts_shadow(direction)
+	var/turf/turf_check = get_step(src, direction)
+	if(!istype(turf_check))
+		return FALSE
+	return locate(/atom/movable/atom_shadow) in turf_check
+
+/// A corner is sealed when either of its two cardinal sides casts a shadow.
+/// NORTHEAST is literally NORTH|EAST, so one `&` per side splits a diagonal
+/// back into its cardinal components.
+/atom/proc/corner_sealed(diagonal_dir)
+	return turf_casts_shadow(diagonal_dir & (NORTH|SOUTH)) || turf_casts_shadow(diagonal_dir & (EAST|WEST))
 
 /proc/diagonal_junction_bit(diagonal_dir)
 	switch(diagonal_dir)

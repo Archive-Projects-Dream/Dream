@@ -78,6 +78,9 @@
 // MARK: Door Airlock
 /obj/machinery/door
 	var/atom/movable/atom_shadow/door/shadow
+	//Glass doors carry no shadow mask, so they can not refresh the neighbouring
+	//masks through one like opaque doors do - they have to notify them directly.
+	tiles_with = BASED_TILES
 
 /obj/machinery/door/Initialize(mapload)
 	. = ..()
@@ -85,6 +88,9 @@
 		shadow = new(loc)
 		shadow.icon_state = icon_state
 		shadow.dir = dir
+	else
+		//Nothing of ours to mask, but the neighbours cardinal-link to us now.
+		relativewall_neighbours()
 
 /obj/machinery/door/setDir(newdir)
     . = ..()
@@ -104,7 +110,12 @@
 				shadow.icon_state = "closed"
 
 /obj/machinery/door/Destroy()
-	shadow?.Destroy()
+	if(shadow)
+		shadow.Destroy()
+	else
+		//Glass doors: no mask of ours to destroy, but the neighbouring masks
+		//just lost their cardinal link to us and have to re-junction.
+		relativewall_neighbours()
 	return ..()
 
 /obj/machinery/door/poddoor/update_icon(updates = ALL)
