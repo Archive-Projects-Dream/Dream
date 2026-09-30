@@ -60,6 +60,18 @@ const ANIMATION_DISABLE_MS = 10000;
 /** Delay before the lobby load jingle, mirrors the original lobby */
 const LOAD_SOUND_DELAY_MS = 250;
 
+/** Duration of the fade-back-in animation when the lobby is re-shown */
+const LOBBY_FADE_IN_MS = 400;
+
+/** How long to wait before re-asking the server for the character preview */
+const PREVIEW_REREQUEST_MS = [2500, 6000] as const;
+
+/** Retries for a preview image whose asset is still in transit */
+const PREVIEW_IMG_RETRIES = 12;
+
+/** Delay between preview image retries */
+const PREVIEW_IMG_RETRY_MS = 400;
+
 const GAME_PHASE_STATUS = {
   startup: 'statusStartup',
   pregame: 'statusPregame',
@@ -83,6 +95,7 @@ function countdownLabel(countdown: string, t: ReturnType<typeof makeT>) {
 export function LobbyMenu() {
   const [ss, setSs] = useState<ServerState | null>(null);
   const [fadingOut, setFadingOut] = useState(false);
+  const [fadingIn, setFadingIn] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [animationsDisabled, setAnimationsDisabled] = useState(false);
   const [filterDisabled, setFilterDisabled] = useState<boolean | undefined>();
@@ -90,6 +103,10 @@ export function LobbyMenu() {
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [soundsOn, setSoundsOn] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
+  /** Set once the server has played a fade-out on us (leaving the lobby) */
+  const hadFadeOut = useRef(false);
+  /** Latest preview urls, read by the delayed re-request timers */
+  const previewUrlsRef = useRef<Record<string, string> | null>(null);
 
   useEffect(() => {
     Byond.subscribeTo('init', (payload: ServerState) => {
@@ -102,6 +119,19 @@ export function LobbyMenu() {
       // keeps the whole lobby at opacity 0 and the screen stays black.
       setFadingOut(false);
       setHidden(false);
+      // Restore the page backdrop for the current mode - the previous
+      // fade-out dropped it so the game could show through the cross-fade.
+      const bg = payload.transparent ? 'transparent' : '#000';
+      document.documentElement.style.setProperty('--lobby-bg', bg);
+      document.documentElement.style.backgroundColor = bg;
+      document.body.style.backgroundColor = bg;
+      // Coming back from a fade-out (returning to the lobby, respawning) -
+      // fade the menu back in instead of popping it into existence.
+      if (hadFadeOut.current) {
+        hadFadeOut.current = false;
+        setFadingIn(true);
+        setTimeout(() => setFadingIn(false), LOBBY_FADE_IN_MS + 100);
+      }
       // The pane may have been hidden for a long time; nudge the
       // background video to make sure it is still playing.
       videoRef.current?.play()?.catch(() => {});
@@ -113,8 +143,33 @@ export function LobbyMenu() {
       );
     });
 
-    // The server hides the browser shortly after this message
-    Byond.subscribeTo('fadeOut', () => setFadingOut(true));
+    // The server hides the browser shortly after this message. Dropping the
+    // opaque backdrop at the same time lets the fading lobby cross-fade into
+    // the live game view behind the (now see-through) browser element.
+    Byond.subscribeTo('fadeOut', () => {
+      setFadingOut(true);
+      hadFadeOut.current = true;
+      document.documentElement.style.setProperty('--lobby-bg', 'transparent');
+      document.documentElement.style.backgroundColor = 'transparent';
+      document.body.style.backgroundColor = 'transparent';
+    });
+
+    // The template-level "ready" fires before React has subscribed, so ask
+    // for a fresh state once we are actually mounted. If the character
+    // preview is still missing later, ask again - its render may have
+    // finished after our first init, or the update got lost in transit
+    // (which used to leave the preview blank until a manual reload).
+    const reRequestState = () => Byond.sendMessage('ready');
+    reRequestState();
+    const timers = PREVIEW_REREQUEST_MS.map((delay) =>
+      setTimeout(() => {
+        if (!previewUrlsRef.current) {
+          reRequestState();
+        }
+      }, delay),
+    );
+
+    return () => timers.forEach((timer) => clearTimeout(timer));
   }, []);
 
   useEffect(() => {
@@ -149,6 +204,11 @@ export function LobbyMenu() {
     document.body.style.backgroundColor = bg;
   }, [ss?.transparent]);
 
+  // Track the latest preview urls for the delayed re-request timers above
+  useEffect(() => {
+    previewUrlsRef.current = ss?.previewUrls ?? null;
+  }, [ss?.previewUrls]);
+
   // (Re)start playback whenever the video element (re)mounts or its
   // source changes - autoplay attributes alone are not reliable for that.
   useEffect(() => {
@@ -176,6 +236,7 @@ export function LobbyMenu() {
         crtFilter && 'filterEnabled',
         animationsDisabled && 'noAnimation',
         fadingOut && 'lobbyFadeOut',
+        fadingIn && 'lobbyFadeIn',
         ss.transparent && 'LobbyScreen--transparent',
       ])}
     >
@@ -399,20 +460,44 @@ function LobbyButton(props: {
 /** Character preview with client-side direction cycling */
 function CharacterPreview({ ss, t }: { ss: ServerState; t: TFunc }) {
   const [dirIndex, setDirIndex] = useState(0);
+  const [imgRetry, setImgRetry] = useState(0);
 
   const urls = ss.previewUrls;
+  const dir = PREVIEW_DIRS[dirIndex];
+  const url = urls ? (urls[dir] ?? Object.values(urls)[0]) : null;
+
+  // A new set of urls resets the retry counter
+  useEffect(() => {
+    setImgRetry(0);
+  }, [url]);
+
   if (!urls) {
     return null;
   }
-
-  const dir = PREVIEW_DIRS[dirIndex];
-  const url = urls[dir] ?? Object.values(urls)[0];
 
   return (
     <div className="lobby__preview">
       <div className="lobby__panel-title">{t('previewTitle')}</div>
       <div className="lobby__preview-body">
-        {url && <img className="lobby__preview-img" src={url} alt="" />}
+        {url && (
+          <img
+            key={`${url}-${imgRetry}`}
+            className="lobby__preview-img"
+            src={url}
+            alt=""
+            onError={() => {
+              // The asset can still be in transit right after login; a
+              // failed load never retries on its own, so remount the img
+              // until the file arrives in the client cache.
+              if (imgRetry < PREVIEW_IMG_RETRIES) {
+                setTimeout(
+                  () => setImgRetry((n) => n + 1),
+                  PREVIEW_IMG_RETRY_MS,
+                );
+              }
+            }}
+          />
+        )}
       </div>
       <Stack className="lobby__preview-buttons">
         <Stack.Item grow>

@@ -425,9 +425,18 @@ img {
 }
 
 // Fade the lobby out when the player enters the game.
-// The browser background shows through as the lobby UI fades + scales + blurs.
+// The page backdrop (--lobby-bg) is made transparent at the same time by
+// the fadeOut handler, so the fading lobby cross-fades into the live game
+// view rendered behind the see-through browser element.
 .lobbyFadeOut {
-  animation: lobby-fade-out 0.45s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+  animation: lobby-fade-out 0.5s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+  pointer-events: none;
+}
+
+// Fade the lobby back in when it is re-shown after being in the game
+// (returning to the lobby, respawning) instead of popping into existence.
+.lobbyFadeIn {
+  animation: lobby-fade-in 0.4s cubic-bezier(0.2, 0, 0.4, 1);
   pointer-events: none;
 }
 
@@ -442,5 +451,15 @@ img {
     opacity: 0;
     transform: scale(0.96);
     filter: blur(8px);
+  }
+}
+
+@keyframes lobby-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
