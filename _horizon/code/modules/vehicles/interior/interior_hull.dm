@@ -35,30 +35,41 @@
  */
 /obj/structure/interior_wall/tank
 	icon = '_horizon/icons/vehicles/obj/interiors/tank.dmi'
+
 /obj/structure/interior_wall/van
 	icon = '_horizon/icons/vehicles/obj/interiors/van.dmi'
+
 /obj/structure/interior_wall/clf_van
 	icon = '_horizon/icons/vehicles/obj/interiors/clf_van.dmi'
+
 /obj/structure/interior_wall/box_van
 	icon = '_horizon/icons/vehicles/obj/interiors/box_van_interior.dmi'
+
 /obj/structure/interior_wall/pizza_van
 	icon = '_horizon/icons/vehicles/obj/interiors/pizza_van_interior.dmi'
+
 /obj/structure/interior_wall/apc
 	icon = '_horizon/icons/vehicles/obj/interiors/apc.dmi'
+
 /obj/structure/interior_wall/apc_pmc
 	icon = '_horizon/icons/vehicles/obj/interiors/apc_pmc.dmi'
+
 /obj/effect/vehicle_roof/van
 	icon = '_horizon/icons/vehicles/obj/interiors/van.dmi'
 	icon_state = "roof_1"
+
 /obj/effect/vehicle_roof/clf_van
 	icon = '_horizon/icons/vehicles/obj/interiors/clf_van.dmi'
 	icon_state = "roof_1"
+
 /obj/effect/vehicle_roof/box_van
 	icon = '_horizon/icons/vehicles/obj/interiors/box_van_interior.dmi'
 	icon_state = "roof_1"
+
 /obj/effect/vehicle_roof/pizza_van
 	icon = '_horizon/icons/vehicles/obj/interiors/pizza_van_interior.dmi'
 	icon_state = "roof_1"
+
 /*
  * Simple interior props (ported from cmss13 /obj/structure/prop/tank).
  * Purely visual dressing mapped inside interiors.
@@ -69,11 +80,13 @@
 	anchored = TRUE
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
 	density = FALSE
+
 /obj/structure/prop/tank
 	name = "tank equipment"
 	desc = "An assorted piece of machinery inside a tank."
 	icon = '_horizon/icons/vehicles/obj/interiors/tank.dmi'
 	icon_state = "prop0_extra"
+
 /*
  * Wall telephone, ported from cmss13 /obj/structure/transmitter.
  * Functions as a fixed intercom-style radio usable by the crew.
@@ -90,6 +103,7 @@
 	var/phone_id = "Vehicle"
 	/// Category grouping phones into switchboards (cosmetic, kept for map compat)
 	var/phone_category = "Vehicles"
+
 /obj/structure/transmitter/attack_hand(mob/user, list/modifiers)
 	if(!isliving(user))
 		return

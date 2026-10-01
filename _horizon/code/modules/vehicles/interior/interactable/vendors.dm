@@ -22,8 +22,10 @@
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
 	all_products_free = TRUE
 	tiltable = FALSE
+
 /obj/machinery/vending/wallmed/vehicle/wy
 	icon = '_horizon/icons/vehicles/obj/interiors/general_wy.dmi'
+
 /// Compact medical resupply station used in the MED APC
 /obj/machinery/vending/medical/vehicle
 	name = "\improper Med Resupply Station"
@@ -50,10 +52,12 @@
 		/obj/item/reagent_containers/blood/o_minus = 2,
 		/obj/item/bodybag = 4,
 	)
+
 /// W-Y skinned med resupply station; the W-Y sheet has no "med" state, so the
 /// standard body is used with corporate branding in the name only.
 /obj/machinery/vending/medical/vehicle/wy
 	name = "\improper Wey-Med Resupply Station"
+
 /// Vehicle supply rack carrying ammo and hardpoint magazines
 /obj/machinery/vending/supply/vehicle
 	name = "\improper Automated Supply Rack"
@@ -90,6 +94,7 @@
 		/obj/item/stack/sheet/iron/fifty = 2,
 		/obj/item/storage/medkit/regular = 2,
 	)
+
 /// W-Y skinned supply rack; the W-Y interior sheet has no "supply" state, so
 /// the standard body is used with corporate branding in the name only.
 /obj/machinery/vending/supply/vehicle/wy

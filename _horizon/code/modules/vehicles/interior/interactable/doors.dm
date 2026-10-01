@@ -96,35 +96,136 @@
  * Per-vehicle door subtypes used by the interior maps.
  */
 /obj/structure/interior_exit/vehicle/tank
+	name = "tank hatch"
+	icon = '_horizon/icons/vehicles/obj/interiors/tank.dmi'
+	icon_state = "hatch"
+
+// MARK: Van
+/obj/structure/interior_exit/vehicle/van
+	icon = '_horizon/icons/vehicles/obj/interiors/van.dmi'
 
 /obj/structure/interior_exit/vehicle/van/left
+	name = "Van left door"
+	icon_state = "interior_door"
+
 /obj/structure/interior_exit/vehicle/van/right
+	name = "Van right door"
+	icon_state = "exterior_door_unique"
+	dir = SOUTH
+
 /obj/structure/interior_exit/vehicle/van/backleft
+	name = "Van back exit"
+	icon_state = "back_2"
+	dir = WEST
+
 /obj/structure/interior_exit/vehicle/van/backright
+	name = "Van back exit"
+	icon_state = "back_1"
+	dir = WEST
+
+// MARK: Clf Van
+/obj/structure/interior_exit/vehicle/clf_van
+	icon = '_horizon/icons/vehicles/obj/interiors/clf_van.dmi'
 
 /obj/structure/interior_exit/vehicle/clf_van/left
+	name = "Technical left door"
+	icon_state = "interior_door"
+
 /obj/structure/interior_exit/vehicle/clf_van/right
+	name = "Technical right door"
+	icon_state = "exterior_door_unique"
+	dir = SOUTH
+
 /obj/structure/interior_exit/vehicle/clf_van/backleft
+	name = "Technical back exit"
+	icon_state = "back_2"
+	dir = WEST
+
 /obj/structure/interior_exit/vehicle/clf_van/backright
+	name = "Technical back exit"
+	icon_state = "back_1"
+	dir = WEST
+
+// MARK: Box Van
+/obj/structure/interior_exit/vehicle/box_van
+	icon = '_horizon/icons/vehicles/obj/interiors/box_van_interior.dmi'
 
 /obj/structure/interior_exit/vehicle/box_van/left
+	name = "Van left door"
+	icon_state = "interior_door"
+
 /obj/structure/interior_exit/vehicle/box_van/right
+	name = "Van right door"
+	icon_state = "exterior_door_unique"
+	dir = SOUTH
+
 /obj/structure/interior_exit/vehicle/box_van/backleft
+	name = "Van back exit"
+	icon_state = "back_2"
+	dir = WEST
+
 /obj/structure/interior_exit/vehicle/box_van/backright
+	name = "Van back exit"
+	icon_state = "back_1"
+	dir = WEST
+
+// MARK: Pizza Van
+/obj/structure/interior_exit/vehicle/pizza_van
+	icon = '_horizon/icons/vehicles/obj/interiors/pizza_van_interior.dmi'
 
 /obj/structure/interior_exit/vehicle/pizza_van/left
+	name = "Van left door"
+	icon_state = "interior_door"
+
 /obj/structure/interior_exit/vehicle/pizza_van/right
+	name = "Van right door"
+	icon_state = "exterior_door_unique"
+	dir = SOUTH
+
 /obj/structure/interior_exit/vehicle/pizza_van/backleft
+	name = "Van back exit"
+	icon_state = "back_2"
+	dir = WEST
+
 /obj/structure/interior_exit/vehicle/pizza_van/backright
+	name = "Van back exit"
+	icon_state = "back_1"
+	dir = WEST
 
+// MARK: APC interior
 /obj/structure/interior_exit/vehicle/apc
+	name = "APC side door"
+	icon = '_horizon/icons/vehicles/obj/interiors/apc.dmi'
+	icon_state = "exit_door"
+
 /obj/structure/interior_exit/vehicle/apc/rear
+	name = "APC rear hatch"
+	icon_state = "door_rear_center"
+
 /obj/structure/interior_exit/vehicle/apc/rear/left
+	icon_state = "door_rear_left"
+
 /obj/structure/interior_exit/vehicle/apc/rear/right
+	icon_state = "door_rear_right"
 
+// MARK: APC - PMC
 /obj/structure/interior_exit/vehicle/apc_pmc
-/obj/structure/interior_exit/vehicle/apc_pmc/rear
-/obj/structure/interior_exit/vehicle/apc_pmc/rear/left
-/obj/structure/interior_exit/vehicle/apc_pmc/rear/right
+	name = "APC side door"
+	icon = '_horizon/icons/vehicles/obj/interiors/apc_pmc.dmi'
+	icon_state = "exit_door"
 
+/obj/structure/interior_exit/vehicle/apc_pmc/rear
+	name = "APC rear hatch"
+	icon_state = "door_rear_center"
+
+/obj/structure/interior_exit/vehicle/apc_pmc/rear/left
+	icon_state = "door_rear_left"
+
+/obj/structure/interior_exit/vehicle/apc_pmc/rear/right
+	icon_state = "door_rear_right"
+
+// MARK: ARC
 /obj/structure/interior_exit/vehicle/arc
+	name = "ARC side door"
+	icon = '_horizon/icons/vehicles/obj/interiors/arc.dmi'
+	icon_state = "exit_door"

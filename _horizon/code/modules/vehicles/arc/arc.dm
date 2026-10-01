@@ -57,9 +57,11 @@
 	var/antenna_deployed = FALSE
 	/// How long it takes to deploy or retract the antenna
 	var/antenna_toggle_time = 10 SECONDS
+
 /obj/vehicle/multitile/arc/Initialize(mapload)
 	. = ..()
 	RegisterSignal(src, COMSIG_ARC_ANTENNA_TOGGLED, PROC_REF(on_antenna_toggle))
+
 /// Keep the sentry's protected faction synced with the driver's faction
 /obj/vehicle/multitile/arc/set_seated_mob(seat, mob/living/seated_mob)
 	. = ..()
@@ -69,18 +71,22 @@
 		var/obj/item/hardpoint/primary/arc_sentry/sentry = locate() in hardpoints
 		if(sentry)
 			sentry.faction_to_protect = length(seated_mob.faction) ? seated_mob.faction[1] : null
+
 /obj/vehicle/multitile/arc/proc/on_antenna_toggle(datum/source)
 	SIGNAL_HANDLER
+
 /obj/vehicle/multitile/arc/relaymove(mob/user, direction)
 	if(antenna_deployed)
 		return FALSE
 	return ..()
+
 /obj/vehicle/multitile/arc/load_role_reserved_slots()
 	var/datum/role_reserved_slots/reserved_slots = new
 	reserved_slots.category_name = "Command Staff"
 	reserved_slots.roles = list("Commanding Officer", "Executive Officer", "Staff Officer", "Head of Personnel", "Captain", "Head of Security", "Chief Engineer", "Research Director", "Chief Medical Officer")
 	reserved_slots.total = 2
 	role_reserved_slots += reserved_slots
+
 /obj/vehicle/multitile/arc/add_seated_verbs(mob/living/seated_mob, seat)
 	if(!seated_mob.client)
 		return
@@ -92,6 +98,7 @@
 		/obj/vehicle/multitile/proc/name_vehicle,
 		/obj/vehicle/multitile/arc/proc/toggle_antenna,
 	))
+
 /obj/vehicle/multitile/arc/remove_seated_verbs(mob/living/seated_mob, seat)
 	if(!seated_mob.client)
 		return
@@ -104,6 +111,7 @@
 		/obj/vehicle/multitile/arc/proc/toggle_antenna,
 	))
 	SStgui.close_user_uis(seated_mob, src)
+
 /obj/vehicle/multitile/arc/initialize_cameras(change_tag = FALSE)
 	if(!camera)
 		camera = new /obj/machinery/camera/vehicle(src)
@@ -118,7 +126,6 @@
 /*
 ** ARC VERBS
 */
-
 /obj/vehicle/multitile/arc/proc/toggle_antenna(mob/toggler)
 	set name = "Toggle Sensor Antenna"
 	set desc = "Raises or lowers the external sensor antenna. While raised, the ARC cannot move."
@@ -163,6 +170,7 @@
 		antenna.deploy_antenna()
 		addtimer(CALLBACK(vehicle, PROC_REF(finish_antenna_deploy), seated_mob), antenna.deploy_animation_time)
 /obj/vehicle/multitile/arc/proc/finish_antenna_retract(mob/user)
+
 	var/obj/item/hardpoint/support/arc_antenna/antenna = locate() in hardpoints
 	if(!antenna)
 		return
@@ -173,6 +181,7 @@
 	antenna.deploying = FALSE
 	update_appearance()
 	SEND_SIGNAL(src, COMSIG_ARC_ANTENNA_TOGGLED)
+
 /obj/vehicle/multitile/arc/proc/finish_antenna_deploy(mob/user)
 	var/obj/item/hardpoint/support/arc_antenna/antenna = locate() in hardpoints
 	if(!antenna)
@@ -184,6 +193,7 @@
 	antenna.deploying = FALSE
 	update_appearance()
 	SEND_SIGNAL(src, COMSIG_ARC_ANTENNA_TOGGLED)
+
 /obj/vehicle/multitile/arc/proc/open_arc_controls_guide()
 	set name = "Vehicle Controls Guide"
 	set desc = "MANDATORY FOR FIRST PLAY AS VEHICLE CREWMAN OR AFTER UPDATES."
@@ -205,6 +215,7 @@
 	2. <b>\"G: Toggle Door Locks\"</b> - toggles vehicle's access restrictions. Heads of staff and security accesses bypass these restrictions.<br> \
 	<font color='#cd6500'><b><i>Driver shortcuts:</i></b></font><br> 1. <b>\"CTRL + Click\"</b> - activates vehicle horn.<br>"
 	seated_mob << browse(dat, "window=vehicle_help;size=900x500")
+
 /*
 ** ARC PRESETS SPAWNERS
 */
@@ -214,20 +225,24 @@
 	icon_state = "apc_base"
 	pixel_x = -48
 	pixel_y = -48
+
 /obj/effect/vehicle_spawner/arc/Initialize(mapload)
 	. = ..()
 	spawn_vehicle()
 	return INITIALIZE_HINT_QDEL
+
 /obj/effect/vehicle_spawner/arc/spawn_vehicle()
 	var/obj/vehicle/multitile/arc/spawned_arc = new (loc)
 	load_misc(spawned_arc)
 	load_hardpoints(spawned_arc)
 	handle_direction(spawned_arc)
 	spawned_arc.update_appearance()
+
 /obj/effect/vehicle_spawner/arc/load_hardpoints(obj/vehicle/multitile/arc/spawned_arc)
 	spawned_arc.add_hardpoint(new /obj/item/hardpoint/locomotion/arc_wheels)
 	spawned_arc.add_hardpoint(new /obj/item/hardpoint/primary/arc_sentry)
 	spawned_arc.add_hardpoint(new /obj/item/hardpoint/support/arc_antenna)
+
 /*
  * ARC interior structures, ported from cmss13 arc/interior.dm and
  * apc/interior.dm (the firing port weapon and sensor equipment props
@@ -238,15 +253,20 @@
 	name = "ARC side door"
 	icon = '_horizon/icons/vehicles/obj/interiors/arc.dmi'
 	icon_state = "exit_door"
+
 /obj/structure/prop/vehicle/arc
 	name = "ARC chassis"
 	desc = "The chassis of the ARC."
 	icon = '_horizon/icons/vehicles/obj/interiors/arc_chassis.dmi'
 	icon_state = "arc_chassis"
-	layer = ABOVE_NORMAL_TURF_LAYER
+	layer = LOW_FLOOR_LAYER
+	//mouse_opacity = FALSE
+
+	//layer = ABOVE_NORMAL_TURF_LAYER
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	density = FALSE
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
+
 /obj/structure/prop/vehicle/sensor_equipment
 	name = "Data Analyzing Nexus"
 	desc = "This machinery collects and analyzes data from the vehicle's sensors cluster. Better not touch it."
@@ -254,6 +274,7 @@
 	icon_state = "sensors_equipment"
 	density = FALSE
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
+
 /// A joystick styled like a smartgun handle; clicking it buckles you into the support gunner seat
 /obj/structure/prop/vehicle/firing_port_weapon
 	name = "M56 FPW handle"
@@ -263,6 +284,7 @@
 	density = FALSE
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
 	var/obj/structure/chair/comfy/vehicle/support_gunner/SG_seat
+
 /obj/structure/prop/vehicle/firing_port_weapon/examine(mob/user)
 	. = ..()
 	if(!ishuman(user))
@@ -278,6 +300,7 @@
 				. += span_notice("The [port_weapon.name]'s ammo count is: [span_bold("[port_weapon.ammo.current_rounds]")]/[span_bold("[port_weapon.ammo.max_rounds]")].")
 				break
 	. += span_notice("Clicking on the [name] while being adjacent to the support gunner seat will buckle you in and give you the control of the M56 FPW.")
+
 /obj/structure/prop/vehicle/firing_port_weapon/attack_hand(mob/living/carbon/human/human_user, list/modifiers)
 	if(!istype(human_user))
 		return
@@ -294,6 +317,7 @@
 					to_chat(human_user, span_notice("The [port_weapon.name]'s ammo count is: [span_bold("[port_weapon.ammo.current_rounds]")]/[span_bold("[port_weapon.ammo.max_rounds]")]."))
 					break
 		return
+
 // Comfy chairs used in the ARC interior (layer tweak, like cmss13)
 /obj/structure/chair/comfy/arc
 	name = "crew chair"
