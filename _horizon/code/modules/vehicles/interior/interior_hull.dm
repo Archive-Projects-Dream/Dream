@@ -13,8 +13,18 @@
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	layer = INTERIOR_WALL_LAYER
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
+
+/// cmss13's interior walls do not stop projectiles (get_projectile_hit_boolean()
+/// returned FALSE): shots fired inside the interior fly over the bulkheads and
+/// die on the void padding instead of stacking up on the wall sprites.
+/obj/structure/interior_wall/Cross(atom/movable/mover)
+	if(istype(mover, /obj/projectile))
+		return TRUE
+	return ..()
+
 /obj/structure/interior_wall/ex_act(severity)
 	return
+
 //roof for small vehicles to emphasize small space
 
 /obj/effect/vehicle_roof
@@ -30,29 +40,51 @@
 	alpha = 80
 /obj/effect/vehicle_roof/ex_act(severity)
 	return
+
 /*
  * Per-vehicle hull subtypes referenced by the interior maps.
+ * Armored hulls (tank/APC/PMC) mirror cmss13: opaque bulkheads at
+ * INTERIOR_WALL_LAYER (cmss13 WALL_LAYER 2.02).
+ * Van hulls mirror cmss13 van/interior.dm: NOT opaque side panels at
+ * WINDOW_LAYER 3.2 so the cabin reads as one glassy space instead of
+ * a black box; TG's ABOVE_OBJ_LAYER is the same 3.2 slot.
  */
 /obj/structure/interior_wall/tank
 	icon = '_horizon/icons/vehicles/obj/interiors/tank.dmi'
-
-/obj/structure/interior_wall/van
-	icon = '_horizon/icons/vehicles/obj/interiors/van.dmi'
-
-/obj/structure/interior_wall/clf_van
-	icon = '_horizon/icons/vehicles/obj/interiors/clf_van.dmi'
-
-/obj/structure/interior_wall/box_van
-	icon = '_horizon/icons/vehicles/obj/interiors/box_van_interior.dmi'
-
-/obj/structure/interior_wall/pizza_van
-	icon = '_horizon/icons/vehicles/obj/interiors/pizza_van_interior.dmi'
 
 /obj/structure/interior_wall/apc
 	icon = '_horizon/icons/vehicles/obj/interiors/apc.dmi'
 
 /obj/structure/interior_wall/apc_pmc
 	icon = '_horizon/icons/vehicles/obj/interiors/apc_pmc.dmi'
+
+/obj/structure/interior_wall/van
+	name = "van interior wall"
+	icon = '_horizon/icons/vehicles/obj/interiors/van.dmi'
+	icon_state = "van_right_1"
+	opacity = FALSE
+	layer = ABOVE_OBJ_LAYER
+
+/obj/structure/interior_wall/clf_van
+	name = "technical interior wall"
+	icon = '_horizon/icons/vehicles/obj/interiors/clf_van.dmi'
+	icon_state = "van_right_1"
+	opacity = FALSE
+	layer = ABOVE_OBJ_LAYER
+
+/obj/structure/interior_wall/box_van
+	name = "van interior wall"
+	icon = '_horizon/icons/vehicles/obj/interiors/box_van_interior.dmi'
+	icon_state = "exterior_2"
+	opacity = FALSE
+	layer = ABOVE_OBJ_LAYER
+
+/obj/structure/interior_wall/pizza_van
+	name = "van interior wall"
+	icon = '_horizon/icons/vehicles/obj/interiors/pizza_van_interior.dmi'
+	icon_state = "exterior_2"
+	opacity = FALSE
+	layer = ABOVE_OBJ_LAYER
 
 /obj/effect/vehicle_roof/van
 	icon = '_horizon/icons/vehicles/obj/interiors/van.dmi'
@@ -72,7 +104,9 @@
 
 /*
  * Simple interior props (ported from cmss13 /obj/structure/prop/tank).
- * Purely visual dressing mapped inside interiors.
+ * Purely visual dressing mapped inside interiors; each map tile overrides
+ * icon_state (prop1..prop7, prop8_extra); the base state is prop0 exactly
+ * like cmss13 (prop0_extra does not exist in the sprite file).
  */
 /obj/structure/prop
 	name = "prop"
@@ -82,10 +116,12 @@
 	density = FALSE
 
 /obj/structure/prop/tank
-	name = "tank equipment"
+	name = "tank machinery"
 	desc = "An assorted piece of machinery inside a tank."
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	density = TRUE
 	icon = '_horizon/icons/vehicles/obj/interiors/tank.dmi'
-	icon_state = "prop0_extra"
+	icon_state = "prop0"
 
 /*
  * Wall telephone, ported from cmss13 /obj/structure/transmitter.

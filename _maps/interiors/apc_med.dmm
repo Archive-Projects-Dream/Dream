@@ -14,9 +14,23 @@
 /turf/open/shuttle/vehicle/dark_sterile_green_11,
 /area/interior/vehicle/apc/med)
 "c" = (
+/obj/effect/decal/medical_decals/permanent{
+	icon_state = "docdecal2";
+	pixel_x = -5;
+	pixel_y = 16
+	},
+/obj/effect/decal/medical_decals/permanent{
+	icon_state = "triagedecalbottom"
+	},
 /turf/open/shuttle/vehicle/dark_sterile_green_5,
 /area/interior/vehicle/apc/med)
 "d" = (
+/obj/effect/decal/medical_decals/permanent{
+	icon_state = "triagedecalbottom"
+	},
+/obj/effect/decal/medical_decals/permanent{
+	icon_state = "triagedecaltopright"
+	},
 /turf/open/shuttle/vehicle/dark_sterile_green_14,
 /area/interior/vehicle/apc/med)
 "e" = (
@@ -75,6 +89,10 @@
 /obj/machinery/vending/medical/vehicle{
 	pixel_x = 2;
 	pixel_y = 23
+	},
+/obj/effect/decal/medical_decals/permanent{
+	icon_state = "triagedecaltop";
+	pixel_y = -2
 	},
 /turf/open/shuttle/vehicle/dark_sterile_green_7,
 /area/interior/vehicle/apc/med)
@@ -144,6 +162,10 @@
 /turf/open/void/vehicle,
 /area/space)
 "w" = (
+/obj/effect/decal/medical_decals/permanent{
+	dir = 4;
+	icon_state = "triagedecaldir"
+	},
 /turf/open/shuttle/vehicle/dark_sterile_green_8,
 /area/interior/vehicle/apc/med)
 "x" = (
@@ -205,6 +227,11 @@
 /turf/open/void/vehicle,
 /area/space)
 "D" = (
+/obj/effect/decal/medical_decals/permanent{
+	icon_state = "docdecal1";
+	pixel_x = -5;
+	pixel_y = 16
+	},
 /turf/open/shuttle/vehicle/dark_sterile,
 /area/interior/vehicle/apc/med)
 "E" = (
@@ -283,6 +310,13 @@
 /turf/open/void/vehicle,
 /area/space)
 "O" = (
+/obj/effect/decal/medical_decals/permanent{
+	icon_state = "triagedecaltop";
+	pixel_y = -2
+	},
+/obj/effect/decal/medical_decals/permanent{
+	icon_state = "triagedecalbottomright"
+	},
 /obj/effect/landmark/interior/spawn/interior_camera{
 	dir = 10;
 	pixel_x = -14;

@@ -64,7 +64,9 @@
 // Driver's seat spawner
 /obj/effect/landmark/interior/spawn/vehicle_driver_seat
 	name = "driver's seat spawner"
-	icon = 'icons/obj/chairs.dmi'
+	// cmss13 uses its own furniture chairs.dmi (comfychair); TG's
+	// chairs.dmi has different art, so the CM13 sheet ships with the port
+	icon = '_horizon/icons/vehicles/obj/interiors/chairs.dmi'
 	icon_state = "comfychair"
 	color = "red"
 
@@ -87,7 +89,7 @@
 // Gunner's seat spawner
 /obj/effect/landmark/interior/spawn/vehicle_gunner_seat
 	name = "gunner's seat spawner"
-	icon = 'icons/obj/chairs.dmi'
+	icon = '_horizon/icons/vehicles/obj/interiors/chairs.dmi'
 	icon_state = "comfychair"
 	color = "blue"
 

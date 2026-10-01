@@ -242,6 +242,30 @@
 	if(!hardpoint)
 		return
 	hardpoint.change_target(source?.mob, src_object, over_object, src_location, over_location, src_control, over_control, params)
+/// Turns a world click into a target the crew can shoot at, or null if it
+/// shouldn't be treated as a shot. Ported from the tgmc armored vehicles
+/// implementation: clicks landing on the screen click catcher (wide crew
+/// views, shots beyond the map edge) are resolved back into turfs relative
+/// to the crewman's eye, and clicks on ourselves or inside our own interior
+/// are ignored so the gunner doesn't shoot their own hull.
+/obj/vehicle/multitile/proc/get_crew_target(mob/crew_member, atom/clicked, list/modifiers)
+	if(istype(clicked, /atom/movable/screen/click_catcher))
+		return parse_caught_click_modifiers(modifiers, get_turf(crew_member.client?.eye), crew_member.client)
+	if(!isturf(clicked) && !isturf(clicked?.loc))
+		return null
+	if(clicked == src)
+		return null
+	if(interior && is_own_interior_turf(get_turf(clicked)))
+		return null
+	return clicked
+/// Helper: is this turf part of our interior reservation?
+/obj/vehicle/multitile/proc/is_own_interior_turf(turf/T)
+	if(!interior?.reservation || !T)
+		return FALSE
+	var/list/bounds = interior.get_bound_turfs()
+	if(!bounds)
+		return FALSE
+	return T.z == bounds[1].z && T.x >= bounds[1].x && T.x <= bounds[2].x && T.y >= bounds[1].y && T.y <= bounds[2].y
 /// Checks for special control keybinds, else relays crew mouse press to active hardpoint.
 /obj/vehicle/multitile/proc/crew_mousedown(client/source, atom/object, turf/location, control, params)
 	SIGNAL_HANDLER
@@ -254,11 +278,11 @@
 	switch(seat)
 		if(VEHICLE_DRIVER)
 			if(modifiers[LEFT_CLICK] && modifiers[CTRL_CLICK])
-				activate_horn()
+				activate_horn(source.mob)
 				return
 		if(VEHICLE_GUNNER)
 			if(modifiers[LEFT_CLICK] && modifiers[ALT_CLICK])
-				toggle_gyrostabilizer()
+				toggle_gyrostabilizer(source.mob)
 				return
 	var/obj/item/hardpoint/hardpoint = get_mob_hp(source.mob)
 	if(QDELETED(hardpoint) || hardpoint.atom_integrity <= 0)
@@ -267,7 +291,12 @@
 		hardpoint = auto_select_hardpoint(source.mob)
 	if(!hardpoint)
 		return
-	hardpoint.start_fire(source.mob, object, location, control, params)
+	// Resolve clicks that landed on the click catcher into real turfs so
+	// distant tiles are valid targets for the active hardpoint
+	var/atom/resolved_target = get_crew_target(source.mob, object, modifiers)
+	if(!resolved_target)
+		return
+	hardpoint.start_fire(source.mob, resolved_target, get_turf(resolved_target), control, params)
 /// Human-readable sides the vehicle entrances are on, named relative
 /// to the vehicle's own facing (front/back/left/right), for the
 /// "you can't climb in from here" feedback.
@@ -329,6 +358,7 @@
 		if(door_locked && atom_integrity > 0) //check if lock on and actually works
 			if(!allowed(entering_mob))
 				to_chat(entering_mob, span_warning("\The [src] is locked!"))
+				log_world("VEHICLE: [key_name(entering_mob)] refused entry to [src] at ([x],[y],[z]): door locked, no access.")
 				return
 	// Only non-humans can force their way in without doors, and only when the frame is completely broken
 	if(!entrance_used && atom_integrity > 0)
@@ -362,11 +392,13 @@
 		if(entering_mob.pulling)
 			dragged_atom = entering_mob.pulling
 	// Transfer them to the interior
-	if(QDELETED(interior))
+	if(QDELETED(interior) || !interior.ready)
 		to_chat(entering_mob, span_warning("\The [src]'s interior failed to load. Report this bug."))
 		log_world("VEHICLE: interior of [src] at [src.x],[src.y],[src.z] failed to load; [key_name(entering_mob)] could not enter.")
 		return
-	interior.enter(entering_mob, entrance_used)
+	var/entered = interior.enter(entering_mob, entrance_used)
+	if(entered)
+		log_world("VEHICLE: [key_name(entering_mob)] entered [src] via '[entrance_used]'.")
 	// We try to make the dragged thing enter last so that the mob who actually entered takes precedence
 	if(dragged_atom)
 		entering_mob.stop_pulling()

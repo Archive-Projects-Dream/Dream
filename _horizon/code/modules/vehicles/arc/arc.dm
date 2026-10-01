@@ -259,10 +259,10 @@
 	desc = "The chassis of the ARC."
 	icon = '_horizon/icons/vehicles/obj/interiors/arc_chassis.dmi'
 	icon_state = "arc_chassis"
-	layer = LOW_FLOOR_LAYER
-	//mouse_opacity = FALSE
-
-	//layer = ABOVE_NORMAL_TURF_LAYER
+	// cmss13 uses ABOVE_TURF_LAYER (2.01); LOW_FLOOR_LAYER is a FLOOR_PLANE
+	// topdown value (10000+) that renders above everything when an /obj
+	// carries it on the GAME_PLANE, burying the whole ARC interior
+	layer = ABOVE_NORMAL_TURF_LAYER
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 	density = FALSE
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
@@ -321,4 +321,7 @@
 // Comfy chairs used in the ARC interior (layer tweak, like cmss13)
 /obj/structure/chair/comfy/arc
 	name = "crew chair"
+	// CM13's comfy chairs come from its own furniture sheet; use it so
+	// the ARC interior matches cmss13 visuals
+	icon = '_horizon/icons/vehicles/obj/interiors/chairs.dmi'
 	layer = BELOW_MOB_LAYER

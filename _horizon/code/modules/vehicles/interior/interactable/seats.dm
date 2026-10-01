@@ -73,7 +73,7 @@
 	vehicle.set_seated_mob(seat, M)
 	if(M.client)
 		stored_view = M.client.view
-		M.client.change_view(8) // cmss13 gives vehicle crew a slightly wider view
+		M.client.change_view(vehicle.get_crew_view(seat))
 
 /obj/structure/chair/comfy/vehicle/unbuckle_mob(mob/living/buckled_mob, force = FALSE, can_fall = TRUE)
 	. = ..()
@@ -86,6 +86,21 @@
 			buckled_mob.client.change_view(stored_view)
 			stored_view = null
 		buckled_mob.reset_perspective()
+
+/// cmss13 /obj/structure/bed/chair/comfy/vehicle/clicked(): clicking your own
+/// seat snaps the camera back onto the vehicle after walking around inside
+/// the interior. Clicking an EMPTY crew seat buckles you into it, like
+/// cmss13 (plain TG chairs only buckle through drag-and-drop).
+/obj/structure/chair/comfy/vehicle/attack_hand(mob/living/user, list/modifiers)
+	if((user in buckled_mobs) && LAZYACCESS(modifiers, SHIFT_CLICK) && !HAS_TRAIT(user, TRAIT_INCAPACITATED))
+		if(vehicle && user.client)
+			user.client.change_view(vehicle.get_crew_view(seat))
+			vehicle.set_seated_mob(seat, user)
+			return TRUE
+	if(!has_buckled_mobs() && !user.buckled && user.Adjacent(src) && !HAS_TRAIT(user, TRAIT_INCAPACITATED))
+		user_buckle_mob(user, user, check_loc = FALSE)
+		return TRUE
+	return ..()
 
 // Pass movement relays to the vehicle
 /obj/structure/chair/comfy/vehicle/relaymove(mob/living/user, direction)
@@ -237,6 +252,14 @@
 
 //------BUCKLING AND UNBUCKLING
 //trying to buckle a mob
+/obj/structure/chair/vehicle/attack_hand(mob/living/user, list/modifiers)
+	// cmss13 buckles you in when you click the seat; plain TG chairs
+	// only support drag-and-drop, so the click path is restored here
+	if(!has_buckled_mobs() && !user.buckled && user.Adjacent(src) && !HAS_TRAIT(user, TRAIT_INCAPACITATED))
+		user_buckle_mob(user, user, check_loc = FALSE)
+		return TRUE
+	return ..()
+
 /obj/structure/chair/vehicle/user_buckle_mob(mob/living/M, mob/user, check_loc = TRUE)
 	if(broken)
 		to_chat(user, span_warning("[src] is broken and requires fixing with a welder!"))
@@ -271,29 +294,41 @@
 		icon_state = initial(icon_state)
 		cut_overlay(chairbar)
 
+	// cmss13's funny "beds converted into seats" trick: two seats share a
+	// tile, and while only one is taken its occupant carries TRAIT_UNDENSE
+	// so everyone can walk over them; once both are taken both become
+	// dense and the tile blocks movement (see DOUBLE_SEATS_TRAIT)
 	for(var/obj/structure/chair/vehicle/VS in get_turf(src))
 		if(VS != src)
-			//if both seats on same tile have buckled mob, we become dense, otherwise, not dense.
 			if(has_buckled_mobs())
 				if(VS.has_buckled_mobs())
-					VS.density = TRUE
-					density = TRUE
+					REMOVE_TRAIT(M, TRAIT_UNDENSE, DOUBLE_SEATS_TRAIT)
+					for(var/mob/living/VS_mob in VS.buckled_mobs)
+						REMOVE_TRAIT(VS_mob, TRAIT_UNDENSE, DOUBLE_SEATS_TRAIT)
+				else
+					ADD_TRAIT(M, TRAIT_UNDENSE, DOUBLE_SEATS_TRAIT)
 			else
-				VS.density = FALSE
+				if(VS.has_buckled_mobs())
+					for(var/mob/living/VS_mob in VS.buckled_mobs)
+						ADD_TRAIT(VS_mob, TRAIT_UNDENSE, DOUBLE_SEATS_TRAIT)
+				REMOVE_TRAIT(M, TRAIT_UNDENSE, DOUBLE_SEATS_TRAIT)
 			break
 
 	handle_rotation()
 
-/obj/structure/chair/vehicle/post_unbuckle_mob()
+/obj/structure/chair/vehicle/post_unbuckle_mob(mob/living/M)
 	. = ..()
 
 	icon_state = initial(icon_state)
 	cut_overlay(chairbar)
 
+	REMOVE_TRAIT(M, TRAIT_UNDENSE, DOUBLE_SEATS_TRAIT)
+
 	for(var/obj/structure/chair/vehicle/VS in get_turf(src))
 		if(VS != src)
-			VS.density = FALSE
-			density = FALSE
+			if(VS.has_buckled_mobs())
+				for(var/mob/living/VS_mob in VS.buckled_mobs)
+					ADD_TRAIT(VS_mob, TRAIT_UNDENSE, DOUBLE_SEATS_TRAIT)
 			break
 
 	handle_rotation()

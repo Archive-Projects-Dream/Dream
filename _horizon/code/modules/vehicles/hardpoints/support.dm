@@ -68,15 +68,22 @@
 	activatable = TRUE
 
 	var/is_active = FALSE
-	var/view_buff = 10 //This way you can VV for more or less fun
+	/// How many tiles over the server default view the optics zoom out to
+	var/view_buff = 3
 	var/view_tile_offset = 7
+
+/// Helper: this server's default view size in tiles
+/obj/item/hardpoint/support/artillery_module/proc/default_view_tiles()
+	var/list/default_view = getviewsize(world.view)
+	return max(default_view[1], default_view[2])
 
 /obj/item/hardpoint/support/artillery_module/handle_fire(atom/target_atom, mob/living/user, params)
 	if(!user.client)
 		return
 
 	if(is_active)
-		user.client.change_view(7)
+		// back to the regular crew view (default + 1)
+		user.client.change_view(default_view_tiles() + 1)
 		user.client.pixel_x = 0
 		user.client.pixel_y = 0
 		is_active = FALSE
@@ -87,7 +94,7 @@
 		view_holder = turret
 		break
 
-	user.client.change_view(view_buff)
+	user.client.change_view(default_view_tiles() + view_buff)
 	is_active = TRUE
 
 	switch(view_holder.dir)
@@ -117,7 +124,7 @@
 		var/mob/seated_mob = vehicle_owner.seats[seat]
 		if(!seated_mob.client)
 			continue
-		seated_mob.client.change_view(7)
+		seated_mob.client.change_view(default_view_tiles() + 1)
 		seated_mob.client.pixel_x = 0
 		seated_mob.client.pixel_y = 0
 	is_active = FALSE

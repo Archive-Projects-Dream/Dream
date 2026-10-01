@@ -75,10 +75,18 @@
 #define HARDPOINT_FIREMODE_BURSTFIRE 2
 
 /// Layer for interior doors, ported from cmss13 layer defines.
-/// BYOND's FLY_LAYER (5) is used for walls; south-facing walls sit above.
-#define INTERIOR_DOOR_LAYER 3.7
+/// cmss13: INTERIOR_DOOR_LAYER = 5.21 (just above south walls at 5.2 and
+/// FLY_LAYER at 5) so door/viewport sprites in the upper wall area render
+/// above mobs standing on their tile.
+#define INTERIOR_DOOR_LAYER 5.21
 #define INTERIOR_WALL_SOUTH_LAYER 5.2
 #define INTERIOR_WALL_LAYER 2.02
+
+/// Trait source for the cmss13 double passenger seat mechanic: two seats
+/// share one tile; while only one is taken its occupant gets TRAIT_UNDENSE
+/// (you can walk over them), when both are taken both mobs become dense and
+/// the tile blocks movement
+#define DOUBLE_SEATS_TRAIT "double_seats"
 
 /*
  * Signals for the multitile vehicle system.

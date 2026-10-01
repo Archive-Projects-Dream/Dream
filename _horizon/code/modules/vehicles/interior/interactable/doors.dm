@@ -17,6 +17,13 @@
 	// Which entrance to exit through
 	var/entrance_id = null
 
+/// cmss13's interior exits do not stop projectiles
+/// (get_projectile_hit_boolean() returned FALSE)
+/obj/structure/interior_exit/Cross(atom/movable/mover)
+	if(istype(mover, /obj/projectile))
+		return TRUE
+	return ..()
+
 /obj/structure/interior_exit/attack_hand(mob/M, list/modifiers)
 
 	// Check if dragging anything
@@ -60,7 +67,7 @@
 	switch(dir)
 		if(NORTH)
 			pixel_y = 31
-			layer = FLY_LAYER
+			layer = INTERIOR_WALL_LAYER
 		if(SOUTH)
 			layer = INTERIOR_WALL_SOUTH_LAYER
 

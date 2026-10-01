@@ -327,7 +327,7 @@
 	if(artillery_module && artillery_module.is_active)
 		var/mob/seated_gunner = tank_owner.seats[VEHICLE_GUNNER]
 		if(seated_gunner && seated_gunner.client)
-			seated_gunner.client.change_view(artillery_module.view_buff)
+			seated_gunner.client.change_view(artillery_module.default_view_tiles() + artillery_module.view_buff)
 
 			switch(dir)
 				if(NORTH)

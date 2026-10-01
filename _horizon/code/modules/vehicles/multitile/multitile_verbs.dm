@@ -220,12 +220,12 @@
 	seated_mob << browse(dat, "window=vehicle_help;size=900x500")
 
 //toggles gyrostabilizer for vehicles that have turret, allowing it to keep direction regardless hull rotations
-/obj/vehicle/multitile/proc/toggle_gyrostabilizer()
+/obj/vehicle/multitile/proc/toggle_gyrostabilizer(mob/toggling_mob)
 	set name = "Toggle Turret Gyrostabilizer"
 	set desc = "Toggles Turret Gyrostabilizer allowing it independent movement regardless of hull direction."
 	set category = "Vehicle"
 
-	var/mob/seated_mob = usr
+	var/mob/seated_mob = toggling_mob || usr
 	if(!istype(seated_mob))
 		return
 

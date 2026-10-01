@@ -323,6 +323,16 @@
 /// Get crewmember of seat.
 /obj/vehicle/multitile/proc/get_seat_mob(seat)
 	return seats[seat]
+/// View size handed to a crew member while seated.
+/// cmss13 ran on a 7-tile world view and gave crews an absolute 8 (one tile
+/// wider), the APC gunner 10. This codebase defaults to a 15x15 world view,
+/// so porting those absolute numbers would BINOCULAR-ZOOM the crew in.
+/// The values are therefore applied as a bump over this server's default
+/// view, preserving the original relative intent (crew +1, APC gunner +3).
+/obj/vehicle/multitile/proc/get_crew_view(seat)
+	var/list/default_view = getviewsize(world.view)
+	var/default_tiles = max(default_view[1], default_view[2])
+	return default_tiles + 1
 /// Get seat of crewmember.
 /obj/vehicle/multitile/proc/get_mob_seat(mob/crew_member)
 	for(var/seat in seats)
@@ -337,6 +347,9 @@
 	return null
 /// Picks the first activatable hardpoint for the seated mob's seat,
 /// stores it as the seat's active hardpoint and returns it.
+/// Weapons (projectile_type + ammo) outrank utility modules like the
+/// artillery optics, so climbing into the gunner seat and left-clicking
+/// fires the cannon instead of toggling a view.
 /// Returns null when the seat controls nothing usable.
 /obj/vehicle/multitile/proc/auto_select_hardpoint(mob/crew_member)
 	var/seat = get_mob_seat(crew_member)
@@ -345,7 +358,12 @@
 	var/list/usable_hardpoints = get_activatable_hardpoints(seat)
 	var/obj/item/hardpoint/chosen_hardpoint = null
 	if(LAZYLEN(usable_hardpoints))
-		chosen_hardpoint = usable_hardpoints[1]
+		for(var/obj/item/hardpoint/candidate in usable_hardpoints)
+			if(candidate.projectile_type && candidate.ammo)
+				chosen_hardpoint = candidate
+				break
+		if(!chosen_hardpoint)
+			chosen_hardpoint = usable_hardpoints[1]
 		active_hp[seat] = chosen_hardpoint
 		to_chat(crew_member, span_notice("You take control of \the [chosen_hardpoint]."))
 	return chosen_hardpoint

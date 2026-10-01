@@ -13,7 +13,7 @@ GLOBAL_LIST_EMPTY(command_apc_list)
 	desc = "An M577 Armored Personnel Carrier. An armored transport with four big wheels. Entrances on the sides and back."
 
 	icon = '_horizon/icons/vehicles/obj/apc.dmi'
-	icon_state = "hull_wy"
+	icon_state = "apc_base"
 	pixel_x = -48
 	pixel_y = -48
 
@@ -90,6 +90,15 @@ GLOBAL_LIST_EMPTY(command_apc_list)
 	reserved_slots.total = 2
 	role_reserved_slots += reserved_slots
 
+/// cmss13 gave the APC gunner an absolute 10-tile view on a 7-tile world
+/// (a +3 bump); translate that bump onto this server's default view so the
+/// gunner sees further out without binocular-zooming everyone else in
+/obj/vehicle/multitile/apc/get_crew_view(seat)
+	if(seat == VEHICLE_GUNNER)
+		var/list/default_view = getviewsize(world.view)
+		return max(default_view[1], default_view[2]) + 3
+	return ..()
+
 /obj/vehicle/multitile/apc/add_seated_verbs(mob/living/seated_mob, seat)
 	if(!seated_mob.client)
 		return
@@ -158,7 +167,7 @@ GLOBAL_LIST_EMPTY(command_apc_list)
 /obj/effect/vehicle_spawner/apc
 	name = "APC Transport Spawner"
 	icon = '_horizon/icons/vehicles/obj/apc.dmi'
-	icon_state = "hull_wy"
+	icon_state = "apc_base"
 	pixel_x = -48
 	pixel_y = -48
 
