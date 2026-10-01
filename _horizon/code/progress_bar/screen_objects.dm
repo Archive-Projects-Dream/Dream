@@ -5,7 +5,14 @@
 	var/datum/world_progressbar/progbar
 	var/iteration = 0
 
-/atom/movable/screen/progbar_container/Initialize(mapload)
+// [HORIZON-FIX] This is the ONLY progbar_container/Initialize definition.
+// It used to exist twice (here and in world_progressbar.dm); the later
+// compiled one (world_progressbar.dm) silently shadowed this one, so the
+// progbar datum was never created and on_changenext() hit a null deref
+// on every click. Both bodies are merged here.
+/atom/movable/screen/progbar_container/Initialize(mapload, datum/hud/hud_owner)
+	if(hud_owner)
+		RegisterSignal(hud_owner.mymob, COMSIG_LIVING_CHANGENEXT_MOVE, PROC_REF(on_changenext))
 	. = ..()
 	progbar = new(src)
 	progbar.qdel_when_done = FALSE

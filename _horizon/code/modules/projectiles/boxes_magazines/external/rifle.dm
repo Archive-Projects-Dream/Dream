@@ -113,10 +113,6 @@
 	. = ..()
 	icon_state = "[base_icon_state]-[ammo_count() ? 15 : 0]"
 
-/obj/item/ammo_box/magazine/a762svd/update_icon_state()
-	. = ..()
-	icon_state = "[base_icon_state]-[ammo_count() ? 15 : 0]"
-
 /obj/item/ammo_box/magazine/a762g3
 	name = "Arma marksman rifle magazine (7.62x51)"
 	icon = '_horizon/icons/obj/items/ammo/rifle.dmi'

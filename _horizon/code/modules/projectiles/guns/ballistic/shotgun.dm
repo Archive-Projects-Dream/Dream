@@ -118,6 +118,11 @@
 	bolt_drop_sound = '_horizon/sound/weapons/guns/shotgun/db_out.wav'
 	fire_sound = list('_horizon/sound/weapons/guns/shotgun/comgun1.wav', '_horizon/sound/weapons/guns/shotgun/comgun2.wav')
 	load_sound = '_horizon/sound/weapons/guns/shotgun/db_load.wav'
+	// [HORIZON-FIX] The 2-shell bobox cylinder is not a subtype of the double
+	// barrel's internal/shot/dual, which made Initialize() CRASH on the
+	// accepted_magazine_type istype() check and left the gun half-initialized
+	// (no chambered round, no icon update). Accept the cylinder directly.
+	accepted_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/bobox
 	spawn_magazine_type = /obj/item/ammo_box/magazine/internal/cylinder/bobox
 	slot_flags = ITEM_SLOT_BELT
 

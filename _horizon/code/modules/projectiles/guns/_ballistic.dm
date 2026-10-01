@@ -259,23 +259,14 @@
 			return
 	return ..()
 
-// [HORIZON-EDIT] Unloading break actions. Nevado pulled rounds out of an open
-// cylinder from attack_hand, but in this codebase attack_hand never fires for
-// items you are already holding (clicking your hand slot routes to attack_self
-// instead), which made revolvers and break action guns impossible to unload.
-// attack_self while the cylinder is open now pulls a round; with the cylinder
-// closed it keeps the normal meaning (rack / hammer / empty magazine eject).
-/obj/item/gun/ballistic/attack_self(mob/living/user)
-	if(cylinder_open && user.is_holding(src))
-		var/obj/item/ammo_casing/casing = pull_cylinder_round()
-		if(casing)
-			add_fingerprint(user)
-			casing.forceMove(drop_location())
-			user.put_in_hands(casing)
-			update_appearance()
-			SEND_SIGNAL(src, COMSIG_UPDATE_AMMO_HUD)
-			return TRUE
-	return ..()
+// [HORIZON-EDIT] Unloading break actions.
+// IMPORTANT: the canonical /obj/item/gun/ballistic/attack_self() lives in
+// ballistic/stuff/wield_attack_self.dm (it compiles after this file, so an
+// attack_self defined here would be silently shadowed by it). The break
+// action open / dump logic was merged into that definition.
+// attack_self while the cylinder is open dumps every round (see
+// wield_attack_self.dm); with the cylinder closed it opens the gun. Dragging
+// the gun onto a hand slot (mouse_drop_dragged below) also toggles it.
 
 /// Takes the front-most round out of an open cylinder / internal magazine
 /// without rotating it. The round is removed from the magazine by forceMove()
@@ -319,8 +310,9 @@
 	else
 		playsound(src, lock_back_sound, bolt_drop_sound_volume, bolt_drop_sound_vary)
 		chamber_round()
-	//if(user)
-	//      to_chat(user, span_notice("I [cylinder_open ? "open" : "close"] [src]'s [cylinder_wording]"))
+	if(user)
+		// [HORIZON-ADD] players need feedback for the break-open state
+		balloon_alert(user, "[cylinder_wording] [cylinder_open ? "open" : "closed"]")
 	update_appearance()
 
 // =============================================================================
@@ -508,3 +500,25 @@
 		if(all_ammo)
 			var/live_ammo = get_ammo(TRUE, FALSE)
 			. += "[live_ammo ? live_ammo : "None"] of those are live rounds."
+
+// [HORIZON-ADD] Fix ammo counting for break action guns (revolvers, double
+// barrels): their chambered round STAYS inside the cylinder magazine, so the
+// upstream get_ammo() counted it twice (once as chambered, once through the
+// magazine). That inflated every readout - examine, the ammo counter HUD and
+// the fire sound pitch math - e.g. a 2-shell double barrel reading "3".
+/obj/item/gun/ballistic/get_ammo(countchambered = TRUE, countempties = TRUE)
+	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
+		countchambered = FALSE // the chambered round lives in the cylinder
+	var/bullets = 0
+	if(chambered && countchambered)
+		bullets++
+	if(magazine)
+		bullets += magazine.ammo_count(countempties)
+	return bullets
+
+/// Break action guns show their cylinder / hammer state when examined, so
+/// players can tell whether the gun is broken open and loaded.
+/obj/item/gun/ballistic/examine(mob/user)
+	. = ..()
+	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
+		. += chamber_examine(user)

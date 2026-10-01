@@ -164,7 +164,7 @@
 	icon_state = "ammo_counter"
 	w_class = WEIGHT_CLASS_TINY
 
-	attach_features_flags = ATTACH_REMOVABLE_HAND|ATTACH_TOGGLE
+	attach_features_flags = ATTACH_REMOVABLE_HAND|ATTACH_TOGGLE|ATTACH_NO_SPRITE
 	slot = ATTACHMENT_SLOT_SCOPE
 	pixel_shift_x = 0
 	pixel_shift_y = 0

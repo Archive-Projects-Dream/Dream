@@ -18,6 +18,13 @@
 	/// Whitelist of attachment types this gun accepts. Defaults to all attachments.
 	var/list/valid_attachments = list(/obj/item/attachment)
 	/// Assoc list of attachment slot -> list("x" = n, "y" = n) pixel offsets for that slot's overlay.
-	var/list/slot_offsets = null
+	/// [HORIZON-ADD] Default rail position: without any slot_offsets the
+	/// attachment overlay rendered at the gun's bottom-left corner (the raw
+	/// sprite origin), visibly detached from the gun. The default puts a rail
+	/// attachment on top of the receiver for the 32x32/40x32 hd_gun sprites;
+	/// individual guns can still override with their own slot_offsets.
+	var/list/slot_offsets = list(
+		ATTACHMENT_SLOT_RAIL = list("x" = 17, "y" = 17),
+	)
 	/// Attachment typepaths this gun spawns with already installed.
 	var/list/default_attachments = null

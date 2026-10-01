@@ -2,10 +2,9 @@
 #define PROGRESSBAR_ANIMATION_TIME 5
 
 
-/atom/movable/screen/progbar_container/Initialize(mapload, datum/hud/hud_owner)
-	if(hud_owner)
-		RegisterSignal(hud_owner.mymob, COMSIG_LIVING_CHANGENEXT_MOVE, PROC_REF(on_changenext))
-	. = ..()
+// [HORIZON-FIX] progbar_container/Initialize used to be duplicated here; the
+// merged definition lives in screen_objects.dm (this file compiled later and
+// shadowed the one that created the progbar datum, null-derefing every click).
 
 /datum/world_progressbar
 	///The progress bar visual element.

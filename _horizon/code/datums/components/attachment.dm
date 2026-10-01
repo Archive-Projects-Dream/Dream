@@ -150,7 +150,21 @@
 			overlay_layer = parent.render_layer
 		if(parent.render_plane)
 			overlay_plane = parent.render_plane
-		overlays += mutable_appearance(parent.icon, "[parent.icon_state]-attached", overlay_layer, overlay_plane)
+		// [HORIZON-FIX] This codebase's mutable_appearance() signature is
+		// (icon, icon_state, layer, atom/offset_spokesman, plane, ...) - it
+		// has an offset_spokesman argument BEFORE plane (Shiptest's does
+		// not). Passing the plane positionally sent FLOAT_PLANE (-32767)
+		// into offset_spokesman and spammed the
+		// "Why did you pass in offset_spokesman as -32767?" runtime on
+		// every update_appearance() of a gun with attachments. Pass the
+		// plane explicitly, with the attachment item as the plane-offset
+		// context atom when the plane is actually set.
+		var/mutable_appearance/overlay
+		if(overlay_plane != FLOAT_PLANE)
+			overlay = mutable_appearance(parent.icon, "[parent.icon_state]-attached", overlay_layer, parent, overlay_plane)
+		else
+			overlay = mutable_appearance(parent.icon, "[parent.icon_state]-attached", overlay_layer)
+		overlays += overlay
 
 /datum/component/attachment/proc/try_attach(obj/item/parent, obj/item/holder, mob/user, bypass_checks)
 	SIGNAL_HANDLER
