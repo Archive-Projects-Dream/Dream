@@ -157,7 +157,13 @@
 	// there is still room). Empties used to be skipped entirely - now
 	// shot-up brass can be gathered back into the box/stack. Live rounds
 	// keep priority so they always fit before empties.
+	// snapshot: give_round() forceMoves casings off the tile, which
+	// mutates turf contents mid-iteration and makes the for-in iterator
+	// skip every other casing.
+	var/list/obj/item/ammo_casing/on_tile = list()
 	for(var/obj/item/ammo_casing/bullet in loc)
+		on_tile += bullet
+	for(var/obj/item/ammo_casing/bullet as anything in on_tile)
 		if (box.stored_ammo.len >= box.max_ammo)
 			break
 		if (!bullet.loaded_projectile)
@@ -170,7 +176,7 @@
 	// gun magazines, where empties would silently clog the feed.
 	var/can_take_spent = istype(box, /obj/item/ammo_box/magazine/ammo_stack) || !istype(box, /obj/item/ammo_box/magazine)
 	if(can_take_spent)
-		for(var/obj/item/ammo_casing/bullet in loc)
+		for(var/obj/item/ammo_casing/bullet as anything in on_tile)
 			if (box.stored_ammo.len >= box.max_ammo)
 				break
 			if (bullet.loaded_projectile)

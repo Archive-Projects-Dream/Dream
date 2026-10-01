@@ -19,29 +19,11 @@
 	var/world_icon = '_horizon/icons/obj/items/ammo/casings_world.dmi'
 	/// World icon state
 	var/world_icon_state = "s-casing"
-	/// [HORIZON-FIX] Empty-stack self-delete guard. While FALSE,
-	/// update_appearance() must NOT run check_for_del(): the world_icon
-	/// element fires an update_appearance() from Attach() during
-	/// Initialize() while stored_ammo is legitimately still empty, and an
-	/// unguarded check_for_del() used to qdel the stack mid-creation - every
-	/// casing the caller then gave it vanished into the deleted zombie
-	/// stack in nullspace ("stacked bullets disappear completely").
-	var/ready_for_del_check = FALSE
 
 /obj/item/ammo_box/magazine/ammo_stack/Initialize(mapload)
 	. = ..()
 	if(world_icon)
 		AddElement(/datum/element/world_icon, PROC_REF(update_icon_world))
-	// [HORIZON-FIX] Enable the empty-stack self-delete only AFTER the
-	// world_icon element's Attach() has run (it calls update_appearance()
-	// while we are still empty - see ready_for_del_check).
-	ready_for_del_check = TRUE
-	// Stacks placed empty on a map are pointless invisible clutter - clean
-	// them up right away. Runtime-created empty stacks (casing + casing ->
-	// new stack, see ammo_casing/attackby) must survive so their creator
-	// can fill them in the same tick.
-	if(mapload && !length(stored_ammo))
-		return INITIALIZE_HINT_QDEL
 
 /obj/item/ammo_box/magazine/ammo_stack/update_icon(updates)
 	icon = initial(icon)
@@ -66,25 +48,45 @@
 	. = ..()
 	check_for_del()
 
-/// Override of upstream's /obj/item/ammo_box/update_appearance() to call
-/// check_for_del() so empty ammo stacks are auto-deleted.
-/obj/item/ammo_box/magazine/ammo_stack/update_appearance(updates = ALL)
+// EFN parity: upstream's attack_self() ended with update_ammo_count(),
+// whose check_for_del() chain deletes the husk once you pull the last
+// round out of a stack (right in your hand). Dream has no
+// update_ammo_count - run the check synchronously right after the
+// parent proc for the same instant feedback.
+/obj/item/ammo_box/magazine/ammo_stack/attack_self(mob/user)
 	. = ..()
-	if(!ready_for_del_check)
-		return
 	check_for_del()
+
+// EFN parity (deferred): EFN's core chained every casing exit into
+// update_ammo_count() -> check_for_del(), so a stack drained dry by
+// ANY route (try_load transfer into another box/mag, revolver speed
+// loading...) self-deleted. Dream routes those transfers through
+// item_interaction()/try_load(), and its Exited() ->
+// remove_from_stored_ammo() hook fires synchronously *inside*
+// give_round()/forceMove() - a qdel there would null stored_ammo
+// mid-iteration and runtime the transfer loop. So we keep the EFN
+// invariant but defer the check to the end of the tick. The QDELETED
+// guard inside check_for_del() makes the timer safe if the stack is
+// already gone (or got refilled) by the time it fires.
+/obj/item/ammo_box/magazine/ammo_stack/remove_from_stored_ammo(atom/movable/gone)
+	. = ..()
+	addtimer(CALLBACK(src, PROC_REF(check_for_del)), 0)
+
+// Dream adaptation: Dream's core /obj/item/ammo_box/Destroy() qdels every
+// casing still in stored_ammo, and anything loose in contents would be
+// stranded in nullspace inside the deleted stack. Nevado's core has no
+// such Destroy. Dump everything we still hold onto the floor first so
+// casings can never vanish without a trace.
+/obj/item/ammo_box/magazine/ammo_stack/Destroy(force)
+	var/atom/dump_loc = drop_location()
+	if(dump_loc)
+		for(var/atom/movable/stray as anything in contents.Copy())
+			stray.forceMove(dump_loc)
+	return ..()
 
 /obj/item/ammo_box/magazine/ammo_stack/proc/check_for_del()
 	. = FALSE
 	if((ammo_count(TRUE) <= 0) && !QDELETED(src))
-		// [HORIZON-FIX] Never delete casings stranded in our contents (they
-		// should always live in stored_ammo, but any bug that leaves one
-		// inside a self-deleting stack would silently eat it) - dump
-		// everything out before we go.
-		var/atom/drop_loc = drop_location()
-		for(var/atom/movable/stray as anything in contents.Copy())
-			if(drop_loc)
-				stray.forceMove(drop_loc)
 		qdel(src)
 		return TRUE
 
@@ -92,11 +94,11 @@
 	cut_overlays()
 	icon_state = ""
 	for(var/casing in stored_ammo)
-		// [HORIZON-FIX] spent casings use the non-live sprite so players can
-		// tell live and empty rounds apart in a stack (typepaths read as
-		// initial var values = null projectile = spent).
 		var/obj/item/ammo_casing/casing_ref = casing
-		var/state = "[world_icon_state][casing_ref.loaded_projectile ? "-live" : ""]"
+		// maploaded /loaded stacks store typepaths (lazyload) - those are
+		// live by definition; runtime-picked casings show a spent sprite
+		// when their projectile is gone so players can tell brass from ammo.
+		var/state = "[world_icon_state][(ispath(casing) || casing_ref.loaded_projectile) ? "-live" : ""]"
 		var/image/bullet = image(world_icon, src, state)
 		bullet.pixel_x = rand(-12, 12)
 		bullet.pixel_y = rand(-12, 12)
@@ -104,7 +106,10 @@
 		add_overlay(bullet)
 	return UPDATE_ICON_STATE | UPDATE_OVERLAYS
 
-// ammo casing attackby code here
+// ammo casing attackby code here - faithful EFN (modular_septic) port:
+// pick a floor casing up with another casing of the same type, they form
+// a stack right in your hand. Spent casings are NOT stackable this way
+// (grab them with a box/stack instead).
 /obj/item/ammo_casing
 	/// What this casing can be stacked into
 	var/obj/item/ammo_box/magazine/stack_type
@@ -126,41 +131,14 @@
 	if(stack_type != ammo_casing.stack_type)
 		to_chat(user, span_warning("I can't stack [ammo_casing] with [src]."))
 		return
-	// [HORIZON-FIX] Only stack casings that actually lie on the floor.
-	// forceMove()ing a casing out of a mob's hands (or out of a container)
-	// without a proper unequip desyncs the holder's hand icon.
-	if(!isturf(loc))
-		to_chat(user, span_warning("Put [src] down first."))
+	if(!loaded_projectile || !ammo_casing.loaded_projectile)
+		to_chat(user, span_warning("I can't stack empty casings."))
 		return
-	// [HORIZON-FIX] Spent casings of the same type stack together now (and
-	// mix with live ones) - the stack's world sprite shows which is which.
-	// (The old check rejected anything involving an empty casing, so
-	// shot-up brass could never be picked back up.)
 	var/obj/item/ammo_box/magazine/ammo_stack = new stack_type(drop_location())
-	if(!ammo_stack.stored_ammo)
-		ammo_stack.stored_ammo = list()
-	// [HORIZON-FIX] give_round() FIRST, transferItemToLoc() only after it
-	// accepted the casing. The old order moved casings into the stack's
-	// contents BEFORE give_round() ran; when give_round() rejected one
-	// (e.g. a null-caliber casing like the old a357) it sat in the stack's
-	// contents but not in stored_ammo, the stack counted as empty and
-	// check_for_del() qdel'd it - deleting the casings with it ("bullets
-	// disappear when you stack them").
-	if(!ammo_stack.give_round(src))
-		qdel(ammo_stack)
-		to_chat(user, span_warning("[src] doesn't fit into [stack_type]!"))
-		return
-	if(!user.transferItemToLoc(ammo_casing, ammo_stack, silent = TRUE))
-		// couldn't unequip the held casing (nodrop etc) - put the floor
-		// casing back down. forceMove() out of the stack fires Exited ->
-		// remove_from_stored_ammo() -> update_appearance() -> check_for_del()
-		// which cleanly self-deletes the now-empty stack.
-		src.forceMove(ammo_stack.drop_location())
-		return
-	if(!ammo_stack.give_round(ammo_casing))
-		ammo_casing.forceMove(ammo_stack.drop_location())
-	if(QDELETED(ammo_stack))
-		return
+	user.transferItemToLoc(src, ammo_stack, silent = TRUE)
+	ammo_stack.give_round(src)
+	user.transferItemToLoc(ammo_casing, ammo_stack, silent = TRUE)
+	ammo_stack.give_round(ammo_casing)
 	user.put_in_hands(ammo_stack)
 	ammo_stack.update_appearance()
 	to_chat(user, span_notice("[src] has been stacked with [ammo_casing]."))
