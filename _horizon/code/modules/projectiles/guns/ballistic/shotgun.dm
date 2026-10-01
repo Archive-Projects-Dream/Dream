@@ -100,6 +100,14 @@
 	inhand_icon_state = "bobox"
 	lefthand_file = '_horizon/icons/obj/items/guns/inhands/shotgun_lefthand.dmi'
 	righthand_file = '_horizon/icons/obj/items/guns/inhands/shotgun_righthand.dmi'
+	// [HORIZON-FIX] The core /obj/item/gun/ballistic/shotgun family uses
+	// 64x64 in-hand icons (icons/mob/inhands/weapons/64x_guns_*.dmi); the
+	// reparent onto shotgun/doublebarrel silently inherited those 64x64
+	// dims while this gun swaps in 32x32 horizon in-hand sprites. The
+	// mismatch made build_worn_icon's center_image() shift the held sprite
+	// 16px left and 16px down ("спрайт в руках смещённый сильно очень").
+	inhand_x_dimension = 32
+	inhand_y_dimension = 32
 	base_icon_state = "bobox"
 	icon_state = "bobox"
 	worn_icon_state = "bobox"

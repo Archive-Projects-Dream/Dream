@@ -19,11 +19,29 @@
 	var/world_icon = '_horizon/icons/obj/items/ammo/casings_world.dmi'
 	/// World icon state
 	var/world_icon_state = "s-casing"
+	/// [HORIZON-FIX] Empty-stack self-delete guard. While FALSE,
+	/// update_appearance() must NOT run check_for_del(): the world_icon
+	/// element fires an update_appearance() from Attach() during
+	/// Initialize() while stored_ammo is legitimately still empty, and an
+	/// unguarded check_for_del() used to qdel the stack mid-creation - every
+	/// casing the caller then gave it vanished into the deleted zombie
+	/// stack in nullspace ("stacked bullets disappear completely").
+	var/ready_for_del_check = FALSE
 
 /obj/item/ammo_box/magazine/ammo_stack/Initialize(mapload)
 	. = ..()
 	if(world_icon)
 		AddElement(/datum/element/world_icon, PROC_REF(update_icon_world))
+	// [HORIZON-FIX] Enable the empty-stack self-delete only AFTER the
+	// world_icon element's Attach() has run (it calls update_appearance()
+	// while we are still empty - see ready_for_del_check).
+	ready_for_del_check = TRUE
+	// Stacks placed empty on a map are pointless invisible clutter - clean
+	// them up right away. Runtime-created empty stacks (casing + casing ->
+	// new stack, see ammo_casing/attackby) must survive so their creator
+	// can fill them in the same tick.
+	if(mapload && !length(stored_ammo))
+		return INITIALIZE_HINT_QDEL
 
 /obj/item/ammo_box/magazine/ammo_stack/update_icon(updates)
 	icon = initial(icon)
@@ -50,8 +68,10 @@
 
 /// Override of upstream's /obj/item/ammo_box/update_appearance() to call
 /// check_for_del() so empty ammo stacks are auto-deleted.
-/obj/item/ammo_box/magazine/ammo_stack/update_appearance()
+/obj/item/ammo_box/magazine/ammo_stack/update_appearance(updates = ALL)
 	. = ..()
+	if(!ready_for_del_check)
+		return
 	check_for_del()
 
 /obj/item/ammo_box/magazine/ammo_stack/proc/check_for_del()
@@ -105,6 +125,12 @@
 		return
 	if(stack_type != ammo_casing.stack_type)
 		to_chat(user, span_warning("I can't stack [ammo_casing] with [src]."))
+		return
+	// [HORIZON-FIX] Only stack casings that actually lie on the floor.
+	// forceMove()ing a casing out of a mob's hands (or out of a container)
+	// without a proper unequip desyncs the holder's hand icon.
+	if(!isturf(loc))
+		to_chat(user, span_warning("Put [src] down first."))
 		return
 	// [HORIZON-FIX] Spent casings of the same type stack together now (and
 	// mix with live ones) - the stack's world sprite shows which is which.

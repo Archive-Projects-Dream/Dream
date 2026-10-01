@@ -293,6 +293,38 @@
 		return round
 	return null
 
+/// [HORIZON-ADD] Pop every spent casing out of a broken-open break-action
+/// gun, keeping the live rounds chambered. This is the "soft unload" half
+/// of the reload-key cycle (attack_self in ballistic/stuff/wield_attack_self.dm):
+/// Z with an open cylinder ejects the brass first, the next Z snaps it shut.
+/obj/item/gun/ballistic/proc/eject_spent_casings(mob/user)
+	if(!magazine)
+		return
+	var/num_ejected = 0
+	// forceMove() below fires Exited -> remove_from_stored_ammo() which
+	// mutates the list we are walking - iterate a copy.
+	for(var/obj/item/ammo_casing/casing as anything in magazine.stored_ammo.Copy())
+		if(ispath(casing) || QDELETED(casing))
+			continue // lazy map casings count as live
+		if(casing.loaded_projectile)
+			continue // live round - keep it
+		if(casing == chambered)
+			// belt and suspenders: chambered is normally cleared when the
+			// cylinder opens - keep the MOVABLE_MOVED listener in sync anyway.
+			UnregisterSignal(chambered, COMSIG_MOVABLE_MOVED)
+			chambered = null
+		casing.forceMove(drop_location())
+		casing.bounce_away(bounce_angle = null, still_warm = FALSE, sound_delay = 0)
+		num_ejected++
+	if(num_ejected)
+		if(user)
+			balloon_alert(user, "[num_ejected] spent [cartridge_wording]\s ejected")
+		playsound(src, eject_sound, eject_sound_volume, eject_sound_vary)
+		update_appearance()
+		SEND_SIGNAL(src, COMSIG_UPDATE_AMMO_HUD) // [HORIZON-ADD] ammo counter refresh
+	else if(user)
+		balloon_alert(user, "no spent [cartridge_wording]s")
+
 /obj/item/gun/ballistic/mouse_drop_dragged(atom/over, mob/user, src_location, over_location, params)
 	if(!isliving(user) || !user.Adjacent(src) || HAS_TRAIT(user, TRAIT_INCAPACITATED))
 		return
@@ -487,6 +519,8 @@
 		. += "[p_They] [span_red("[p_have()]")] a round chambered."
 	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
 		. += "[p_Their] [cylinder_wording] is [cylinder_open ? span_green("open") : span_red("closed")]."
+		if(cylinder_open)
+			. += span_notice("Z ejects spent [cartridge_wording]s or closes it; right-click dumps everything.")
 	if(bolt_locked)
 		switch(bolt_wording)
 			if("pump")

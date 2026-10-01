@@ -8,16 +8,23 @@
 // Click (Z / activate-in-hand) on a ballistic gun now does, in order:
 //  1. two-handed wield toggle for wieldable guns (wielded_inhand_state);
 //  2. eject empty external magazines (upstream behaviour);
-//  3. break actions (revolvers, double barrels):
-//       - cylinder open + rounds inside -> dump every round out, exactly
-//         like stock BOLT_TYPE_NO_BOLT revolvers ("как из обычных");
-//       - cylinder open + empty         -> close it back up;
+//  3. break actions (revolvers, double barrels) - full reload cycle on one
+//     key ("кнопка перезарядки"):
+//       - cylinder open + spent brass inside -> eject ONLY the spent
+//         casings (live rounds stay chambered, cylinder stays open, so you
+//         can top up right after) - the "разряжает когда барабан открыт"
+//         half;
+//       - cylinder open, only live rounds/empty -> snap it shut (the old
+//         behaviour dumped EVERY round here, so a loaded cylinder could
+//         never be closed except via the hidden drag-onto-hand gesture);
 //       - cylinder closed (double action, or single action with the hammer
 //         already cocked) -> break the gun open;
 //       - single action with the hammer down -> cock the hammer (rack),
 //         the second click then opens the gun;
 //  4. upstream logic: NO_BOLT dump-all, LOCKING bolt drop, rack.
 //
+// Right-click (attack_self_secondary below) with a broken-open gun is the
+// hard unload: it dumps EVERYTHING, live rounds included.
 // Dragging the gun onto a hand slot (see mouse_drop_dragged in _ballistic.dm)
 // toggles the cylinder open/closed as well.
 
@@ -36,16 +43,20 @@
 		if(!magazine.ammo_count())
 			eject_magazine(user)
 			return
-	// 3) Break action guns: open / dump / close by clicking.
+	// 3) Break action guns: open / eject brass / close by clicking.
 	if(bolt_type == BOLT_TYPE_BREAK_ACTION)
 		if(cylinder_open)
-			// The chambered reference was already cleared when the cylinder
-			// was opened, so unload_ammo() dumps the whole cylinder cleanly
-			// (live rounds and spent casings alike).
-			if(get_ammo(FALSE, TRUE))
-				unload_ammo(user)
+			// [HORIZON-FIX] Spent brass goes first: pressing the reload key
+			// with an open cylinder pops the empty casings out but keeps the
+			// live rounds chambered, so the SAME key can then close the gun.
+			// (The old behaviour dumped every round - including freshly loaded
+			// ones - which made a loaded cylinder impossible to close.)
+			var/live_rounds = get_ammo(FALSE, FALSE)
+			var/all_rounds = get_ammo(FALSE, TRUE)
+			if(all_rounds > live_rounds)
+				eject_spent_casings(user)
 				return
-			toggle_cylinder_open(user) // nothing left inside - snap it shut
+			toggle_cylinder_open(user) // only live rounds (or empty) left - snap it shut
 			return
 		if(semi_auto || !bolt_locked)
 			// Double action revolvers/shotguns (and single actions that are
@@ -67,6 +78,15 @@
 	rack(user)
 
 /obj/item/gun/ballistic/attack_self_secondary(mob/living/user, modifiers)
+	// [HORIZON-ADD] Hard unload: right-clicking a broken-open break action
+	// dumps EVERY round (live ones too). Safety keeps working on the closed
+	// gun.
+	if(bolt_type == BOLT_TYPE_BREAK_ACTION && cylinder_open)
+		if(get_ammo(FALSE, TRUE))
+			unload_ammo(user)
+		else
+			balloon_alert(user, "it's empty!")
+		return TRUE
 	if(safety_flags & GUN_SAFETY_HAS_SAFETY)
 		toggle_safety(user)
 		return TRUE
