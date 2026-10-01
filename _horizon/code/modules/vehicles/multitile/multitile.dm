@@ -304,9 +304,13 @@
 	RegisterSignal(seated_mob.client, COMSIG_CLIENT_MOUSEDOWN, PROC_REF(crew_mousedown), override = TRUE)
 	RegisterSignal(seated_mob.client, COMSIG_CLIENT_MOUSEUP, PROC_REF(crew_mouseup), override = TRUE)
 	RegisterSignal(seated_mob.client, COMSIG_CLIENT_MOUSEDRAG, PROC_REF(crew_mousedrag), override = TRUE)
+	// tgmc parity: the crew's world clicks are also cancelled so firing the
+	// active hardpoint does not double as a normal interaction with whatever
+	// was clicked (picking up items, opening doors, ...) while seated
+	RegisterSignal(seated_mob, COMSIG_MOB_CLICKON, PROC_REF(crew_clickon), override = TRUE)
 /// Unregisters mouse relay signals from a crew mob and its client.
 /obj/vehicle/multitile/proc/unregister_crew_mouse(mob/living/seated_mob)
-	UnregisterSignal(seated_mob, COMSIG_MOB_LOGIN)
+	UnregisterSignal(seated_mob, list(COMSIG_MOB_LOGIN, COMSIG_MOB_CLICKON))
 	if(seated_mob.client)
 		UnregisterSignal(seated_mob.client, list(COMSIG_CLIENT_MOUSEDOWN, COMSIG_CLIENT_MOUSEUP, COMSIG_CLIENT_MOUSEDRAG))
 /// A seated mob logged in mid-seat; hook their new client up.
@@ -320,6 +324,18 @@
 	RegisterSignal(new_client, COMSIG_CLIENT_MOUSEDOWN, PROC_REF(crew_mousedown), override = TRUE)
 	RegisterSignal(new_client, COMSIG_CLIENT_MOUSEUP, PROC_REF(crew_mouseup), override = TRUE)
 	RegisterSignal(new_client, COMSIG_CLIENT_MOUSEDRAG, PROC_REF(crew_mousedrag), override = TRUE)
+/// Cancels normal click behaviour for armed crew members; the weapon fires
+/// on mouse down, the click itself must not reach the world
+/obj/vehicle/multitile/proc/crew_clickon(mob/clicker, atom/clicked, list/modifiers)
+	SIGNAL_HANDLER
+	if(LAZYACCESS(modifiers, SHIFT_CLICK) || LAZYACCESS(modifiers, CTRL_CLICK) || LAZYACCESS(modifiers, ALT_CLICK))
+		return
+	var/obj/item/hardpoint/hardpoint = get_mob_hp(clicker)
+	if(!hardpoint)
+		return
+	if(!get_crew_target(clicker, clicked, modifiers))
+		return
+	return COMSIG_MOB_CANCEL_CLICKON
 /// Get crewmember of seat.
 /obj/vehicle/multitile/proc/get_seat_mob(seat)
 	return seats[seat]
