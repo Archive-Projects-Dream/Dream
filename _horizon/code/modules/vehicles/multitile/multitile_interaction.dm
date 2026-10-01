@@ -290,6 +290,9 @@
 		// for this seat automatically instead of nagging on every click
 		hardpoint = auto_select_hardpoint(source.mob)
 	if(!hardpoint)
+		// let the crewman know why their clicks do nothing instead of
+		// failing silently (e.g. an empty turret with no guns mounted)
+		to_chat(source.mob, span_warning("No usable hardpoint for your seat. Install a weapon on \the [src] first."))
 		return
 	// Resolve clicks that landed on the click catcher into real turfs so
 	// distant tiles are valid targets for the active hardpoint

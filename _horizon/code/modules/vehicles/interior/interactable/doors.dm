@@ -25,6 +25,8 @@
 	return ..()
 
 /obj/structure/interior_exit/attack_hand(mob/M, list/modifiers)
+	if(!interior)
+		return ..()
 
 	// Check if dragging anything
 	var/atom/dragged_atom = M.pulling
@@ -77,6 +79,8 @@
 	return locate(V.x + entrance_coords[1], V.y + entrance_coords[2], V.z)
 
 /obj/structure/interior_exit/vehicle/attack_hand(mob/M, list/modifiers)
+	if(!interior)
+		return ..()
 
 	// Check if dragging anything
 	var/atom/dragged_atom = M.pulling
