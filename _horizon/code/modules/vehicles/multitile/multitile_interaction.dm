@@ -156,6 +156,39 @@
 	toggle_cameras_status(TRUE)
 	update_appearance()
 	user.visible_message(span_notice("[user] finishes [repair_message] on \the [src]."), span_notice("You finish [repair_message] on \the [src]. Hull integrity is at [span_bold("100%")]%."))
+/// TG's click chain resolves reachability through the CLICKER's Adjacent
+/// (the mob's turf against the target's root turf, 1 tile max). A multitile
+/// vehicle's root turf is at least 2 tiles away from every turf a mob can
+/// stand on outside the hull, so plain clicks (attack_hand entry), item
+/// attacks (attackby hardpoint install) and drag-onto drops would never
+/// resolve at all. cmss13 instead asked the clicked atom's own Adjacent,
+/// whose /atom/movable/Adjacent iterated every turf covered by the
+/// object's bounds (locs). Restore that semantics for both directions.
+/obj/vehicle/multitile/Adjacent(atom/neighbor, atom/target, atom/movable/mover)
+	if(neighbor == loc)
+		return TRUE
+	if(neighbor?.loc == src)
+		return TRUE
+	for(var/turf/covered_turf in locs)
+		if(isnull(covered_turf))
+			continue
+		if(covered_turf.Adjacent(neighbor, target = src, mover = mover))
+			return TRUE
+	return FALSE
+
+/// The reach gate used by /mob/proc/ClickOn (through IsReachableBy) and by
+/// base_mouse_drop_handler before mouse_drop_receive fires. Normally it
+/// only consults the clicker's Adjacent against our root turf; check every
+/// turf our bounds cover instead, exactly like cmss13's
+/// /atom/movable/Adjacent did, so standing next to any side of the hull
+/// counts as reaching it.
+/obj/vehicle/multitile/CheckReachableAdjacency(atom/movable/reacher, reacher_range)
+	for(var/turf/covered_turf in locs)
+		if(isnull(covered_turf))
+			continue
+		if(covered_turf.Adjacent(reacher, target = src, mover = reacher))
+			return TRUE
+	return ..()
 //Special case for entering the vehicle without using the verb
 /obj/vehicle/multitile/attack_hand(mob/user, list/modifiers)
 	var/mob_x = user.x - src.x
