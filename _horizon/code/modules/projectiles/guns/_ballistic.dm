@@ -200,6 +200,9 @@
 			if((bolt_type == BOLT_TYPE_BREAK_ACTION) && !cylinder_open)
 				return
 			if(chambered && !chambered.loaded_projectile)
+				// [HORIZON-FIX] drop the MOVABLE_MOVED listener before
+				// clearing the reference (see toggle_cylinder_open).
+				UnregisterSignal(chambered, COMSIG_MOVABLE_MOVED)
 				chambered.forceMove(drop_location())
 				chambered = null
 			// [HORIZON-EDIT] upstream's ammo_box attackby() was replaced by
@@ -283,6 +286,9 @@
 		if(QDELETED(round))
 			continue // empty cylinder chamber (null slot)
 		if(chambered == round)
+			// [HORIZON-FIX] drop the MOVABLE_MOVED listener too, or the stale
+			// signal runtime'd (null._listen_lookup) when the pulled casing moved
+			UnregisterSignal(chambered, COMSIG_MOVABLE_MOVED)
 			chambered = null
 		return round
 	return null
@@ -306,7 +312,14 @@
 	//sound_hint()
 	if(cylinder_open)
 		playsound(src, bolt_drop_sound, lock_back_sound_volume, lock_back_sound_vary)
-		chambered = null
+		// [HORIZON-FIX] properly detach the chambered round: drop the
+		// MOVABLE_MOVED listener as well. Without this the stale signal
+		// runtime'd ("Cannot read null._listen_lookup") the moment the old
+		// chambered casing was pulled out and moved, and re-chambering the
+		// same casing on close spammed a signal override warning.
+		if(chambered)
+			UnregisterSignal(chambered, COMSIG_MOVABLE_MOVED)
+			chambered = null
 	else
 		playsound(src, lock_back_sound, bolt_drop_sound_volume, bolt_drop_sound_vary)
 		chamber_round()

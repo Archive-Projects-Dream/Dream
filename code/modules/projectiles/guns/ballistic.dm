@@ -381,8 +381,21 @@
 
 /obj/item/gun/ballistic/proc/clear_chambered(datum/source)
 	SIGNAL_HANDLER
-	UnregisterSignal(chambered, COMSIG_MOVABLE_MOVED)
-	chambered = null
+	// [HORIZON-FIX] Two call forms must both work:
+	// * signal (MOVABLE_MOVED): source is the casing that moved. It may be
+	//   a stale listener while chambered is already null (cylinder opened)
+	//   or points at a different round - the old code unregistering
+	//   `chambered` runtime'd with "Cannot read null._listen_lookup".
+	// * direct call (handle_chamber): source is null, drop whatever is
+	//   chambered.
+	if(source)
+		UnregisterSignal(source, COMSIG_MOVABLE_MOVED)
+		if(chambered == source)
+			chambered = null
+	else
+		if(chambered)
+			UnregisterSignal(chambered, COMSIG_MOVABLE_MOVED)
+		chambered = null
 
 ///updates a bunch of racking related stuff and also handles the sound effects and the like
 /obj/item/gun/ballistic/proc/rack(mob/user = null)

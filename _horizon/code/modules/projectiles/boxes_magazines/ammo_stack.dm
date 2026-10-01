@@ -57,6 +57,14 @@
 /obj/item/ammo_box/magazine/ammo_stack/proc/check_for_del()
 	. = FALSE
 	if((ammo_count(TRUE) <= 0) && !QDELETED(src))
+		// [HORIZON-FIX] Never delete casings stranded in our contents (they
+		// should always live in stored_ammo, but any bug that leaves one
+		// inside a self-deleting stack would silently eat it) - dump
+		// everything out before we go.
+		var/atom/drop_loc = drop_location()
+		for(var/atom/movable/stray as anything in contents.Copy())
+			if(drop_loc)
+				stray.forceMove(drop_loc)
 		qdel(src)
 		return TRUE
 
@@ -64,7 +72,12 @@
 	cut_overlays()
 	icon_state = ""
 	for(var/casing in stored_ammo)
-		var/image/bullet = image(world_icon, src, "[world_icon_state]-live")
+		// [HORIZON-FIX] spent casings use the non-live sprite so players can
+		// tell live and empty rounds apart in a stack (typepaths read as
+		// initial var values = null projectile = spent).
+		var/obj/item/ammo_casing/casing_ref = casing
+		var/state = "[world_icon_state][casing_ref.loaded_projectile ? "-live" : ""]"
+		var/image/bullet = image(world_icon, src, state)
 		bullet.pixel_x = rand(-12, 12)
 		bullet.pixel_y = rand(-12, 12)
 		bullet.transform = bullet.transform.Turn(rand(0, 360))
@@ -93,16 +106,35 @@
 	if(stack_type != ammo_casing.stack_type)
 		to_chat(user, span_warning("I can't stack [ammo_casing] with [src]."))
 		return
-	if(!loaded_projectile || !ammo_casing.loaded_projectile)
-		to_chat(user, span_warning("I can't stack empty casings."))
-		return
+	// [HORIZON-FIX] Spent casings of the same type stack together now (and
+	// mix with live ones) - the stack's world sprite shows which is which.
+	// (The old check rejected anything involving an empty casing, so
+	// shot-up brass could never be picked back up.)
 	var/obj/item/ammo_box/magazine/ammo_stack = new stack_type(drop_location())
 	if(!ammo_stack.stored_ammo)
 		ammo_stack.stored_ammo = list()
-	user.transferItemToLoc(src, ammo_stack, silent = TRUE)
-	ammo_stack.give_round(src)
-	user.transferItemToLoc(ammo_casing, ammo_stack, silent = TRUE)
-	ammo_stack.give_round(ammo_casing)
+	// [HORIZON-FIX] give_round() FIRST, transferItemToLoc() only after it
+	// accepted the casing. The old order moved casings into the stack's
+	// contents BEFORE give_round() ran; when give_round() rejected one
+	// (e.g. a null-caliber casing like the old a357) it sat in the stack's
+	// contents but not in stored_ammo, the stack counted as empty and
+	// check_for_del() qdel'd it - deleting the casings with it ("bullets
+	// disappear when you stack them").
+	if(!ammo_stack.give_round(src))
+		qdel(ammo_stack)
+		to_chat(user, span_warning("[src] doesn't fit into [stack_type]!"))
+		return
+	if(!user.transferItemToLoc(ammo_casing, ammo_stack, silent = TRUE))
+		// couldn't unequip the held casing (nodrop etc) - put the floor
+		// casing back down. forceMove() out of the stack fires Exited ->
+		// remove_from_stored_ammo() -> update_appearance() -> check_for_del()
+		// which cleanly self-deletes the now-empty stack.
+		src.forceMove(ammo_stack.drop_location())
+		return
+	if(!ammo_stack.give_round(ammo_casing))
+		ammo_casing.forceMove(ammo_stack.drop_location())
+	if(QDELETED(ammo_stack))
+		return
 	user.put_in_hands(ammo_stack)
 	ammo_stack.update_appearance()
 	to_chat(user, span_notice("[src] has been stacked with [ammo_casing]."))

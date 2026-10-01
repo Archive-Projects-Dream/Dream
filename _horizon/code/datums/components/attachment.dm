@@ -208,14 +208,18 @@
 	if(attach_features_flags & ATTACH_TOGGLE)
 		// Remove from the gun's action list without qdel()ing it - the action
 		// datum is reused if the attachment is re-attached later.
-		if(holder.actions)
-			holder.actions -= attachment_toggle_action
+		// [HORIZON-FIX] also drop the COMSIG_QDELETING listener that
+		// add_item_action() registered, mirroring remove_item_action()
+		// without the qdel - otherwise re-attaching warned about the
+		// signal being overridden.
+		holder.UnregisterSignal(attachment_toggle_action, COMSIG_QDELETING)
+		LAZYREMOVE(holder.actions, attachment_toggle_action)
 		attachment_toggle_action.gun = null
 		attachment_toggle_action.Remove(user)
 
 	if(attach_features_flags & ATTACH_AMMOMODE)
-		if(holder.actions)
-			holder.actions -= attachment_ammo_action
+		holder.UnregisterSignal(attachment_ammo_action, COMSIG_QDELETING)
+		LAZYREMOVE(holder.actions, attachment_ammo_action)
 		attachment_ammo_action.gun = null
 		attachment_ammo_action.Remove(user)
 

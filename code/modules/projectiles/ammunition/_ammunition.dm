@@ -153,6 +153,10 @@
 /// Collects the casing and its like on its tile into the passed box, TRUE if anything collected.
 /obj/item/ammo_casing/proc/collect_into_box(mob/living/user, obj/item/ammo_box/box)
 	var/boolets = 0
+	// [HORIZON-EDIT] Two passes: live rounds first, then spent casings (if
+	// there is still room). Empties used to be skipped entirely - now
+	// shot-up brass can be gathered back into the box/stack. Live rounds
+	// keep priority so they always fit before empties.
 	for(var/obj/item/ammo_casing/bullet in loc)
 		if (box.stored_ammo.len >= box.max_ammo)
 			break
@@ -161,11 +165,24 @@
 		if (box.give_round(bullet, 0))
 			boolets++
 
-	if (!boolets)
+	var/spent = 0
+	// Spent brass only goes into loose boxes and ammo stacks - NOT into
+	// gun magazines, where empties would silently clog the feed.
+	var/can_take_spent = istype(box, /obj/item/ammo_box/magazine/ammo_stack) || !istype(box, /obj/item/ammo_box/magazine)
+	if(can_take_spent)
+		for(var/obj/item/ammo_casing/bullet in loc)
+			if (box.stored_ammo.len >= box.max_ammo)
+				break
+			if (bullet.loaded_projectile)
+				continue
+			if (box.give_round(bullet, 0))
+				spent++
+
+	if (!boolets && !spent)
 		to_chat(user, span_warning("You fail to collect anything!"))
 		return FALSE
 	box.update_appearance()
-	to_chat(user, span_notice("You collect [boolets] [box.casing_phrasing]\s. [box] now contains [box.stored_ammo.len] [box.casing_phrasing]\s."))
+	to_chat(user, span_notice("You collect [boolets + spent] [box.casing_phrasing]\s[spent ? " ([spent] spent)" : ""]. [box] now contains [box.stored_ammo.len] [box.casing_phrasing]\s."))
 	return TRUE
 
 /obj/item/ammo_casing/throw_impact(atom/hit_atom, datum/thrownthing/throwingdatum)

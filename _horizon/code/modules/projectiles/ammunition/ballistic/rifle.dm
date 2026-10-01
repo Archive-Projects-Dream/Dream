@@ -1,7 +1,15 @@
 /obj/item/ammo_casing/a762
+	name = "7.62 bullet casing"
+	desc = "A 7.62 bullet casing."
 	icon_state = "c762"
 	base_icon_state = "c762"
 	world_icon_state = "762-casing"
+	// [HORIZON-FIX] Same port gap as the a357: the old repo's core defined
+	// these on the base a762, the port only brought the cosmetic override.
+	// Without them rifle magazines spawned dud rounds that couldn't fire
+	// and couldn't be stacked (null caliber).
+	caliber = CALIBER_A762
+	projectile_type = /obj/projectile/bullet/a762
 	stack_type = /obj/item/ammo_box/magazine/ammo_stack/a762
 
 /obj/item/ammo_casing/a762/ap
