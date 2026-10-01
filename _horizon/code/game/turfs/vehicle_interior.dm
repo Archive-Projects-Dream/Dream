@@ -153,9 +153,17 @@
  * The black void that pads vehicle interior reservations, ported from
  * cmss13 /turf/open/void/vehicle. Dense and opaque so players can't wander
  * out of the interior into the reserved z-level.
+ * NOTE: this must stay a plain /turf/open child (like cmss13) so that
+ * /turf/open/Initialize() builds a gas mixture for it. Basing it on
+ * /turf/open/space/basic skips initialization (air stays null) while the
+ * void still enters atmos_adjacent_turfs of the interior floors, which
+ * crashes LINDA every SSair tick with "Cannot execute null.archive()".
  */
 /turf/open/void
-	parent_type = /turf/open/space/basic
+	name = "void"
+	icon = 'icons/turf/space.dmi'
+	icon_state = "black"
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
 
 /turf/open/void/vehicle
 	density = TRUE

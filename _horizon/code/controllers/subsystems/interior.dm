@@ -23,11 +23,17 @@ SUBSYSTEM_DEF(interior)
 	var/datum/turf_reservation/reserved_area = SSmapping.request_turf_block_reservation(width_to_request, height_to_request, reservation_type = /datum/turf_reservation/interior)
 
 	if(!reserved_area)
+		log_world("SSinterior: no free reserved space for interior '[template.interior_id]' ([width_to_request]x[height_to_request])")
 		return null
 
 	var/turf/bottom_left = reserved_area.bottom_left_turfs[1]
 
 	var/list/bounds = template.load(locate(bottom_left.x + (INTERIOR_BORDER_SIZE / 2), bottom_left.y + (INTERIOR_BORDER_SIZE / 2), bottom_left.z), centered = FALSE)
+
+	if(!bounds)
+		log_world("SSinterior: template '[template.interior_id]' failed to load (missing or invalid map file)")
+		QDEL_NULL(reserved_area)
+		return null
 
 	var/list/turfs = block(bounds[MAP_MINX], bounds[MAP_MINY], bounds[MAP_MINZ], bounds[MAP_MAXX], bounds[MAP_MAXY], bounds[MAP_MAXZ])
 

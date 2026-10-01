@@ -205,6 +205,9 @@
 // Moves the atom to the interior
 /datum/interior/proc/enter(atom/movable/A, entrance_used)
 	if(!ready)
+		if(ismob(A))
+			to_chat(A, span_warning("\The [exterior] is still being prepared, try again in a moment."))
+		log_world("VEHICLE: interior '[name]' refused entry for [A]: not ready.")
 		return FALSE
 
 	if(!A)
@@ -294,6 +297,9 @@
 			A.forceMove(get_turf(E))
 			return TRUE
 
+	if(ismob(A))
+		to_chat(A, span_warning("You can't find your way into \the [exterior]!"))
+	log_world("VEHICLE: interior '[name]' refused entry for [A]: no entrance marker tagged '[entrance_used]'.")
 	return FALSE
 
 // Moves the atom to the exterior

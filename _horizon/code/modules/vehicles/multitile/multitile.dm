@@ -158,7 +158,9 @@
 		INVOKE_ASYNC(src, PROC_REF(do_create_interior))
 /obj/vehicle/multitile/proc/do_create_interior()
 	interior.create_interior(interior_map)
-	if(!interior)
+	// create_interior() qdels the datum on failure and a qdeleted
+	// reference is still truthy, so QDELETED() is the correct check
+	if(QDELETED(interior))
 		to_chat(world, span_danger("Interior [interior_map] failed to load for [src]! Tell a developer!"))
 		qdel(src)
 		return
@@ -254,10 +256,13 @@
 	return
 /obj/vehicle/multitile/proc/set_seated_mob(seat, mob/living/seated_mob)
 	// Give/remove verbs
-	if(QDELETED(seated_mob))
-		var/mob/living/old_mob = seats[seat]
+	var/mob/living/old_mob = seats[seat]
+	if(old_mob && old_mob != seated_mob)
 		remove_seated_verbs(old_mob, seat)
-	else
+		// Detach the mouse relay from the previous occupant; otherwise
+		// sitting back down double-registers the client mouse signals
+		unregister_crew_mouse(old_mob)
+	if(!QDELETED(seated_mob))
 		add_seated_verbs(seated_mob, seat)
 	seats[seat] = seated_mob
 	// Checked here because we want to be able to null the mob in a seat
@@ -270,9 +275,9 @@
 	if(!seated_mob.client)
 		RegisterSignal(seated_mob, COMSIG_MOB_LOGIN, PROC_REF(on_crew_login))
 		return
-	RegisterSignal(seated_mob.client, COMSIG_CLIENT_MOUSEDOWN, PROC_REF(crew_mousedown))
-	RegisterSignal(seated_mob.client, COMSIG_CLIENT_MOUSEUP, PROC_REF(crew_mouseup))
-	RegisterSignal(seated_mob.client, COMSIG_CLIENT_MOUSEDRAG, PROC_REF(crew_mousedrag))
+	RegisterSignal(seated_mob.client, COMSIG_CLIENT_MOUSEDOWN, PROC_REF(crew_mousedown), override = TRUE)
+	RegisterSignal(seated_mob.client, COMSIG_CLIENT_MOUSEUP, PROC_REF(crew_mouseup), override = TRUE)
+	RegisterSignal(seated_mob.client, COMSIG_CLIENT_MOUSEDRAG, PROC_REF(crew_mousedrag), override = TRUE)
 /// Unregisters mouse relay signals from a crew mob and its client.
 /obj/vehicle/multitile/proc/unregister_crew_mouse(mob/living/seated_mob)
 	UnregisterSignal(seated_mob, COMSIG_MOB_LOGIN)
@@ -286,9 +291,9 @@
 	var/client/new_client = source.client
 	if(!new_client)
 		return
-	RegisterSignal(new_client, COMSIG_CLIENT_MOUSEDOWN, PROC_REF(crew_mousedown))
-	RegisterSignal(new_client, COMSIG_CLIENT_MOUSEUP, PROC_REF(crew_mouseup))
-	RegisterSignal(new_client, COMSIG_CLIENT_MOUSEDRAG, PROC_REF(crew_mousedrag))
+	RegisterSignal(new_client, COMSIG_CLIENT_MOUSEDOWN, PROC_REF(crew_mousedown), override = TRUE)
+	RegisterSignal(new_client, COMSIG_CLIENT_MOUSEUP, PROC_REF(crew_mouseup), override = TRUE)
+	RegisterSignal(new_client, COMSIG_CLIENT_MOUSEDRAG, PROC_REF(crew_mousedrag), override = TRUE)
 /// Get crewmember of seat.
 /obj/vehicle/multitile/proc/get_seat_mob(seat)
 	return seats[seat]

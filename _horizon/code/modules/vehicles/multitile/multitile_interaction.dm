@@ -300,6 +300,10 @@
 		if(entering_mob.pulling)
 			dragged_atom = entering_mob.pulling
 	// Transfer them to the interior
+	if(QDELETED(interior))
+		to_chat(entering_mob, span_warning("\The [src]'s interior failed to load. Report this bug."))
+		log_world("VEHICLE: interior of [src] at [src.x],[src.y],[src.z] failed to load; [key_name(entering_mob)] could not enter.")
+		return
 	interior.enter(entering_mob, entrance_used)
 	// We try to make the dragged thing enter last so that the mob who actually entered takes precedence
 	if(dragged_atom)
