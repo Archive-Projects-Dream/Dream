@@ -589,10 +589,16 @@
  * Math helpers ported from cmss13, missing in Horizon-Dream.
  */
 
-/// Returns the angle between two dirs in degrees (clockwise positive), or 0.
+/// Returns the angle to feed turn()/RotateAroundAxis() to rotate from
+/// from_dir to to_dir, in degrees, or 0.
+/// Port note: cmss13 defines this as a NEGATED macro,
+/// #define turning_angle(a, b) -(dir2angle(b) - dir2angle(a)).
+/// dir2angle grows clockwise while turn()/RotateAroundAxis() rotate
+/// counterclockwise for positive angles, so the minus is mandatory.
+/// Dropping it mirrored vehicle entrances onto the wrong sides and
+/// inverted steering for anything not facing south.
 /proc/turning_angle(from_dir, to_dir)
-	var/angle = dir2angle(to_dir) - dir2angle(from_dir)
-	return angle
+	return -(dir2angle(to_dir) - dir2angle(from_dir))
 /// Rotates a coordinate pair around a center point by deg degrees.
 /proc/RotateAroundAxis(list/coords, list/center, deg)
 	var/s = sin(deg)

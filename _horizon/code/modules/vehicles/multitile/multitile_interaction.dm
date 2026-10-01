@@ -165,7 +165,17 @@
 		if(mob_x == entrance_coord[1] && mob_y == entrance_coord[2])
 			handle_player_entrance(user)
 			return
+	if(isliving(user) && LAZYLEN(entrances))
+		to_chat(user, span_warning("You can't climb into \the [src] from here. The way in is on \the [get_entrance_hint()]."))
 	. = ..()
+/// Drag-and-drop yourself onto the vehicle to climb in, mirroring
+/// /obj/vehicle/sealed/mouse_drop_receive. Position checks still
+/// apply through handle_player_entrance().
+/obj/vehicle/multitile/mouse_drop_receive(atom/dropping, mob/living/user, params)
+	if(dropping == user && isliving(user))
+		handle_player_entrance(user)
+		return
+	return ..()
 /obj/vehicle/multitile/attack_ghost(mob/dead/observer/user)
 	if(!interior)
 		return ..()
@@ -246,10 +256,55 @@
 				toggle_gyrostabilizer()
 				return
 	var/obj/item/hardpoint/hardpoint = get_mob_hp(source.mob)
+	if(QDELETED(hardpoint) || hardpoint.atom_integrity <= 0)
+		// nothing selected (or it broke): grab the first usable module
+		// for this seat automatically instead of nagging on every click
+		hardpoint = auto_select_hardpoint(source.mob)
 	if(!hardpoint)
-		to_chat(source.mob, span_warning("Please select an active hardpoint first."))
 		return
 	hardpoint.start_fire(source.mob, object, location, control, params)
+/// Human-readable sides the vehicle entrances are on, named relative
+/// to the vehicle's own facing (front/back/left/right), for the
+/// "you can't climb in from here" feedback.
+/obj/vehicle/multitile/proc/get_entrance_hint()
+	if(!LAZYLEN(entrances))
+		return "front"
+	var/list/sides = list()
+	for(var/entrance in entrances)
+		var/entrance_coord = entrances[entrance]
+		var/world_dir = NONE
+		if(entrance_coord[1] > 0)
+			world_dir |= EAST
+		else if(entrance_coord[1] < 0)
+			world_dir |= WEST
+		if(entrance_coord[2] > 0)
+			world_dir |= NORTH
+		else if(entrance_coord[2] < 0)
+			world_dir |= SOUTH
+		// entrances are stored in world coordinates; rotate them into
+		// the vehicle's local south-facing frame for naming
+		var/local_dir = world_dir ? turn(world_dir, turning_angle(dir, SOUTH)) : SOUTH
+		var/side_name
+		switch(local_dir)
+			if(NORTH)
+				side_name = "back"
+			if(SOUTH)
+				side_name = "front"
+			if(EAST)
+				side_name = "left side"
+			if(WEST)
+				side_name = "right side"
+			if(NORTHEAST)
+				side_name = "back left corner"
+			if(NORTHWEST)
+				side_name = "back right corner"
+			if(SOUTHEAST)
+				side_name = "front left corner"
+			if(SOUTHWEST)
+				side_name = "front right corner"
+		if(side_name && !(side_name in sides))
+			sides += side_name
+	return english_list(sides)
 /obj/vehicle/multitile/proc/handle_player_entrance(mob/entering_mob)
 	if(!entering_mob || !entering_mob.client)
 		return
@@ -272,6 +327,8 @@
 				return
 	// Only non-humans can force their way in without doors, and only when the frame is completely broken
 	if(!entrance_used && atom_integrity > 0)
+		if(ismob(entering_mob) && LAZYLEN(entrances))
+			to_chat(entering_mob, span_warning("You can't climb into \the [src] from here. The way in is on \the [get_entrance_hint()]."))
 		return
 	else if(!entrance_used && ishuman(entering_mob))
 		return
@@ -285,7 +342,7 @@
 		if(dragged_atom)
 			enter_time = 2 SECONDS
 	to_chat(entering_mob, span_notice(enter_msg))
-	if(!do_after(entering_mob, enter_time, target = src))
+	if(!do_after(entering_mob, enter_time, target = src, timed_action_flags = IGNORE_HELD_ITEM))
 		return
 	if(entrance_used)
 		var/entrance_coord = entrances[entrance_used]

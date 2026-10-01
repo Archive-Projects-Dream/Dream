@@ -24,6 +24,12 @@
 	bound_x = 0
 	bound_y = 0
 	can_buckle = FALSE
+	// cmss13 mobs cannot push objects by walking into them; TG's
+	// PushAM() shoves any unanchored movable unless move_resist is
+	// overwhelming. tgmc's armored vehicles use INFINITY for the same
+	// effect. Internal movement (try_move -> forceMove) and huge-mob
+	// van shoving (CanAllowThrough -> try_move(force=TRUE)) are immune.
+	move_resist = INFINITY
 	light_system = COMPLEX_LIGHT
 	light_range = 5
 	var/atom/movable/vehicle_light_holder/lighting_holder
@@ -269,6 +275,11 @@
 	if(!istype(seated_mob))
 		return FALSE
 	register_crew_mouse(seated_mob)
+	// cmss13 auto-selects the firing port weapon for support gunners
+	// when they buckle up; generalized so any crewman whose seat has
+	// activatable hardpoints can fire without opening a verb menu first
+	if(!active_hp[seat])
+		auto_select_hardpoint(seated_mob)
 	return TRUE
 /// Registers mouse relay signals on the seated mob's client so weapons can be aimed by clicking.
 /obj/vehicle/multitile/proc/register_crew_mouse(mob/living/seated_mob)
@@ -309,6 +320,20 @@
 	if(seat)
 		return active_hp[seat]
 	return null
+/// Picks the first activatable hardpoint for the seated mob's seat,
+/// stores it as the seat's active hardpoint and returns it.
+/// Returns null when the seat controls nothing usable.
+/obj/vehicle/multitile/proc/auto_select_hardpoint(mob/crew_member)
+	var/seat = get_mob_seat(crew_member)
+	if(!seat)
+		return null
+	var/list/usable_hardpoints = get_activatable_hardpoints(seat)
+	var/obj/item/hardpoint/chosen_hardpoint = null
+	if(LAZYLEN(usable_hardpoints))
+		chosen_hardpoint = usable_hardpoints[1]
+		active_hp[seat] = chosen_hardpoint
+		to_chat(crew_member, span_notice("You take control of \the [chosen_hardpoint]."))
+	return chosen_hardpoint
 /obj/vehicle/multitile/proc/get_passengers()
 	if(interior)
 		return interior.get_passengers()

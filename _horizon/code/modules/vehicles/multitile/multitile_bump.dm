@@ -242,11 +242,9 @@
 		Knockdown(5 SECONDS)
 		apply_damage(15 + rand(0, 10), BRUTE)
 		dmg = TRUE
-	var/list/slots = bumping_vehicle.get_activatable_hardpoints()
-	for(var/slot in slots)
-		var/obj/item/hardpoint/held_hardpoint = bumping_vehicle.hardpoints[slot]
-		if(!held_hardpoint)
-			continue
+	// cmss13 looked these up by "slot name" in an assoc list it never
+	// had, so ram modules never actually fired; iterate them directly
+	for(var/obj/item/hardpoint/held_hardpoint as anything in bumping_vehicle.get_activatable_hardpoints())
 		held_hardpoint.livingmob_interact(src)
 	Knockdown(3 SECONDS)
 	apply_damage(7 + rand(0, 5), BRUTE)
