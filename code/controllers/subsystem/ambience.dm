@@ -136,7 +136,10 @@ SUBSYSTEM_DEF(ambience)
 		return
 
 	//Station ambience is dependent on a functioning and charged APC with environment power enabled.
-	if(!is_mining_level(my_area.z) && ((!my_area.apc || !my_area.apc.operating || !my_area.apc.cell?.charge && my_area.requires_power || !my_area.power_environ)))
+	// [HORIZON-EDIT] vehicle interiors: self-powered areas without an APC opt in
+	// to keeping their ambient buzz (engine hum) through this flag
+	if(!is_mining_level(my_area.z) && !my_area.ambient_buzz_apc_independent && ((!my_area.apc || !my_area.apc.operating || !my_area.apc.cell?.charge && my_area.requires_power || !my_area.power_environ)))
+	// [/HORIZON-EDIT]
 		SEND_SOUND(src, sound(null, repeat = 0, wait = 0, channel = CHANNEL_AMBIENCE))
 		client.current_ambient_sound = null
 		return

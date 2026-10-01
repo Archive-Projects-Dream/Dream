@@ -79,6 +79,11 @@
 			continue
 		if(get_dist_euclidean(mob_turf, turf_source) <= maxdistance)
 			listening_mob.playsound_local(turf_source, soundin, vol, vary, frequency, falloff_exponent, channel, pressure_affected, S, maxdistance, falloff_distance, 1, use_reverb, min_volume, mixer_channel)
+	// [HORIZON-EDIT] multitile vehicle interiors (cmss13 parity): sounds
+	// made near a vehicle are heard by its crew and vice versa
+	if(SSinterior && length(SSinterior.interiors))
+		SSinterior.relay_vehicle_sound(turf_source, soundin, vol, vary, frequency, falloff_exponent, channel, pressure_affected, S, maxdistance, falloff_distance, use_reverb, min_volume, mixer_channel)
+	// [/HORIZON-EDIT]
 	return listeners
 
 /**
@@ -102,7 +107,7 @@
  * * min_volume - minimum volume the sound can reach at max_range.
  * * mixer_channel - Optional: The mixer channel for volume control.
  */
-/mob/proc/playsound_local(turf/turf_source, soundin, vol as num, vary, frequency, falloff_exponent = SOUND_FALLOFF_EXPONENT, channel = 0, pressure_affected = TRUE, sound/sound_to_use, max_distance, falloff_distance = SOUND_DEFAULT_FALLOFF_DISTANCE, distance_multiplier = 1, use_reverb = TRUE,  min_volume = 5, mixer_channel = 0)
+/mob/proc/playsound_local(turf/turf_source, soundin, vol as num, vary, frequency, falloff_exponent = SOUND_FALLOFF_EXPONENT, channel = 0, pressure_affected = TRUE, sound/sound_to_use, max_distance, falloff_distance = SOUND_DEFAULT_FALLOFF_DISTANCE, distance_multiplier = 1, use_reverb = TRUE,  min_volume = 5, mixer_channel = 0, turf/virtual_listener_turf)
 	if(!client || HAS_TRAIT(src, TRAIT_DEAF))
 		return
 
@@ -128,7 +133,10 @@
 	var/distance = 0
 
 	if(isturf(turf_source))
-		var/turf/turf_loc = get_turf(src)
+		// [HORIZON-EDIT] vehicle interiors: crews hear exterior sounds from
+		// the vehicle's position instead of their reserved z-level turf
+		var/turf/turf_loc = virtual_listener_turf || get_turf(src)
+		// [/HORIZON-EDIT]
 
 		//sound volume falloff with distance
 		distance = get_dist_euclidean(turf_loc, turf_source) * distance_multiplier

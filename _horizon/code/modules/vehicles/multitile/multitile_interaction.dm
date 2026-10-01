@@ -175,6 +175,11 @@
 	if(dropping == user && isliving(user))
 		handle_player_entrance(user)
 		return
+	// dragging a pulled mob onto the vehicle stuffs it inside
+	// (same habit as TG's /obj/vehicle/sealed)
+	if(isliving(dropping) && user.pulling == dropping)
+		handle_fitting_pulled_atom(user, dropping)
+		return
 	return ..()
 /obj/vehicle/multitile/attack_ghost(mob/dead/observer/user)
 	if(!interior)

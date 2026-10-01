@@ -73,7 +73,7 @@
 	vehicle.set_seated_mob(seat, M)
 	if(M.client)
 		stored_view = M.client.view
-		M.client.change_view(7)
+		M.client.change_view(8) // cmss13 gives vehicle crew a slightly wider view
 
 /obj/structure/chair/comfy/vehicle/unbuckle_mob(mob/living/buckled_mob, force = FALSE, can_fall = TRUE)
 	. = ..()

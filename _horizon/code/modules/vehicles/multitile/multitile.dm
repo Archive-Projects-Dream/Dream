@@ -158,7 +158,9 @@
 	GLOB.all_multi_vehicles += src
 	return INITIALIZE_HINT_LATELOAD
 /obj/vehicle/multitile/LateInitialize()
-	. = ..()
+	// No parent call: /atom/proc/LateInitialize() is SHOULD_CALL_PARENT(FALSE)
+	// upstream and stack_traces ("called LateInitialize but has nothing
+	// on it!") on every vehicle spawn if invoked.
 	if(interior_map)
 		interior = new(src)
 		INVOKE_ASYNC(src, PROC_REF(do_create_interior))
@@ -217,6 +219,10 @@
 		. += installed_hardpoint.examine(user)
 	if(clamped)
 		. += "There is a vehicle clamp attached."
+	// helps players find the doors; cmss13 only hints via the tank's
+	// "Entrance in the back." description
+	if(LAZYLEN(entrances))
+		. += span_notice("The way in is on \the [get_entrance_hint()].")
 /obj/vehicle/multitile/proc/load_hardpoints()
 	return
 /obj/vehicle/multitile/proc/load_damage()
@@ -275,6 +281,15 @@
 	if(!istype(seated_mob))
 		return FALSE
 	register_crew_mouse(seated_mob)
+	// cmss13 set_seated_mob() also snapped the crewman's camera onto the
+	// vehicle so they can see out of it (the tank crew's "external
+	// camera") and handed them the vehicle unbuckle action to step
+	// back out; ported here
+	if(seated_mob.client)
+		seated_mob.reset_perspective(src)
+		if(!locate(/datum/action/vehicle/multitile_view) in seated_mob.actions)
+			var/datum/action/vehicle/multitile_view/view_action = new()
+			view_action.Grant(seated_mob)
 	// cmss13 auto-selects the firing port weapon for support gunners
 	// when they buckle up; generalized so any crewman whose seat has
 	// activatable hardpoints can fire without opening a verb menu first
