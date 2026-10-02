@@ -1,23 +1,19 @@
 GLOBAL_LIST_EMPTY(lobby_menus)
 GLOBAL_VAR(lobby_background_transparent)
 
-#define LOBBY_TITLE_ASSET_NAME "lobby_title_screen.png"
-GLOBAL_VAR(lobby_title_asset_registered)
+// [HORIZON-ADD]
+GLOBAL_VAR(lobby_video_asset_name)
+GLOBAL_VAR(lobby_background_asset_name)
 
-/proc/register_lobby_title_asset()
-	if(GLOB.lobby_title_asset_registered)
-		return
-	GLOB.lobby_title_asset_registered = TRUE
-	UNTIL(SStitle.icon)
-	SSassets.transport.register_asset(LOBBY_TITLE_ASSET_NAME, SStitle.icon)
+#define LOBBY_FADE_OUT_TIME 0.6 SECONDS
+#define LOBBY_PREVIEW_REFRESH_COOLDOWN 8 SECONDS
+#define LOBBY_PREVIEW_DIRS list("south" = SOUTH, "east" = EAST, "north" = NORTH, "west" = WEST)
+// [/HORIZON-ADD]
 
 /client/var/datum/lobby_menu/lobby_menu
 
 /client/proc/initialize_lobby_menu()
 	set waitfor = FALSE
-	register_lobby_title_asset()
-	// Wait for the title screen asset to be available
-	UNTIL(SSassets.transport.get_asset_url(LOBBY_TITLE_ASSET_NAME))
 	if(!src)
 		return
 	lobby_menu = new(src)
@@ -34,6 +30,15 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	var/datum/tgui_window/window
 	/// Whether we've already registered for asset subsystem init signals
 	var/assets_signals_registered = FALSE
+	// [HORIZON-ADD]
+	var/shown = FALSE
+	var/preview_sequence = 0
+	var/list/preview_urls
+	var/preview_last_refresh = 0
+	var/preview_dirty = TRUE
+	var/last_prefs_update_count = 0
+	var/fade_timer
+	// [/HORIZON-ADD]
 
 /datum/lobby_menu/New(client/client)
 	src.client = client
@@ -51,15 +56,11 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	RegisterSignal(SSticker, COMSIG_TICKER_ENTER_SETTING_UP, PROC_REF(on_ticker_setting_up))
 	RegisterSignal(SSticker, COMSIG_TICKER_ERROR_SETTING_UP, PROC_REF(on_ticker_error_setting_up))
 	RegisterSignal(SSticker, COMSIG_TICKER_ROUND_STARTING, PROC_REF(on_round_start))
-	RegisterSignals(SSdcs, list(COMSIG_GLOB_LOBBY_TRAIT_ADDED, COMSIG_GLOB_LOBBY_TRAIT_REMOVED), PROC_REF(on_traits_changed))
 
 	GLOB.lobby_menus += src
 	update_visibility()
 	send_init()
 
-/// Creates the lobby_menu browser element in the appropriate parent window.
-/// When transparent, it lives in map_screen overlaying the map.
-/// When opaque, it lives in lobby_screen (swapped via the CHILD selector).
 /datum/lobby_menu/proc/create_browser(transparent = FALSE)
 	// Remove existing browser element
 	winset(client, "lobby_menu", list("parent" = ""))
@@ -77,12 +78,14 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		))
 	else
 		winset(client, "lobby_menu", list(
-			"parent" = SKIN_LOBBY_SCREEN,
+			"parent" = SKIN_MAP_SCREEN,
 			"type" = "BROWSER",
 			"pos" = "0,0",
 			"size" = "640x480",
 			"anchor1" = "0,0",
 			"anchor2" = "100,100",
+			"background-color" = "#000000",
+			"inner-background-color" = "#000000",
 		))
 
 /datum/lobby_menu/Destroy(force)
@@ -91,6 +94,10 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	window?.unsubscribe(src)
 	window = null
 	client = null
+	preview_urls = null
+	if(fade_timer)
+		deltimer(fade_timer)
+		fade_timer = null
 	return ..()
 
 /// Loads the bundle, sends assets, and pushes initial state into the browser.
@@ -102,11 +109,10 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	)
 	window.send_asset(get_asset_datum(/datum/asset/simple/namespaced/lobby_menu_font))
 	window.send_asset(get_asset_datum(/datum/asset/simple/namespaced/lobby_menu_sounds))
-	window.send_asset(get_asset_datum(/datum/asset/simple/namespaced/lobby_menu_icons))
-	SSassets.transport.send_assets(client, LOBBY_TITLE_ASSET_NAME)
+	window.send_asset(get_asset_datum(/datum/asset/simple/namespaced/fontawesome))
 
-/// Toggle the lobby browser between opaque (own pane) and transparent (overlaying map).
-/// Recreates the browser element in the appropriate parent and reinitializes it.
+/// Toggle the lobby browser between opaque (black backdrop) and transparent (overlaying map).
+/// Recreates the browser element and reinitializes it.
 /datum/lobby_menu/proc/set_transparency(transparent)
 	if(transparent && client?.prefs?.read_preference(/datum/preference/toggle/disable_lobby_transparency))
 		return
@@ -126,6 +132,12 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"adminCount" = length(GLOB.admins),
 		"shiftTime" = (SSticker.round_start_time == 0) ? "Pre-Game" : round_timestamp(),
 	))
+	var/update_count = length(client?.prefs?.recently_updated_keys)
+	if(update_count != last_prefs_update_count)
+		last_prefs_update_count = update_count
+		INVOKE_ASYNC(src, PROC_REF(update_character_preview))
+	if(preview_dirty)
+		INVOKE_ASYNC(src, PROC_REF(update_character_preview))
 
 /datum/lobby_menu/proc/on_client_qdel()
 	SIGNAL_HANDLER
@@ -135,21 +147,50 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	SIGNAL_HANDLER
 	update_visibility()
 
-/// Swaps between the lobby screen and the map screen based on whether the client's mob is a new_player
+/**
+ * Shows or hides the lobby browser depending on whether the client's mob is
+ * a new_player. The map pane itself stays selected the entire time - the
+ * lobby is simply an overlay on top of it.
+ */
 /datum/lobby_menu/proc/update_visibility()
 	var/should_show = istype(client?.mob, /mob/dead/new_player) && !client.interviewee
-	if(GLOB.lobby_background_transparent)
-		// In transparent mode the browser overlays the map, selector always shows map_screen
-		winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
-		winset(client, "lobby_menu", "is-visible=[should_show]")
-	else
-		// In opaque mode, swap the CHILD selector between lobby_screen and map_screen
-		winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[should_show ? SKIN_LOBBY_SCREEN : SKIN_MAP_SCREEN]")
 	if(should_show)
+		shown = TRUE
+		if(fade_timer)
+			deltimer(fade_timer)
+			fade_timer = null
+		preview_dirty = TRUE
+		winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
+		if(!GLOB.lobby_background_transparent)
+			winset(client, "lobby_menu", "background-color=#000000")
+		winset(client, "lobby_menu", "is-visible=true")
 		START_PROCESSING(SSlobby_menu, src)
 		send_init()
 	else
+		var/was_shown = shown
+		shown = FALSE
 		STOP_PROCESSING(SSlobby_menu, src)
+		if(was_shown)
+			window?.send_message("fadeOut")
+			if(!GLOB.lobby_background_transparent)
+				winset(client, "lobby_menu", "background-color=none")
+			if(fade_timer)
+				deltimer(fade_timer)
+			fade_timer = addtimer(CALLBACK(src, PROC_REF(apply_hidden_visibility)), LOBBY_FADE_OUT_TIME, TIMER_STOPPABLE)
+		else
+			if(fade_timer)
+				deltimer(fade_timer)
+				fade_timer = null
+			apply_hidden_visibility()
+
+/datum/lobby_menu/proc/apply_hidden_visibility()
+	fade_timer = null
+	if(shown || !client)
+		return
+	winset(client, "lobby_menu", "is-visible=false")
+	if(!GLOB.lobby_background_transparent)
+		winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
+		winset(client, "lobby_menu", "background-color=#000000")
 
 /datum/lobby_menu/proc/on_ticker_pregame()
 	SIGNAL_HANDLER
@@ -182,10 +223,6 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"canJoin" = TRUE,
 	))
 
-/datum/lobby_menu/proc/on_traits_changed()
-	SIGNAL_HANDLER
-	send_update(list("stationTraits" = get_station_traits()))
-
 /datum/lobby_menu/proc/get_game_phase()
 	switch(SSticker.current_state)
 		if(GAME_STATE_STARTUP)
@@ -206,27 +243,11 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		return "DELAYED"
 	return "SOON"
 
-/datum/lobby_menu/proc/get_station_traits()
-	var/list/result = list()
-	var/mob/dead/new_player/player = client?.mob
-	for(var/datum/station_trait/trait as anything in GLOB.lobby_station_traits)
-		if(!trait.can_display_lobby_button(client))
-			continue
-		result += list(list(
-			"ref" = REF(trait),
-			"name" = trait.name,
-			"description" = trait.get_lobby_description(),
-			"iconState" = trait.get_lobby_icon_state(player),
-			"overlays" = trait.get_lobby_overlay_states(player),
-		))
-	return result
-
 /datum/lobby_menu/proc/send_init()
 	var/mob/dead/new_player/player = client?.mob
 	var/game_phase = get_game_phase()
 
 	window.send_message("init", list(
-		"titleImageUrl" = SSassets.transport.get_asset_url(LOBBY_TITLE_ASSET_NAME),
 		"gamePhase" = game_phase,
 		"isReady" = istype(player) && player.ready == PLAYER_READY_TO_PLAY,
 		"canReady" = game_phase == "pregame" || game_phase == "startup",
@@ -242,11 +263,17 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		"shiftTime" = (SSticker.round_start_time == 0) ? "Pre-Game" : round_timestamp(),
 		"isAdmin" = !isnull(client?.holder),
 		"isLocalhost" = client?.is_localhost(),
-		"stationTraits" = get_station_traits(),
 		"hasNewPoll" = FALSE,
 		"canPoll" = !is_guest_key(client?.key) && SSdbcore.Connect(),
-		"overflowJob" = null,
 		"transparent" = GLOB.lobby_background_transparent,
+		// [HORIZON-ADD]
+		"characterName" = get_character_name(),
+		"preferenceIssues" = get_preference_issues(),
+		"serverName" = CONFIG_GET(string/server),
+		"videoUrl" = get_lobby_video_url(),
+		"backgroundUrl" = get_lobby_background_url(),
+		"previewUrls" = preview_urls,
+		// [/HORIZON-ADD]
 	))
 
 	check_new_polls()
@@ -259,6 +286,9 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		if(SSatoms.initialized != INITIALIZATION_INNEW_REGULAR)
 			RegisterSignal(SSatoms, COMSIG_SUBSYSTEM_POST_INITIALIZE, PROC_REF(on_assets_ready))
 			assets_signals_registered = TRUE
+
+	if(preview_dirty)
+		INVOKE_ASYNC(src, PROC_REF(update_character_preview))
 
 /datum/lobby_menu/proc/on_assets_ready(datum/source)
 	SIGNAL_HANDLER
@@ -384,19 +414,110 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 			SSticker.start_immediately = TRUE
 			if(SSticker.current_state == GAME_STATE_STARTUP)
 				to_chat(player, span_admin("The server is still setting up, but the round will be started as soon as possible."))
-		if("sign_up")
-			var/trait_ref = payload["ref"]
-			if(!trait_ref)
-				return TRUE
-			var/datum/station_trait/trait = locate(trait_ref)
-			if(!istype(trait) || !(trait in GLOB.lobby_station_traits))
-				return TRUE
-			var/feedback = trait.on_lobby_button_click(player)
-			send_update(list(
-				"stationTraits" = get_station_traits(),
-				"traitFeedback" = feedback,
-			))
+		if("refresh_preview")
+			INVOKE_ASYNC(src, PROC_REF(update_character_preview), TRUE)
 
 	return TRUE
 
-#undef LOBBY_TITLE_ASSET_NAME
+// [HORIZON-ADD]
+/datum/lobby_menu/proc/get_character_name()
+	return client?.prefs?.read_preference(/datum/preference/name/real_name)
+
+/datum/lobby_menu/proc/get_preference_issues()
+	var/datum/preferences/prefs = client?.prefs
+	if(!prefs)
+		return list()
+	if(prefs.job_preferences.len == 0 && prefs.read_preference(/datum/preference/choiced/jobless_role) == RETURNTOLOBBY)
+		return list("You have no jobs enabled, along with return to lobby if job is unavailable. This makes you ineligible for any round start role, please update your job preferences.")
+	return list()
+
+/datum/lobby_menu/proc/update_character_preview(force = FALSE)
+	set waitfor = FALSE
+	if(!client?.prefs)
+		// Preferences are not settled yet (very early login) - process() retries
+		preview_dirty = TRUE
+		return
+	if(!force && world.time < preview_last_refresh + LOBBY_PREVIEW_REFRESH_COOLDOWN)
+		preview_dirty = TRUE
+		return
+	preview_last_refresh = world.time
+
+	var/datum/preferences/prefs = client.prefs
+	var/mob/living/carbon/human/dummy/mannequin = new()
+	// Dress the mannequin once; silicon jobs return an /image instead
+	var/rendered = prefs.render_new_preview_appearance(mannequin, TRUE)
+	var/icon_source = istype(rendered, /image) ? rendered : mannequin
+
+	var/list/new_urls = list()
+	preview_sequence += 1
+	for(var/dir_name in LOBBY_PREVIEW_DIRS)
+		var/icon/flat = getFlatIcon(icon_source, LOBBY_PREVIEW_DIRS[dir_name])
+		if(!flat)
+			continue
+		var/asset_name = "lobby_preview_[client.ckey]_[preview_sequence]_[dir_name].png"
+		SSassets.transport.register_asset(asset_name, flat)
+		SSassets.transport.send_assets(client, asset_name)
+		new_urls[dir_name] = SSassets.transport.get_asset_url(asset_name)
+
+	qdel(mannequin)
+
+	preview_urls = length(new_urls) ? new_urls : null
+	if(!preview_urls)
+		preview_dirty = TRUE
+		return
+	preview_dirty = FALSE
+	send_update(list("previewUrls" = preview_urls))
+
+/// Videos are picked up from config/lobby_art/ (.webm or .mp4) and cached per server boot.
+/datum/lobby_menu/proc/get_lobby_video_url()
+	if(GLOB.lobby_background_transparent)
+		return null
+	if(isnull(GLOB.lobby_video_asset_name))
+		var/list/candidates = list()
+		for(var/filename in flist("[global.config.directory]/lobby_art/"))
+			var/extension = copytext(filename, findlasttext(filename, "."))
+			if(extension in list(".webm", ".mp4"))
+				candidates += filename
+		if(!length(candidates))
+			GLOB.lobby_video_asset_name = ""
+			return null
+		var/chosen = pick(candidates)
+		GLOB.lobby_video_asset_name = "lobby_video_[ckey(chosen)]"
+		SSassets.transport.register_asset(GLOB.lobby_video_asset_name, fcopy_rsc("[global.config.directory]/lobby_art/[chosen]"))
+	if(!GLOB.lobby_video_asset_name)
+		return null
+	SSassets.transport.send_assets(client, GLOB.lobby_video_asset_name)
+	return SSassets.transport.get_asset_url(GLOB.lobby_video_asset_name)
+
+/datum/lobby_menu/proc/get_lobby_background_url()
+	if(GLOB.lobby_background_transparent)
+		return null
+	if(isnull(GLOB.lobby_background_asset_name))
+		var/art_dir = "[global.config.directory]/lobby_art/"
+		var/map_name = SSmapping.current_map?.map_name
+		var/chosen
+		if(map_name && fexists("[art_dir][map_name].png"))
+			chosen = "[map_name].png"
+		else if(map_name && fexists("[art_dir][map_name].jpg"))
+			chosen = "[map_name].jpg"
+		else
+			for(var/filename in flist(art_dir))
+				var/lower_name = LOWER_TEXT(filename)
+				if(lower_name == "default.png" || lower_name == "default.jpg" || lower_name == "default.jpeg")
+					chosen = filename
+					break
+		if(!chosen)
+			// Negative cache so we don't rescan on every init
+			GLOB.lobby_background_asset_name = ""
+			return null
+		GLOB.lobby_background_asset_name = "lobby_background_[ckey(chosen)]"
+		SSassets.transport.register_asset(GLOB.lobby_background_asset_name, fcopy_rsc("[art_dir][chosen]"))
+	if(!GLOB.lobby_background_asset_name)
+		return null
+	SSassets.transport.send_assets(client, GLOB.lobby_background_asset_name)
+	return SSassets.transport.get_asset_url(GLOB.lobby_background_asset_name)
+
+#undef LOBBY_FADE_OUT_TIME
+#undef LOBBY_PREVIEW_REFRESH_COOLDOWN
+#undef LOBBY_PREVIEW_DIRS
+// [/HORIZON-ADD]
