@@ -112,6 +112,12 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 	create_browser(transparent)
 	if(!lobby_window)
 		lobby_window = new(client, "lobby_browser")
+		// The element is created via winset at runtime, so the
+		// winexists() check inside tgui_window/initialize() can
+		// race the control creation and misroute every message to
+		// "lobby_browser.browser:update" (nowhere), leaving a blank
+		// white screen. Upstream master sets this explicitly too.
+		lobby_window.is_browser = TRUE
 		initialize_browser()
 	// In opaque mode the CHILD selector swaps between the lobby pane and the
 	// map pane; in transparent mode the map is always selected and the
@@ -166,14 +172,32 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		))
 
 /// Loads the tgui bundle and the lobby fonts into the browser element.
+/// Guarded: a missing build artifact (e.g. tgui.bundle.js after pulling the
+/// branch without running the tgui build) would CRASH inside SSassets before
+/// tgui_window/initialize() ever reaches browse(), leaving the element
+/// permanently blank-white. Check the files up front, say so in chat, and
+/// always let the html reach the browser.
 /datum/lobby_menu/proc/initialize_browser()
-	lobby_window.initialize(
-		strict_mode = TRUE,
-		assets = list(
-			get_asset_datum(/datum/asset/simple/tgui),
-			get_asset_datum(/datum/asset/simple/namespaced/chakrapetch),
-		),
-	)
+	var/list/lobby_assets = list()
+	if(fexists("tgui/public/tgui.bundle.js") && fexists("tgui/public/tgui.bundle.css"))
+		lobby_assets += get_asset_datum(/datum/asset/simple/tgui)
+	else
+		to_chat(client, span_danger("<b>Lobby:</b> tgui bundle was not found in tgui/public/. Build it (tgui:build / tools/build/build.ts) and restart the server, otherwise the lobby will stay blank."))
+		log_tgui(client, "Lobby: tgui/public/tgui.bundle.js or .css is missing - run the tgui build.", context = "lobby_browser")
+	if(fexists("tgui/packages/chakrapetch/chakrapetch.css"))
+		lobby_assets += get_asset_datum(/datum/asset/simple/namespaced/chakrapetch)
+	else
+		log_tgui(client, "Lobby: chakrapetch font asset is missing.", context = "lobby_browser")
+	try
+		lobby_window.initialize(
+			strict_mode = TRUE,
+			assets = lobby_assets,
+		)
+	catch(var/exception/e)
+		// Asset transit exploded - load a bare page so the element
+		// shows the tgui error screen instead of an empty white box.
+		log_tgui(client, "Lobby: initialization failed ([e.name]): retrying without assets.", context = "lobby_browser")
+		lobby_window.initialize(strict_mode = TRUE)
 
 /// Toggle the lobby browser between opaque (own pane) and transparent (overlaying the map).
 /// Recreates the browser element in the appropriate parent and reinitializes it.
@@ -188,6 +212,7 @@ ADMIN_VERB(toggle_lobby_transparency, R_ADMIN, "Toggle Lobby Transparency", "Tog
 		lobby_window.unsubscribe()
 		QDEL_NULL(lobby_window)
 	lobby_window = new(client, "lobby_browser")
+	lobby_window.is_browser = TRUE
 	initialize_browser()
 	if(transparent)
 		winset(client, SKIN_MAP_LOBBY_SELECTOR, "left=[SKIN_MAP_SCREEN]")
