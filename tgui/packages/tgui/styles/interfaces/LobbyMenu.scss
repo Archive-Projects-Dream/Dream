@@ -1,0 +1,342 @@
+.LobbyScreen.crtTheme {
+  &.filterEnabled {
+    box-shadow: 0 0 15px;
+  }
+
+  .typeEffect {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: typing 1s steps(20, end) forwards;
+    animation-delay: 1.3s;
+  }
+
+  .buttonEffect {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: typing 1s steps(20, end) forwards;
+  }
+
+  .sectionLoad {
+    animation: section-loading 1s forwards;
+    box-shadow: 0 0 15px;
+    background-color: hsla(120, 100%, 3%, 0.7);
+  }
+
+  .dividerEffect {
+    animation: typing 1s steps(20, end) forwards;
+    width: 0;
+  }
+
+  .bgLoad {
+    opacity: 0;
+    animation: bg-load 10s forwards;
+    animation-delay: 5s;
+  }
+
+  @keyframes bg-load {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes typing {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  @keyframes section-loading {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  &.filterEnabled {
+    .crt {
+      &::before {
+        content: ' ';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background:
+          linear-gradient(hsla(0, 6%, 7%, 0) 50%, hsla(0, 0%, 0%, 0.25) 50%),
+          linear-gradient(
+            90deg,
+            hsla(0, 100%, 50%, 0.06),
+            hsla(120, 100%, 50%, 0.02),
+            hsla(240, 100%, 50%, 0.06)
+          );
+        z-index: 2;
+        background-size:
+          100% 8px,
+          6px 100%;
+        pointer-events: none;
+      }
+
+      &::after {
+        content: ' ';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: hsla(0, 6%, 7%, 0.1);
+        opacity: 0;
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      @supports (not (-webkit-hyphens: none)) and (not (-moz-appearance: none)) {
+        box-shadow: 0 0 500px 25px hsla(0, 0%, 0%, 0.9) inset;
+      }
+    }
+  }
+}
+
+// CRT lobby theme — green-tinted retro terminal look
+.theme-crtlobby:root {
+  --color-base: hsl(220, 30%, 15%);
+  --color-primary: hsl(220, 50%, 40%);
+  --secondary-lightness-adjustment: 6.33;
+
+  --button-color-transparent: hsla(220, 50%, 40%, 0.75);
+  --progress-bar-background: hsla(0, 0%, 0%, 0.5);
+  --tooltip-background-lightness: 25;
+
+  --lobby-accent: hsl(120, 55%, 45%);
+  --lobby-accent-dim: hsla(120, 55%, 45%, 0.45);
+}
+
+// Fallback theme when CRT is disabled — neutral grey/blue
+.theme-weyland_yutani:root {
+  --color-base: hsl(213, 30%, 20%);
+  --color-primary: hsl(213, 30%, 40%);
+  --secondary-lightness-adjustment: 6.33;
+
+  --button-color-transparent: hsla(213, 30%, 40%, 0.75);
+  --progress-bar-background: hsla(0, 0%, 0%, 0.5);
+  --tooltip-background-lightness: 25;
+
+  --lobby-accent: hsl(213, 35%, 60%);
+  --lobby-accent-dim: hsla(213, 35%, 60%, 0.45);
+}
+
+.theme-weyland_yutani {
+  .LobbyScreen {
+    .sectionLoad {
+      border: 3px solid hsl(213, 30%, 31%);
+      background-color: hsla(0, 0%, 0%, 0.7);
+    }
+
+    .dividerEffect {
+      border-color: hsl(213, 30%, 31%);
+    }
+  }
+}
+
+.LobbyScreen {
+  font-family: chakrapetch-bold;
+  line-height: 100%;
+  font-size: large;
+
+  background-position: 'center';
+  background-size: 'cover';
+
+  .bgBackground {
+    background-position: center;
+    background-size: cover;
+    position: absolute;
+  }
+
+  .crt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .authorAttrib {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    padding: 5px;
+  }
+
+  .Button__content {
+    .Icon {
+      vertical-align: middle;
+      margin-bottom: 3px;
+    }
+  }
+
+  .messageHolder {
+    pointer-events: none;
+
+    .issueSection {
+      width: 300px;
+      max-width: 34vw;
+      margin-bottom: 0.5em;
+      font-size: 0.8em;
+    }
+
+    .issueText {
+      font-weight: normal;
+      white-space: normal;
+    }
+  }
+
+  .badgeNotification {
+    margin-left: 0.5em;
+    color: var(--lobby-accent, hsl(120, 55%, 45%));
+    font-size: 0.75em;
+  }
+
+  .hideButton {
+    margin-top: 0.5em;
+  }
+
+  // Left column: character preview + server stats (from the html_v2 lobby)
+  .lobby__left {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 185px;
+    max-width: 30vw;
+  }
+
+  .lobby__panel-title {
+    color: var(--lobby-accent, hsl(120, 55%, 45%));
+    font-size: 1em;
+    border-bottom: 1px solid var(--lobby-accent-dim, hsla(120, 55%, 45%, 0.45));
+    padding-bottom: 0.25em;
+    margin-bottom: 0.4em;
+  }
+
+  .lobby__preview {
+    padding: 0.5em;
+    box-sizing: border-box;
+    background-color: hsla(120, 100%, 3%, 0.7);
+    border: 1px solid var(--lobby-accent-dim, hsla(120, 55%, 45%, 0.45));
+    font-size: 0.8em;
+  }
+
+  .lobby__stats {
+    padding: 0.6em 0.75em;
+    box-sizing: border-box;
+    background-color: hsla(120, 100%, 3%, 0.7);
+    border: 1px solid var(--lobby-accent-dim, hsla(120, 55%, 45%, 0.45));
+    font-size: 0.8em;
+  }
+
+  .lobby__stats-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5em;
+    line-height: 1.6;
+  }
+
+  .lobby__stats-label {
+    color: var(--lobby-accent, hsl(120, 55%, 45%));
+    white-space: nowrap;
+  }
+
+  .lobby__stats-value {
+    color: #ffffff;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lobby__preview-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 128px;
+    background: radial-gradient(
+      ellipse at center,
+      hsla(120, 55%, 45%, 0.12) 0%,
+      hsla(0, 0%, 0%, 0) 75%
+    );
+  }
+
+  .lobby__preview-img {
+    image-rendering: pixelated;
+    height: 112px;
+    width: auto;
+  }
+
+  .lobby__preview-buttons {
+    margin-top: 0.4em;
+  }
+}
+
+.theme-weyland_yutani {
+  .LobbyScreen {
+    .lobby__preview,
+    .lobby__stats {
+      background-color: hsla(0, 0%, 0%, 0.7);
+      border-color: hsl(213, 30%, 31%);
+    }
+
+    .lobby__stats-label,
+    .lobby__panel-title,
+    .badgeNotification {
+      color: hsl(213, 35%, 70%);
+    }
+  }
+}
+
+// Transparent mode — the map shows through the whole window
+.LobbyScreen--transparent {
+  .bgBackground,
+  .crt {
+    display: none;
+  }
+}
+
+.noAnimation {
+  animation-delay: 0s !important;
+}
+
+/* [HORIZON-EDIT] HorizonLobby - fade the lobby root itself, not a black overlay. */
+.lobbyFadeOut {
+  animation: lobby-fade-out 0.5s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+  pointer-events: none;
+}
+
+@keyframes lobby-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+    filter: blur(8px);
+  }
+}

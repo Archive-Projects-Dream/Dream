@@ -80,22 +80,26 @@
  *
  * Open this UI (and initialize it with data).
  *
+ * optional preinitialized bool - If TRUE, assume the window is already
+ *   initialized and skip the initialization step.
+ *
  * return bool - TRUE if a new pooled window is opened, FALSE in all other situations including if a new pooled window didn't open because one already exists.
  */
-/datum/tgui/proc/open()
+/datum/tgui/proc/open(preinitialized = FALSE)
 	if(!user.client)
 		return FALSE
-	if(window)
+	if(window && window.status > TGUI_WINDOW_LOADING)
 		return FALSE
 	process_status()
 	if(status < UI_UPDATE)
 		return FALSE
-	window = SStgui.request_pooled_window(user)
+	if(!window)
+		window = SStgui.request_pooled_window(user)
 	if(!window)
 		return FALSE
 	opened_at = world.time
 	window.acquire_lock(src)
-	if(!window.is_ready())
+	if(!window.is_ready() && !preinitialized)
 		window.initialize(
 			strict_mode = TRUE,
 			assets = list(

@@ -30,6 +30,9 @@
 @include meta.load-css('./interfaces/LibraryAdmin.scss');
 @include meta.load-css('./interfaces/LibraryComputer.scss');
 @include meta.load-css('./interfaces/ListInput.scss');
+// [HORIZON-ADD] HorizonLobby
+@include meta.load-css('./interfaces/LobbyMenu.scss');
+// [/HORIZON-ADD]
 @include meta.load-css('./interfaces/Mecha.scss');
 @include meta.load-css('./interfaces/NtosMessenger.scss');
 @include meta.load-css('./interfaces/NtosNanopaint.scss');

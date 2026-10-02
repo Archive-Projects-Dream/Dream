@@ -521,6 +521,11 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 		test_sound_channels.Cut()
 	// [/HORIZON-ADD]
 
+	// [HORIZON-ADD] HorizonLobby - re-render the lobby character preview
+	// so it reflects the changes the player just made.
+	parent?.lobby_menu?.queue_preview_update()
+	// [/HORIZON-ADD]
+
 /datum/preferences/Topic(href, list/href_list)
 	. = ..()
 	if (.)

@@ -429,7 +429,10 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 	tgui_say.initialize()
 
 	initialize_escape_menu()
-	initialize_lobby_menu()
+	// [HORIZON-EDIT] HorizonLobby - lobby menu is created on-demand by
+	// /client/proc/fully_create (see the block below), signal-driven.
+	// initialize_lobby_menu()
+	// [/HORIZON-EDIT]
 
 	if(alert_mob_dupe_login && !holder)
 		// Notify admins if the connecting player's CID is configured to be ignored by stickybans
@@ -579,6 +582,10 @@ GLOBAL_LIST_INIT(unrecommended_builds, list(
 	//This is down here because of the browse() calls in tooltip/New()
 	if(!tooltips)
 		tooltips = new /datum/tooltip(src)
+	// [HORIZON-ADD] HorizonLobby
+	if(!lobby_menu)
+		lobby_menu = new(src)
+	// [/HORIZON-ADD]
 
 	loot_panel = new(src)
 

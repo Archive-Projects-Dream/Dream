@@ -69,7 +69,10 @@
 	return ready == PLAYER_READY_TO_PLAY
 
 //When you cop out of the round (NB: this HAS A SLEEP FOR PLAYER INPUT IN IT)
-/mob/dead/new_player/proc/make_me_an_observer()
+// [HORIZON-EDIT] HorizonLobby - skip_alert lets the tgui confirmation modal
+// replace the raw alert() popup. The alert stays as a fallback for callers
+// that did not confirm client-side.
+/mob/dead/new_player/proc/make_me_an_observer(skip_alert = FALSE)
 	if(QDELETED(src) || !src.client)
 		ready = PLAYER_NOT_READY
 		return FALSE
@@ -78,7 +81,9 @@
 	if(SSlag_switch.measures[DISABLE_DEAD_KEYLOOP])
 		less_input_message = " - Notice: Observer freelook is currently disabled."
 	// Don't convert this to tgui please, it's way too important
-	var/this_is_like_playing_right = alert(usr, "Are you sure you wish to observe? You will not be able to play this round![less_input_message]", "Observe", "Yes", "No")
+	var/this_is_like_playing_right = "Yes"
+	if(!skip_alert)
+		this_is_like_playing_right = alert(usr, "Are you sure you wish to observe? You will not be able to play this round![less_input_message]", "Observe", "Yes", "No")
 	if(QDELETED(src) || !src.client || this_is_like_playing_right != "Yes")
 		ready = PLAYER_NOT_READY
 		return FALSE
@@ -107,6 +112,7 @@
 	observer.update_appearance()
 	observer.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	deadchat_broadcast(" has observed.", "<b>[observer.real_name]</b>", follow_target = observer, turf_target = get_turf(observer), message_type = DEADCHAT_DEATHRATTLE)
+	client?.lobby_menu?.send_fade_out() // [HORIZON-EDIT] HorizonLobby
 	QDEL_NULL(mind)
 	qdel(src)
 	return TRUE
@@ -193,7 +199,7 @@
 	var/mob/living/character = create_character(destination, forced_slot = client.prefs.default_slot)
 	if(!character)
 		CRASH("Failed to create a character for latejoin.")
-	transfer_character()
+	transfer_character(fade_out = TRUE) // [HORIZON-EDIT] HorizonLobby
 
 	SSjob.equip_rank(character, job, character.client)
 	job.after_latejoin_spawn(character)
@@ -300,10 +306,16 @@
 	new_character = .
 
 
-/mob/dead/new_player/proc/transfer_character()
+/mob/dead/new_player/proc/transfer_character(fade_out = FALSE) // [HORIZON-EDIT] HorizonLobby
 	. = new_character
 	if(!.)
 		return
+	// [HORIZON-EDIT] HorizonLobby - async fade+close via addtimer, no sleep.
+	// The lobby browser is bound to the client, not the mob, so it survives
+	// the transfer and closes itself once the fade completes.
+	if(fade_out)
+		client?.lobby_menu?.send_fade_out()
+	// [/HORIZON-EDIT]
 	new_character.PossessByPlayer(key) //Manually transfer the key to log them in,
 	new_character.stop_sound_channel(CHANNEL_LOBBYMUSIC)
 	var/area/joined_area = get_area(new_character.loc)
@@ -377,5 +389,181 @@
 		return TRUE
 	if(CONFIG_GET(flag/auto_deadmin_on_ready_or_latejoin) || (client.prefs.read_preference(/datum/preference/toggle/auto_deadmin_on_ready_or_latejoin)) || (client.prefs?.toggles & DEADMIN_ALWAYS))
 		return client.holder.auto_deadmin()
+
+// [HORIZON-ADD] HorizonLobby - tgui lobby menu (CM13-style, rendered in the
+// client-owned lobby_browser element; see _horizon/code/modules/lobby_menu).
+/mob/dead/new_player/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	// Track the ui on the client datum so we can close it after the mob is
+	// qdeleted (the mob is destroyed in transfer_character while the
+	// fade-out is still playing).
+	if(!ui && user.client?.lobby_menu?.lobby_window)
+		ui = new(user, src, "LobbyMenu")
+		ui.window = user.client.lobby_menu.lobby_window
+		// No polling loop: data is pushed via lobby menu signals
+		// (client connects, ticker phase changes) and on ui_act.
+		ui.set_autoupdate(FALSE)
+		ui.open(preinitialized = TRUE)
+		user.client.lobby_menu.ui = ui
+
+/mob/dead/new_player/ui_state(mob/user)
+	return GLOB.always_state
+
+/mob/dead/new_player/ui_static_data(mob/user)
+	. = ..()
+
+	var/datum/lobby_art/lobby_art = get_round_lobby_art()
+	.["lobby_author"] = lobby_art?.author
+
+/mob/dead/new_player/ui_data(mob/user)
+	. = ..()
+
+	var/datum/lobby_menu/lobby = client?.lobby_menu
+
+	// If you have a runtime here it likely means your new_player didn't get qdeleted after transfering client off it
+	.["character_name"] = client?.prefs ? client.prefs.read_preference(/datum/preference/name/real_name) : client?.key
+
+	.["round_start"] = !SSticker || SSticker.current_state <= GAME_STATE_PREGAME
+	.["round_starting"] = SSticker && (SSticker.current_state == GAME_STATE_SETTING_UP || (SSticker.current_state == GAME_STATE_PREGAME && SSticker.GetTimeLeft() <= 0))
+	.["readied"] = ready == PLAYER_READY_TO_PLAY
+
+	.["preference_issues"] = get_preference_issues()
+
+	// Server stats panel. Refreshed on open, on every interaction and on
+	// client connect signals - see /datum/lobby_menu/queue_stats_update.
+	.["server_name"] = CONFIG_GET(string/servername) || "Unknown Server"
+	.["map_name"] = SSmapping.current_map?.map_name || "Loading..."
+	.["player_count"] = length(GLOB.clients)
+	.["ready_count"] = SSticker.totalPlayersReady
+	.["admin_count"] = length(GLOB.admins)
+	.["admin_ready_count"] = SSticker.total_admins_ready
+	.["shift_time"] = (SSticker.round_start_time == 0) ? null : round_timestamp()
+
+	.["has_new_poll"] = lobby?.has_new_poll
+	.["can_poll"] = !is_guest_key(client?.key) && SSdbcore.Connect()
+
+	.["preview_urls"] = lobby?.preview_urls
+	.["transparent"] = lobby?.transparent
+
+/mob/dead/new_player/ui_assets(mob/user)
+	. = ..()
+
+	. += get_asset_datum(/datum/asset/simple/lobby_files)
+	. += get_asset_datum(/datum/asset/simple/lobby_art)
+
+/mob/dead/new_player/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
+	. = ..()
+
+	if(!ui.user.client || ui.user.client.interviewee || !isnewplayer(ui.user))
+		return TRUE
+
+	switch(action)
+		if("preferences")
+			// Otherwise the preview dummy will runtime
+			// because atoms aren't initialized yet
+			if(SSticker.current_state < GAME_STATE_PREGAME)
+				to_chat(src, span_warning("Game is still starting up, please wait."))
+				return FALSE
+
+			var/datum/preferences/preferences = client.prefs
+			preferences.current_window = PREFERENCE_TAB_CHARACTER_PREFERENCES
+			preferences.update_static_data(src)
+			preferences.ui_interact(src)
+			return TRUE
+
+		if("game_preferences")
+			var/datum/preferences/preferences = client.prefs
+			preferences.current_window = PREFERENCE_TAB_GAME_PREFERENCES
+			preferences.update_static_data(usr)
+			preferences.ui_interact(usr)
+			return TRUE
+
+		if("manifest")
+			ViewManifest()
+			return TRUE
+
+		if("changelog")
+			client?.changelog()
+			return TRUE
+
+		if("polls")
+			handle_player_polling()
+			return TRUE
+
+		if("refresh_preview")
+			client?.lobby_menu?.queue_preview_update(force = TRUE)
+			return TRUE
+
+		if("late_join")
+			if(!SSticker?.IsRoundInProgress())
+				to_chat(src, span_warning("The round is either not ready, or has already finished..."))
+				return FALSE
+
+			var/relevant_cap
+			var/hard_popcap = CONFIG_GET(number/hard_popcap)
+			var/extreme_popcap = CONFIG_GET(number/extreme_popcap)
+			if(hard_popcap && extreme_popcap)
+				relevant_cap = min(hard_popcap, extreme_popcap)
+			else
+				relevant_cap = max(hard_popcap, extreme_popcap)
+
+			if(SSticker.queued_players.len || (relevant_cap && living_player_count() >= relevant_cap && !(ckey(src.key) in GLOB.admin_datums)))
+				to_chat(src, span_danger("[CONFIG_GET(string/hard_popcap_message)]"))
+				var/queue_position = SSticker.queued_players.Find(src)
+				if(queue_position == 1)
+					to_chat(src, span_notice("You are next in line to join the game. You will be notified when a slot opens up."))
+				else if(queue_position)
+					to_chat(src, span_notice("There are [queue_position-1] players in front of you in the queue to join the game."))
+				else
+					SSticker.queued_players += src
+					to_chat(src, span_notice("You have been added to the queue to join the game. Your position in queue is [SSticker.queued_players.len]."))
+				return TRUE
+
+			GLOB.latejoin_menu.ui_interact(src)
+			return TRUE
+
+		if("observe")
+			if(!SSticker || SSticker.current_state == GAME_STATE_STARTUP)
+				to_chat(src, span_warning("The game is still setting up, please try again later."))
+				return TRUE
+
+			// The tgui modal already asked for confirmation; the server-side
+			// alert stays as a fallback for unconfirmed calls.
+			make_me_an_observer(skip_alert = params["confirmed"] == 1)
+			return TRUE
+
+		if("ready")
+			if((SSticker.current_state <= GAME_STATE_PREGAME) && ready == PLAYER_NOT_READY) // Make sure we don't ready up after the round has started
+				auto_deadmin_on_ready_or_latejoin()
+				ready = PLAYER_READY_TO_PLAY
+				if(hud_used)
+					SEND_SIGNAL(hud_used, COMSIG_HUD_PLAYER_READY_TOGGLE)
+
+			return TRUE
+
+		if("unready")
+			if((SSticker.current_state <= GAME_STATE_PREGAME) && ready == PLAYER_READY_TO_PLAY) // Make sure we don't ready up after the round has started
+				ready = PLAYER_NOT_READY
+				if(hud_used)
+					SEND_SIGNAL(hud_used, COMSIG_HUD_PLAYER_READY_TOGGLE)
+
+			return TRUE
+
+		if("keyboard")
+			if(client)
+				SEND_SOUND(client, sound(get_sfx(SFX_KEYBOARD_CLICKS), volume = 20)) // [HORIZON-ADD] HorizonLobby
+			return TRUE
+
+/// Lobby warnings about the player's current setup (CM13-style preference issues).
+/mob/dead/new_player/proc/get_preference_issues()
+	var/list/issues = list()
+	var/datum/preferences/preferences = client?.prefs
+	if(!preferences)
+		return issues
+	if(!length(preferences.job_preferences))
+		var/datum/job/overflow_role = SSjob.get_job_type(SSjob.overflow_role)
+		issues += "You have no jobs set in your character setup - if you ready up you will join as [overflow_role?.title || "a fallback role"]."
+	return issues
+// [/HORIZON-ADD]
 
 #undef RESET_HUD_INTERVAL
