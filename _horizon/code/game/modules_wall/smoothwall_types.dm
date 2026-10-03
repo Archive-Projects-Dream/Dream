@@ -1,26 +1,4 @@
-/turf/closed/wall/simple
-	icon = '_horizon/icons/turf/walls/simple_wall/wall.dmi'
-	icon_state = "wall0"
-	// F4CK SMOTHING-SYSTEM
-	smoothing_flags = NONE
-	smoothing_groups = null
-	canSmoothWith = null
-	tiles_with = list(/turf/closed/wall/simple)
-
-/turf/closed/wall/simple/Initialize(mapload)
-	. = ..()
-	relativewall()
-	relativewall_neighbours()
-
-/turf/closed/wall/simple/handle_icon_junction(junction)
-	icon_state = "wall[junction]"
-
-/turf/closed/wall/simple/wood
-	name = "wood"
-	icon = '_horizon/icons/turf/walls/simple_wall/wood.dmi'
-
 // MARK: Shadow-atom
-
 /atom/movable/atom_shadow
 	name = "shadow"
 	icon = '_horizon/icons/obj/solid_wall_mask.dmi'
@@ -28,73 +6,68 @@
 	anchored = TRUE
 	plane = ATOMS_FOV_SHADOWS_PLANE
 	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
-	tiles_with = BASED_TILES
-	///Shadow masks have to stay connected across missing corner tiles,
-	///so they also smooth diagonally (see relativewall_diagonals()).
+	smoothing_flags = SMOOTH_BITMASK_CARDINALS
 	smooth_diagonals = TRUE
 
 /atom/movable/atom_shadow/Initialize(mapload)
+	tiles_with = BASED_TILES
 	. = ..()
+	QUEUE_SMOOTH(src)
+	if(!mapload)
+		relativewall_neighbours()
+
+/atom/movable/atom_shadow/smooth_icon()
+	smoothing_flags &= ~SMOOTH_QUEUED
 	relativewall()
-	relativewall_neighbours()
 
 /atom/movable/atom_shadow/handle_icon_junction(junction)
+	if(smoothing_junction == junction)
+		return
+	smoothing_junction = junction
 	icon_state = "wall-[junction]"
 
 /atom/movable/atom_shadow/Destroy()
-	//Our disappearance changes the junction of everything around us,
-	//including diagonal neighbours that link to us across an open corner.
-	var/list/smoothing_neighbours = get_adjacent_smoothers()
-	. = ..()
-	for(var/atom/smoothing_neighbour in smoothing_neighbours)
-		smoothing_neighbour.relativewall()
+	relativewall_neighbours()
+	return ..()
 
-/atom/movable/atom_shadow/door
-	icon = '_horizon/icons/obj/airlock_mask.dmi'
-
-/atom/movable/atom_shadow/door/handle_icon_junction(junction)
-	return
-
-// MARK: WALL
+// WALL
 /turf/closed/wall
-	plane = WALL_PLANE
 	var/atom/movable/atom_shadow/shadow
 
 /turf/closed/wall/Initialize(mapload)
 	. = ..()
-	shadow = new /atom/movable/atom_shadow(src, src)
-
-/*
-/turf/closed/wall/smooth_icon()
-	. = ..()
-	var/atom/movable/atom_shadow/shadow = locate(/atom/movable/atom_shadow) in src
-	shadow?.icon_state = "wall-[smoothing_junction]"
-*/
+	shadow = new(src)
 
 /turf/closed/wall/Destroy()
 	shadow?.Destroy()
 	return ..()
 
 // MARK: Door Airlock
+/atom/movable/atom_shadow/door
+	icon = '_horizon/icons/obj/airlock_mask.dmi'
+
+/atom/movable/atom_shadow/door/smooth_icon()
+	smoothing_flags &= ~SMOOTH_QUEUED
+
+/atom/movable/atom_shadow/door/handle_icon_junction(junction)
+	return
+
 /obj/machinery/door
 	var/atom/movable/atom_shadow/door/shadow
-	//Glass doors carry no shadow mask, so they can not refresh the neighbouring
-	//masks through one like opaque doors do - they have to notify them directly.
-	tiles_with = BASED_TILES
 
 /obj/machinery/door/Initialize(mapload)
+	tiles_with = BASED_TILES
 	. = ..()
 	if(!glass)
 		shadow = new(loc)
 		shadow.icon_state = icon_state
 		shadow.dir = dir
-	else
-		//Nothing of ours to mask, but the neighbours cardinal-link to us now.
+	else if(!mapload)
 		relativewall_neighbours()
 
 /obj/machinery/door/setDir(newdir)
-    . = ..()
-    shadow?.dir = newdir
+	. = ..()
+	shadow?.dir = newdir
 
 /obj/machinery/door/airlock/update_icon(updates = ALL)
 	. = ..()
@@ -113,8 +86,6 @@
 	if(shadow)
 		shadow.Destroy()
 	else
-		//Glass doors: no mask of ours to destroy, but the neighbouring masks
-		//just lost their cardinal link to us and have to re-junction.
 		relativewall_neighbours()
 	return ..()
 
