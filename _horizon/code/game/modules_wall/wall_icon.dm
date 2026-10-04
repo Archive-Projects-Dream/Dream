@@ -73,7 +73,7 @@ GLOBAL_LIST_EMPTY(closed_blend_caches)
 	var/cardinal_only
 
 	for(var/turf/T in orange(src, 1))
-		cardinal_only = get_dir(src, T) in GLOB.cardinals
+		cardinal_only = (get_dir(src, T) in GLOB.cardinals)
 		if(istype(T, /turf/closed))
 			var/turf/closed/W = T
 			if(W.type == type || !(noblend_turfs[W.type]) && blend_turfs[W.type])
@@ -141,6 +141,6 @@ GLOBAL_LIST_EMPTY(closed_blend_caches)
 	icon_state = "blank"
 	var/image/I
 	for(var/i in 1 to 4)
-		I = image(icon, "wall[wall_connections[i]]", dir = 1<<(i-1))
+		I = image(icon, corner_icon_state(wall_connections[i]), dir = 1<<(i-1))
 		I.plane = GAME_PLANE
 		overlays += I
